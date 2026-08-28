@@ -10,30 +10,34 @@ This document outlines the complete **Hardware-Free, AI-Driven Geospatial Machin
 
 ---
 
-## 2. Dataset-to-Model Mapping Matrix (All 8 Phases)
+## 2. Active Dataset & Model Mapping Matrix
 
-| Phase | Architecture Phase | Primary Dataset Required | Workspace File Path / Source | Key Features & Attributes Used |
+> [!IMPORTANT]  
+> **Raw Initial Datasets Superseded**: Raw files like `FIRMS VIIRS`, `MODIS`, `GFED5`, `FSI`, and `VIIRS Flaring 2024` were used in Phase 1 & 2 to generate spatial joins and ground-truth labels. Because Phase 1 & 2 are complete, **raw files are superseded and no longer needed for training**.  
+> The entire ML pipeline now relies exclusively on **3 consolidated dataset assets**.
+
+| Phase | Architecture Subsystem | Consolidated Active Dataset | Workspace Location / Source | Key Attributes Used |
 |:---|:---|:---|:---|:---|
-| **Phase 1** | Label Harmonization *(Done)* | Raw VIIRS/MODIS Detections, OSM Factories, FSI Reserve Maps | Raw GIS & Satellite Detections | `latitude`, `longitude`, `frp`, spatial buffers |
-| **Phase 2** | Feature Matrix Construction *(Done)* | Harmonized & Border-Clipped Sovereign India Detections | [`master_2024_training.csv`](file:///Users/aadeshkhande/Documents/Professional/College/assignment_SAD/master_2024_training.csv) | 1.37M clean rows with land cover & spatial joins |
-| **Phase 3** | **Model 1: Tabular Classifier** | Cleaned Tabular Feature Matrix & Target Labels | [`master_2024_training.csv`](file:///Users/aadeshkhande/Documents/Professional/College/assignment_SAD/master_2024_training.csv) | `brightness`, `frp`, `land_cover_code`, `is_industrial`, `is_wildfire`, `is_gas_flare` |
-| **Phase 4** | **Model 2: 1D-CNN Temporal Classifier** | Himawari-9 10-Minute Cadence Time Series (12,795 CSV files) | [`datasets/Himawari_Dataset/`](file:///Users/aadeshkhande/Documents/Professional/College/assignment_SAD/datasets/Himawari_Dataset/) | 24-hour diurnal heat curve vector `(Batch, 1, 144)` |
-| **Phase 5** | **Model 3: ResNet-18 Image Classifier** | 10m ESA WorldCover Satellite Raster Tiles *(Uploaded on Kaggle)* | Download from Kaggle to [`datasets/esa_worldcover/`](file:///Users/aadeshkhande/Documents/Professional/College/assignment_SAD/datasets/esa_worldcover/) | 76 GeoTIFFs (5.57 GB) used to crop $224 \times 224$ chips at `(lat, lon)` |
-| **Phase 6** | **Stacking Ensemble Fusion** | Concatenated Probability Prediction Outputs from Base Models | Output vectors $[P_{\text{Model1}}, P_{\text{Model2}}, P_{\text{Model3}}]$ | 15-column probability matrix fed into MLP Meta-Learner |
-| **Phase 7** | **Z-Score Anomaly Engine** | 365-Day Chronological FRP History | `acq_date` & `frp` in [`master_2024_training.csv`](file:///Users/aadeshkhande/Documents/Professional/College/assignment_SAD/master_2024_training.csv) | Rolling 30-day baseline mean ($\mu_{30d}$) and std ($\sigma_{30d}$) |
-| **Phase 8** | **SHAP Explainability & GIS Overlay** | Tabular Feature Matrix $X$ & Trained Model Weights | [`master_2024_training.csv`](file:///Users/aadeshkhande/Documents/Professional/College/assignment_SAD/master_2024_training.csv) & `models/` | Feature importance tree explainers & GeoJSON export |
+| **Phase 3** | **Model 1: Tabular Classifier** *(XGBoost)* | Master Tabular Feature Matrix (1.37M clean rows) | [`master_2024_training.csv`](file:///Users/aadeshkhande/Documents/Professional/College/assignment_SAD/master_2024_training.csv) | `brightness`, `frp`, `land_cover_code`, `is_industrial`, `is_wildfire`, `is_gas_flare` |
+| **Phase 4** | **Model 2: 1D-CNN Temporal Classifier** | Himawari-9 10-Min Time-Series (12,795 CSV files) | [`datasets/Himawari_Dataset/`](file:///Users/aadeshkhande/Documents/Professional/College/assignment_SAD/datasets/Himawari_Dataset/) | 24-hour diurnal heat curve vector `(Batch, 1, 144)` |
+| **Phase 5** | **Model 3: ResNet-18 Image Classifier** | ESA WorldCover 10m Raster Tiles *(Uploaded on Kaggle)* | Kaggle Download $\rightarrow$ [`datasets/esa_worldcover/`](file:///Users/aadeshkhande/Documents/Professional/College/assignment_SAD/datasets/esa_worldcover/) | 76 GeoTIFFs (5.57 GB) used to crop $224 \times 224$ chips |
+| **Phase 6** | **Stacking Ensemble Meta-Learner** | Concatenated Probability Predictions Matrix | Output vectors $[P_{\text{Model1}}, P_{\text{Model2}}, P_{\text{Model3}}]$ | **9 input features** (3 models × 3 classes) fed into MLP Meta-Learner |
+| **Phase 7** | **Z-Score Anomaly Engine** | Chronological FRP History | `acq_date` & `frp` in [`master_2024_training.csv`](file:///Users/aadeshkhande/Documents/Professional/College/assignment_SAD/master_2024_training.csv) | Rolling 30-day baseline mean ($\mu_{30d}$) and std ($\sigma_{30d}$) |
+| **Phase 8** | **SHAP Explainability & GIS Export** | Tabular Feature Matrix $X$ & Trained Model Weights | [`master_2024_training.csv`](file:///Users/aadeshkhande/Documents/Professional/College/assignment_SAD/master_2024_training.csv) & `models/` | Feature importance tree explainers & GeoJSON export |
 
 ---
 
 ## 3. Target Classes Taxonomy
 
-The machine learning system classifies any detected hotspot into **5 distinct categories**:
+The machine learning system classifies thermal detections using a **3-Class Supervised Taxonomy** + **Post-Processing Anomaly Engine**:
 
-1. **`industrial_persistent`**: Routine operational heat (refinery flare stacks, cement kiln boilers, power plant discharge).
-2. **`industrial_accidental`**: Emergency industrial fires, refinery explosions, chemical facility blazes, pipeline ruptures.
-3. **`agricultural_burning`**: Seasonal crop stubble burning (paddy/wheat field burning).
-4. **`wildfire_forest`**: Natural or accidental forest fires and brushland blazes.
-5. **`mining_activity`**: Coal seam fires, open-cast mining thermal operations.
+### Supervised Classification Targets (`Target_Class` in [`master_2024_training.csv`](file:///Users/aadeshkhande/Documents/Professional/College/assignment_SAD/master_2024_training.csv))
+* **`Class 0: Wildfire / Forest Fire`** — Natural or accidental forest/brushland fires.
+* **`Class 1: Agricultural Stubble Burning`** — Seasonal paddy/wheat crop residue burning.
+* **`Class 2: Industrial Fire & Gas Flare`** — Operational refinery flare stacks, power plant boilers, steel mills, and gas flaring.
+
+### Post-Processing Anomaly Engine (Phase 7)
+* **`Accidental Industrial Explosion`** — Triggered when a Class 2 (Industrial) detection has an FRP spike $Z > 3.0$ above its 30-day rolling baseline ($\mu_{FRP} + 3\sigma_{FRP}$).
 
 ---
 
@@ -43,7 +47,8 @@ To achieve **maximum classification accuracy (88% – 93%)**, we implement a **3
 
 ```
                                   ┌──────────────────────────────────────────┐
-                                  │   RAW INPUT DATASETS (FIRMS, OSM, S-2)   │
+                                  │   3 CONSOLIDATED DATASETS (Master,       │
+                                  │   Himawari CSVs, Kaggle ESA Tiles)       │
                                   └────────────────────┬─────────────────────┘
                                                        │
          ┌─────────────────────────────────────────────┼─────────────────────────────────────────────┐
@@ -51,10 +56,10 @@ To achieve **maximum classification accuracy (88% – 93%)**, we implement a **3
 ┌─────────────────────────┐               ┌─────────────────────────┐               ┌─────────────────────────┐
 │        MODEL 1          │               │        MODEL 2          │               │        MODEL 3          │
 │ Tabular Spatial Boosted │               │  Temporal Diurnal Curve │               │ Multi-Spectral Imagery  │
-│  (XGBoost / LightGBM)   │               │   (Himawari-9 1D-CNN)   │               │  (ResNet-18 / EffNet)   │
+│  (XGBoost / LightGBM)   │               │   (Himawari-9 1D-CNN)   │               │ (ResNet-18 on ESA 10m)  │
 └────────┬────────────────┘               └────────┬────────────────┘               └────────┬────────────────┘
          │                                             │                                             │
-         │ Probabilities: P_tab                        │ Probabilities: P_temp                       │ Probabilities: P_img
+         │ Probabilities: P_tab (1x3)                  │ Probabilities: P_temp (1x3)                  │ Probabilities: P_img (1x3)
          └─────────────────────────────┬───────────────┴─────────────────────────────┘
                                        ▼
                        ┌───────────────────────────────┐
@@ -79,92 +84,88 @@ To achieve **maximum classification accuracy (88% – 93%)**, we implement a **3
 
 ## 5. Detailed Step-by-Step Machine Learning Workflow
 
-### PHASE 1: Automated Label Generation & Data Harmonization
+### PHASE 1: Automated Label Generation & Data Harmonization (ALREADY COMPLETED)
 
 #### The Challenge
 Raw FIRMS data provides hotspot locations and intensity, but does not provide class labels.
 
 #### The Workflow
-Instead of manual guessing, we cross-reference FIRMS hotspots with your collected ground-truth datasets using spatial buffer joins in GeoPandas:
+Cross-referenced FIRMS hotspots with ground-truth datasets using spatial buffer joins in GeoPandas:
+1. **Gas Flare / Industrial Labeling**: Spatial join FIRMS hotspots with `VIIRS_India_flaring_2024.csv` within a **500m radius buffer**. If matched $\rightarrow$ Label as `Class 2` (Industrial).
+2. **Wildfire Labeling**: Spatial join FIRMS hotspots with `FSI dataset` forest fire reserve boundaries. If inside forest polygon $\rightarrow$ Label as `Class 0` (Wildfire).
+3. **Agricultural Burning Labeling**: Spatial join FIRMS hotspots with `gfed5_india_2020` burned area polygons where MODIS Land Cover is Cropland (`12`/`40`) during harvest months $\rightarrow$ Label as `Class 1` (Agricultural).
 
-1. **Gas Flare / Industrial Labeling**: Spatial join FIRMS hotspots with `VIIRS_India_flaring_2024.csv` within a **500m radius buffer**. If matched $\rightarrow$ Label as `industrial_persistent`.
-2. **Wildfire Labeling**: Spatial join FIRMS hotspots with `FSI dataset` forest fire reserve boundaries. If inside forest polygon $\rightarrow$ Label as `wildfire_forest`.
-3. **Agricultural Burning Labeling**: Spatial join FIRMS hotspots with `gfed5_india_2020` burned area polygons where MODIS Land Cover is Cropland (`12`) during harvest months (April–May, Oct–Nov) $\rightarrow$ Label as `agricultural_burning`.
-4. **Accidental Industrial Fire Labeling**: Hotspots within **1km of OSM/IHS industrial polygons** whose FRP exceeds **3 standard deviations above the 30-day baseline** $\rightarrow$ Label as `industrial_accidental`.
+*All results saved into [`master_2024_training.csv`](file:///Users/aadeshkhande/Documents/Professional/College/assignment_SAD/master_2024_training.csv) (1.37M clean rows).*
 
 ---
 
 ### PHASE 2: Advanced Feature Engineering (Tabular & Geospatial)
 
-We engineer **22 quantitative features** for every detected hotspot:
+All 12 compiled columns in [`master_2024_training.csv`](file:///Users/aadeshkhande/Documents/Professional/College/assignment_SAD/master_2024_training.csv) — **verified by audit**:
 
-#### A. Radiative Thermal Features (from VIIRS & MODIS)
-1. `frp`: Fire Radiative Power in Megawatts (MW).
-2. `bright_ti4` ($BT_{21}$): Brightness temperature of the mid-infrared channel (Kelvin). High for active industrial fires.
-3. `bright_ti5` ($BT_{31}$): Thermal infrared channel (Kelvin).
-4. `bt_ratio`: $\frac{\text{bright\_ti4}}{\text{bright\_ti5}}$ — High ratio indicates intense point-source flares.
-5. `is_night`: Binary flag (`0` for Day, `1` for Night). Gas flares stand out sharply at night.
+| Column | Type | Notes |
+|:---|:---|:---|
+| `latitude` | float64 | 6.88 – 34.68 (✅ sovereign India only, 0 leakage) |
+| `longitude` | float64 | 68.51 – 97.40 (✅ sovereign India only) |
+| `brightness` | float64 | **⚠️ 48,837 NULLs (3.55%)** — fill with median per-source before training |
+| `frp` | float64 | 0 – 7,528 MW, 0 NULLs (✅ clean) |
+| `acq_date` | string | 2024-01-01 to 2024-12-31 (✅ full calendar year) |
+| `source` | string | VIIRS_JPSS1, VIIRS_SNPP, FIRMS_ZIP, MODIS, Himawari9, Sentinel3 |
+| `is_industrial` | int64 | Binary 0/1, 0 NULLs |
+| `is_wildfire` | int64 | Binary 0/1, 0 NULLs |
+| `is_gas_flare` | int64 | Binary 0/1, 0 NULLs |
+| `land_cover_code` | float64 | **⚠️ 4,120 NULLs (0.30%)** — fill with 0 (Unknown) before training |
+| `land_cover_name` | string | ESA class names, 0 NULLs |
+| `Target_Class` | int64 | 0/1/2 — 0 NULLs (✅ perfectly labeled) |
 
-#### B. Infrastructure Proximity Features (from OpenStreetMap & IHS 2019)
-6. `dist_to_industrial`: Minimum distance (in meters) to the nearest industrial polygon using scipy `cKDTree`.
-7. `nearest_facility_type`: Facility tag (`refinery`, `power_plant`, `steel_mill`, `chemical`, `none`).
-8. `industrial_density_2km`: Count of industrial facilities within a 2km radius circle.
-
-#### C. Spatial Persistence & Temporal Fingerprinting
-9. `spatial_recurrence_30d`: Number of times a hotspot was detected within 500m of this coordinate in the past 30 days.
-   - Industrial flares: $20 - 30$ days (persistent).
-   - Agricultural/Wildfires: $1 - 3$ days (ephemeral).
-10. `coord_variance`: Spatial variance $\sigma_{lat}^2 + \sigma_{lon}^2$ over historical detections. Low for fixed chimneys, high for moving fire fronts.
-11. `frp_mean_30d` & `frp_std_30d`: Rolling 30-day mean and standard deviation of FRP at this coordinate.
-12. `frp_cv`: Coefficient of Variation $CV = \frac{\sigma_{FRP}}{\mu_{FRP}}$. Industrial flares have steady FRP ($CV < 0.35$), while wildfires spike violently ($CV > 0.8$).
-
-#### D. Land Cover Features (from MODIS Land Cover MCD12Q1)
-13. `landcover_class`: Integer land class (`12`=Cropland, `1-9`=Forest, `13`=Urban/Industrial).
+*(Upcoming)* `tropomi_no2`, `tropomi_so2`, `elevation`: Currently extracting via Google Earth Engine task `T2VXDCMZ7JLJVUOOYADPECAV`.
 
 ---
 
 ### PHASE 3: Model 1 — Tabular Classifier (XGBoost / LightGBM)
 
 #### Role
-Classifies hotspots based on tabular spatial, temporal, and radiative features.
+Classifies hotspots based on tabular spatial, temporal, and radiative features from [`master_2024_training.csv`](file:///Users/aadeshkhande/Documents/Professional/College/assignment_SAD/master_2024_training.csv).
 
 #### Implementation Code Snippet
 ```python
+import pandas as pd
 import xgboost as xgb
-from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
 import joblib
 
-# Features Matrix X, Target Vector y
-feature_cols = [
-    'frp', 'bright_ti4', 'bright_ti5', 'bt_ratio', 'is_night',
-    'dist_to_industrial', 'industrial_density_2km',
-    'spatial_recurrence_30d', 'coord_variance', 'frp_mean_30d', 
-    'frp_std_30d', 'frp_cv', 'landcover_class'
-]
+# Load Master Preprocessed Dataset
+df = pd.read_csv("master_2024_training.csv")
 
+# Feature Matrix X and Target Vector y
+feature_cols = [
+    'brightness', 'frp', 'land_cover_code', 
+    'is_industrial', 'is_wildfire', 'is_gas_flare'
+]
 X = df[feature_cols]
-le = LabelEncoder()
-y = le.fit_transform(df['label'])
+y = df['Target_Class']  # Classes 0: Wildfire, 1: Agricultural, 2: Industrial
+
+X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
 # Hyperparameters optimized for multi-class classification
 xgb_model = xgb.XGBClassifier(
-    n_estimators=600,
+    n_estimators=500,
     max_depth=8,
     learning_rate=0.03,
     subsample=0.85,
     colsample_bytree=0.8,
-    gamma=0.2,
-    min_child_weight=2,
     objective='multi:softprob',
+    num_class=3,
     eval_metric='mlogloss',
     random_state=42
 )
 
-xgb_model.fit(X_train, y_train, eval_set=[(X_val, y_val)], early_stopping_rounds=50)
+xgb_model.fit(X_train, y_train, eval_set=[(X_val, y_val)], verbose=100)
 
-# Save Model
+# Save Model & Get Validation Probabilities P_Model1
 joblib.dump(xgb_model, 'models/xgboost_model.pkl')
-joblib.dump(le, 'models/label_encoder.pkl')
+P_tab_val = xgb_model.predict_proba(X_val)  # Shape: (N, 3)
 ```
 - **Expected Standalone Accuracy**: **78% – 82%**
 
@@ -177,13 +178,25 @@ Himawari-9 geostationary satellite updates imagery every **10 minutes**:
 - **Crop Stubble Fires**: Ignite around 12:00 PM – 3:00 PM when humidity drops, and die out by sunset.
 - **Industrial Gas Flares / Refineries**: Emit heat **24 hours a day, 7 days a week**.
 
+#### ⚠️ Critical Data Loading Note (Audited)
+Himawari files use a **commented header format** (`# ID,Year,Month,...`). Load with:
+```python
+cols = ['ID','Year','Month','Day','Time_UTC','Lat','Lon','Area_km2','Volcano','Level','Reliability','FRP_Wm2','QF','HotID']
+df = pd.read_csv(filepath, comment='#', header=None, names=cols)
+# IMPORTANT: Filter to India bounds (Himawari covers full Asia-Pacific disk)
+df_india = df[(df['Lat'] >= 6) & (df['Lat'] <= 36) & (df['Lon'] >= 68) & (df['Lon'] <= 97)]
+```
+- **Folders:** `Apr_WILDFIRE/` (4,252 files), `Aug_INDUSTRIALFIRE/` (4,392 files), `Nov_AGRICULTURALFIRE/` (4,151 files)
+- **FRP column name in Himawari files:** `FRP_Wm2` (not `frp`)
+- **Only ~2.4% of detections per file fall inside India** — India-filter is mandatory before building diurnal vectors.
+
 #### 1D-CNN PyTorch Architecture
 ```python
 import torch
 import torch.nn as nn
 
 class DiurnalTemporalCNN(nn.Module):
-    def __init__(self, num_classes=5):
+    def __init__(self, num_classes=3):
         super(DiurnalTemporalCNN, self).__init__()
         # Input shape: (Batch, 1, 144) representing 144 ten-minute readings in 24 hours
         self.conv1d = nn.Sequential(
@@ -209,26 +222,19 @@ class DiurnalTemporalCNN(nn.Module):
 ### PHASE 5: Model 3 — Multi-Spectral Satellite Image Classifier (ResNet-18)
 
 #### Concept
-Using imagery from `terrascope_download...zip`:
-- Extract a **224x224 image chip** centered at each FIRMS hotspot.
-- Use **6 Multi-Spectral Bands**:
-  - **Band 4 (Red)**
-  - **Band 8 (Near-Infrared - NIR)**: Vegetation health.
-  - **Band 11 (Short-Wave Infrared 1 - SWIR1)**: Active heat & combustion.
-  - **Band 12 (Short-Wave Infrared 2 - SWIR2)**: High-temperature industrial flare detection.
-  - **NDVI Channel**: $\frac{\text{B8} - \text{B4}}{\text{B8} + \text{B4}}$
-  - **NBR Channel (Burn Ratio)**: $\frac{\text{B8} - \text{B12}}{\text{B8} + \text{B12}}$
+Using ESA WorldCover 10m resolution raster tiles (downloaded from Kaggle into [`datasets/esa_worldcover/`](file:///Users/aadeshkhande/Documents/Professional/College/assignment_SAD/datasets/esa_worldcover/)):
+- Extract a **224x224 image chip** centered at each coordinate in [`master_2024_training.csv`](file:///Users/aadeshkhande/Documents/Professional/College/assignment_SAD/master_2024_training.csv).
+- Classify the visual spatial texture and land cover context around the fire hotspot.
 
-#### Custom 6-Channel ResNet-18 Architecture
+#### Custom ResNet-18 Architecture
 ```python
 import torchvision.models as models
+import torch.nn as nn
 
-class MultiSpectralFireResNet(nn.Module):
-    def __init__(self, num_classes=5):
-        super(MultiSpectralFireResNet, self).__init__()
-        self.resnet = models.resnet18(pretrained=True)
-        # Modify first layer for 6 spectral input channels instead of 3 RGB channels
-        self.resnet.conv1 = nn.Conv2d(6, 64, kernel_size=7, stride=2, padding=3, bias=False)
+class FireImageResNet(nn.Module):
+    def __init__(self, num_classes=3):
+        super(FireImageResNet, self).__init__()
+        self.resnet = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
         self.resnet.fc = nn.Linear(self.resnet.fc.in_features, num_classes)
 
     def forward(self, x):
@@ -247,13 +253,13 @@ import numpy as np
 from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import accuracy_score, classification_report
 
-# Stack base model probabilities (3 models * 5 classes = 15 features)
+# Stack base model probabilities (3 models * 3 classes = 9 input features)
 X_meta_train = np.hstack([P_tab_train, P_temp_train, P_img_train])
 X_meta_test  = np.hstack([P_tab_test,  P_temp_test,  P_img_test])
 
 # Meta-Learner Neural Network
 meta_learner = MLPClassifier(
-    hidden_layer_sizes=(64, 32),
+    hidden_layer_sizes=(32, 16),
     activation='relu',
     solver='adam',
     max_iter=400,
@@ -265,7 +271,7 @@ meta_learner.fit(X_meta_train, y_train)
 # Final Prediction & Evaluation
 y_pred_final = meta_learner.predict(X_meta_test)
 print(f"Final Stacking Ensemble Accuracy: {accuracy_score(y_test, y_pred_final):.4f}")
-print(classification_report(y_test, y_pred_final, target_names=le.classes_))
+print(classification_report(y_test, y_pred_final, target_names=['Wildfire', 'Agricultural', 'Industrial']))
 ```
 
 ---
