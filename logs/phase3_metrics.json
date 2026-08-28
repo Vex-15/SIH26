@@ -1,0 +1,38 @@
+{
+  "model": "XGBoost",
+  "phase": 3,
+  "train_rows": 1100828,
+  "val_rows": 275207,
+  "features": [
+    "latitude",
+    "longitude",
+    "brightness",
+    "frp",
+    "elevation",
+    "tropomi_no2",
+    "tropomi_so2",
+    "land_cover_code",
+    "is_industrial",
+    "is_wildfire",
+    "is_gas_flare"
+  ],
+  "n_features": 11,
+  "best_iteration": 499,
+  "best_val_mlogloss": 0.00591345495884134,
+  "standard_accuracy": 0.9974,
+  "balanced_accuracy": 0.9617,
+  "macro_f1": 0.8848,
+  "weighted_f1": 0.998,
+  "train_time_min": 1.5,
+  "P_tab_val_shape": [
+    275207,
+    5
+  ],
+  "class_names": [
+    "Wildfire",
+    "Agricultural",
+    "Industrial",
+    "GasFlare",
+    "Accidental"
+  ]
+}

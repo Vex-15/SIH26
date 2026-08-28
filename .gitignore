@@ -1,0 +1,10 @@
+# Datasets and Large Folders
+*.csv
+Himawari 9 JAXA/
+__MACOSX/
+
+# Temporary / OS files
+.DS_Store
+
+# Training Logs (keep JSON metrics)
+logs/*.log
