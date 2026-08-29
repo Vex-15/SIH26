@@ -1,0 +1,23 @@
+{
+  "phase": 4,
+  "num_classes_cnn": 4,
+  "cnn_to_master_class": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 4
+  },
+  "raw_samples": 148,
+  "train_after_aug": 2478,
+  "val_samples": 30,
+  "best_epoch": 11,
+  "standard_accuracy": 0.8667,
+  "balanced_accuracy": 0.8333,
+  "macro_f1": 0.8286,
+  "P_temp_val_shape": [
+    30,
+    4
+  ],
+  "phase6_remap": "CNN[:,3]->master class 4. No Gas Flare column in CNN.",
+  "train_time_min": 3.37
+}

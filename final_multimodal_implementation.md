@@ -175,7 +175,20 @@ P_tab_val = xgb_model.predict_proba(X_val)  # Shape: (N, 5)
 #### Scientific Basis
 Himawari-9 geostationary satellite updates imagery every **10 minutes**:
 - **Crop Stubble Fires**: Ignite around 12:00 PM – 3:00 PM when humidity drops, and die out by sunset.
-- **Industrial Gas Flares / Refineries**: Emit heat **24 hours a day, 7 days a week**.
+- **Industrial Persistent Sources**: Emit heat **24 hours a day, 7 days a week** (flat continuous curve).
+- **Accidental Industrial Fires**: Sudden FRP spike ($Z > 2.0$) with rapid onset and exponential decay — distinct pattern from all other classes.
+
+> [!NOTE]
+> **Gas Flare (master Class 3) is deliberately excluded from the 1D-CNN.** Gas flares produce a flat 24/7 curve physically identical to Industrial Persistent (only magnitude differs — not detectable by temporal shape). Gas Flare is handled with ~100% precision by XGBoost's `is_gas_flare` binary feature. The CNN is a **4-class classifier**.
+
+#### Dataset — 4 Classes Verified
+| CNN Class | Folder | Files | Label |
+|:---:|:---|:---:|:---|
+| 0 | `Apr_WILDFIRE/` | 4,252 | Wildfire (real JAXA) |
+| 1 | `Nov_AGRICULTURALFIRE/` | 4,151 | Agricultural (real JAXA) |
+| 2 | `Aug_INDUSTRIALFIRE/` | 4,392 | Industrial (real JAXA) |
+| 3 | `Accidental_FIRE/` | 8,039 | Accidental (physically-accurate synthetic from real Class 4 coords) |
+| — | Gas Flare | — | **Excluded by design — handled by XGBoost** |
 
 #### ⚠️ Critical Data Loading Note (Audited)
 Himawari files use a **commented header format** (`# ID,Year,Month,...`). Load with:
@@ -185,9 +198,9 @@ df = pd.read_csv(filepath, comment='#', header=None, names=cols)
 # IMPORTANT: Filter to India bounds (Himawari covers full Asia-Pacific disk)
 df_india = df[(df['Lat'] >= 6) & (df['Lat'] <= 36) & (df['Lon'] >= 68) & (df['Lon'] <= 97)]
 ```
-- **Folders:** `Apr_WILDFIRE/` (4,252 files), `Aug_INDUSTRIALFIRE/` (4,392 files), `Nov_AGRICULTURALFIRE/` (4,151 files)
 - **FRP column name in Himawari files:** `FRP_Wm2` (not `frp`)
 - **Only ~2.4% of detections per file fall inside India** — India-filter is mandatory before building diurnal vectors.
+- **Accidental_FIRE files**: already India-filtered in synthetic generation — no bounds check needed.
 
 #### 1D-CNN PyTorch Architecture
 ```python
@@ -195,7 +208,7 @@ import torch
 import torch.nn as nn
 
 class DiurnalTemporalCNN(nn.Module):
-    def __init__(self, num_classes=5):
+    def __init__(self, num_classes=4):  # 4-class: Wildfire, Agri, Industrial, Accidental
         super(DiurnalTemporalCNN, self).__init__()
         # Input shape: (Batch, 1, 144) representing 144 ten-minute readings in 24 hours
         self.conv1d = nn.Sequential(
@@ -214,7 +227,9 @@ class DiurnalTemporalCNN(nn.Module):
         feat = self.conv1d(x).squeeze(-1)
         return self.fc(feat)
 ```
-- **Expected Standalone Accuracy**: **74% – 78%**
+- **Output shape:** `P_temp_val` → `(N, 4)` — *clean, no noise columns*
+- **Phase 6 mapping:** CNN class 3 (Accidental) → master class 4 via `remap_P_temp()` before stacking
+- **Expected Standalone Accuracy**: **78% – 83%**
 
 ---
 
@@ -435,3 +450,152 @@ Use this quick revision guide to understand and explain all machine learning alg
 - **What it is**: An explainability technique that breaks down why an AI model made a specific prediction.
 - **Easy Analogy**: Think of an itemized receipt after shopping. SHAP gives an itemized receipt for the AI's decision: *"Distance to refinery added +40% confidence, FRP persistence added +35% confidence."*
 - **Why we use it**: It makes the AI a transparent "glass box" so SIH hackathon judges can see exact reasoning behind every fire alert.
+
+---
+
+## PHASE 4 TRAINING — DEBUG LOG & ALL FIXES APPLIED
+
+> This section documents every bug found and fix applied during the actual Phase 4 (1D-CNN) training session on 2026-08-29. Added for team transparency and reproducibility.
+
+---
+
+### Fix 1 — UnicodeEncodeError on Windows Terminal (cp1252)
+
+**What was wrong:**
+The training script printed Unicode arrow characters that the Windows cp1252 terminal codec cannot encode. Training crashed immediately on the first print statement with `UnicodeEncodeError: 'charmap' codec can't encode character`.
+
+**Fix applied:** Added UTF-8 stdout override at the top of the script, replaced all Unicode symbols with ASCII:
+
+```python
+import sys, io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+# All '->' and '--' used instead of Unicode arrow characters
+```
+
+---
+
+### Fix 2 — ReduceLROnPlateau verbose Argument Removed in PyTorch 2.x
+
+**What was wrong:**
+`verbose=True` was valid in older PyTorch but removed in PyTorch 2.x, causing a `TypeError` crash before training started.
+
+```
+TypeError: ReduceLROnPlateau.__init__() got an unexpected keyword argument 'verbose'
+```
+
+**Fix applied:** Removed the `verbose=True` argument from the scheduler initialization.
+
+---
+
+### Fix 3 — Grid-Cell Dataset Strategy Was Too Slow (Never Finished in 45+ Minutes)
+
+**What was wrong:**
+The first rewrite attempt used a 0.5-degree spatial grid-cell approach: for each day-folder, all 144 CSVs were loaded and their rows were processed one-by-one using `iterrows()`. With 20,834 total CSV files, loading never finished after 45+ minutes and the task had to be killed.
+
+**Fix applied:** Reverted to the correct design — one diurnal vector per day-folder (148 raw samples total). Replaced row-by-row `iterrows()` with fully vectorized `numpy.bincount`:
+
+```python
+# WRONG (iterrows -- ~1000x slower than vectorized):
+for _, row in df.iterrows():
+    slot = int(row['time_slot'])
+    frp_vector[slot] += float(row['FRP_Wm2'])
+
+# CORRECT (vectorized -- fast):
+slots     = ((t % 10000) // 100 * 6 + (t % 100) // 10).clip(0, 143).values
+frp       = data['FRP_Wm2'].values.astype(np.float32)
+frp_sum   = np.bincount(slots, weights=frp, minlength=144).astype(np.float32)
+frp_count = np.bincount(slots,              minlength=144).astype(np.float32)
+```
+
+**Result:** Total training time dropped from 45+ min (never finished) to **3.4 minutes**.
+
+---
+
+### Fix 4 — Data Augmentation Done BEFORE Train/Val Split (Data Leakage)
+
+**What was wrong:**
+The original plan augmented the entire dataset first, then split into train/val. This is data leakage — augmented copies of validation samples would appear in the training set, artificially inflating reported accuracy.
+
+**Fix applied:** Always split raw samples first, then augment the train split only:
+
+```python
+# CORRECT (no leakage -- split first, augment train only):
+X_tr_raw, X_val, y_tr_raw, y_val = train_test_split(
+    X_raw, y_raw, test_size=0.2, stratify=y_raw)
+X_train, y_train = augment(X_tr_raw, y_tr_raw, n=20)   # val is never augmented
+```
+
+---
+
+### Fix 5 — RuntimeWarning: invalid value encountered in divide
+
+**What was wrong:**
+`np.where()` evaluates both branches before applying the boolean mask. So `frp_sum / frp_count` was computed even where `frp_count == 0`, producing hundreds of division-by-zero warnings in the log.
+
+```python
+# WRONG (evaluates division on zeros, floods log with warnings):
+vec = np.where(frp_count > 0, frp_sum / frp_count, 0.0).astype(np.float32)
+```
+
+**Fix applied:** Used `np.divide()` with `out` and `where` parameters — division only occurs where count > 0:
+
+```python
+# CORRECT (zero-safe, no warnings):
+vec = np.divide(frp_sum, frp_count,
+                out=np.zeros(SEQ_LEN, dtype=np.float32),
+                where=frp_count > 0)
+```
+
+---
+
+### Fix 6 — num_classes=5 in Implementation Plan (Wrong Architecture)
+
+**What was wrong:**
+`final_multimodal_implementation.md` had `num_classes=5` in the 1D-CNN architecture block. Only 4 classes have Himawari training data. Classes 3 and 4 would have zero training signal, making the output neurons for those classes produce random noise.
+
+**Fix applied:** Updated both the implementation plan and training script to `num_classes=4`. Gas Flare (master class 3) was intentionally excluded — its flat 24/7 curve is physically identical to Industrial Persistent and is handled by XGBoost `is_gas_flare` at ~100% precision.
+
+---
+
+### Fix 7 — README.md File Count Discrepancy (Accidental_FIRE)
+
+**What was wrong:**
+`Himawari_Dataset/README.md` stated `3,456 synthetic files` for `Accidental_FIRE/`. Live verification showed the actual directory contained **8,039 files** (spanning April + August + November months).
+
+**Fix applied:** Updated README with correct counts. Total dataset: `~20,834 CSV files` (not 16,251).
+
+---
+
+### Fix 8 — Gas Flare Class Number Wrong in README
+
+**What was wrong:**
+README said `Gas Flare (Class 4 in master CSV)`. In the actual `master_2024_training (1).csv`, the mapping is Gas Flare = Class 3, Accidental = Class 4.
+
+**Fix applied:** Corrected to `Gas Flare (master CSV Class 3)`.
+
+---
+
+### Phase 4 Final Outcome Summary
+
+| Metric | Value |
+|:---|:---|
+| Training script | `phase4_train_1dcnn.py` |
+| Total training time | **3.4 minutes** |
+| Raw diurnal vectors | 148 (30+30+31+57 from day-folders) |
+| Augmented train set | 2,478 samples (20x noise+shift+scale, train only) |
+| Val set (unaugmented) | 30 samples |
+| Best epoch | 11 of 80 (early stopped at epoch 26) |
+| Standard Accuracy | **86.67%** |
+| Balanced Accuracy | **83.33%** |
+| Macro F1-Score | **82.86%** |
+| `P_temp_val.npy` shape | `(30, 4)` — ready for Phase 6 stacking |
+| Phase 6 remap | CNN class 3 (Accidental) → master class 4 via `remap_P_temp()` |
+
+**Per-class F1 scores:**
+
+| Class | F1 | Note |
+|:---|:---:|:---|
+| Wildfire (0) | **1.00** | Perfect — afternoon FRP peak unmistakable |
+| Agricultural (1) | **0.60** | Some confusion with Industrial (both daytime peaks) |
+| Industrial (2) | **0.71** | Some confusion with Agricultural (expected overlap) |
+| Accidental (3) | **1.00** | Perfect — Z-score spike pattern is extreme (105 MW vs 1.6 MW baseline) |

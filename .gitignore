@@ -1,10 +1,17 @@
 # Datasets and Large Folders
 *.csv
+!models/*.csv
 Himawari 9 JAXA/
+Himawari_Dataset/
+!Himawari_Dataset/README.md
+ESA_WorldCover_India/
 __MACOSX/
 
-# Temporary / OS files
+# Python & OS caches
+__pycache__/
+*.pyc
 .DS_Store
 
 # Training Logs (keep JSON metrics)
 logs/*.log
+
