@@ -1,0 +1,109 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  
+  html, body, #root {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #07090e;
+    color: #e2e8f0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* Custom Tactical Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0b0f17;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Leaflet Tactical Tooltip Styling */
+.leaflet-tooltip.tactical-tooltip {
+  background-color: #0d131f !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #334155 !important;
+  border-radius: 6px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.8) !important;
+  padding: 8px 10px !important;
+}
+
+.leaflet-tooltip-top.tactical-tooltip::before {
+  border-top-color: #0d131f !important;
+}
+.leaflet-tooltip-bottom.tactical-tooltip::before {
+  border-bottom-color: #0d131f !important;
+}
+
+/* ============================================================
+   Simplicity Rules tokens (v1.1 — NASA/ESA grammar)
+   - One accent: --accent. Chrome is slate only.
+   - Type voices: sans for labels (sentence case), mono for numbers only.
+   - Class colors are data: they appear on map markers and the drawer
+     header dot only — never on chrome.
+   ============================================================ */
+:root {
+  --accent: #f97316;
+}
+
+/* ============================================================
+   Floating Overlay Chrome — redesign.md design system (Rule 6)
+   Glass background shared by all floating elements. Never use
+   solid, white, or light backgrounds. No drop shadows.
+   ============================================================ */
+.floating-glass {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+/* Hotspot Detail Drawer — slides in from the right (Rule 4) */
+.hotspot-drawer {
+  position: fixed;
+  right: 72px;   /* clears the right icon strip */
+  top: 80px;
+  bottom: 24px;
+  width: 360px;
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+/* Panel entrance animations */
+@keyframes panelInLeft {
+  from { opacity: 0; transform: translateY(-50%) translateX(-12px); }
+  to   { opacity: 1; transform: translateY(-50%) translateX(0); }
+}
+@keyframes panelInRight {
+  from { opacity: 0; transform: translateY(-50%) translateX(12px); }
+  to   { opacity: 1; transform: translateY(-50%) translateX(0); }
+}
+@keyframes drawerIn {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.animate-panel-in-left  { animation: panelInLeft 0.2s ease-out; }
+.animate-panel-in-right { animation: panelInRight 0.2s ease-out; }
+.animate-drawer-in      { animation: drawerIn 0.2s ease-out; }
+

@@ -1,0 +1,67 @@
+[
+  {
+    "alert_id": "TW-ALERT-2026000",
+    "location": {
+      "lat": 20.9501,
+      "lon": 86.05019
+    },
+    "frp_mw": 8.71,
+    "baseline_mean_mw": 3.044709302325581,
+    "z_score": 2.55,
+    "spike_ratio": "286.1% of normal",
+    "severity": "ELEVATED (Automated Drone Reconnaissance Triggered)",
+    "action_protocol": "NTRO / NDMA Automated Notification Dispatched"
+  },
+  {
+    "alert_id": "TW-ALERT-2026001",
+    "location": {
+      "lat": 20.9669,
+      "lon": 86.0134
+    },
+    "frp_mw": 19.6,
+    "baseline_mean_mw": 3.5691152810887616,
+    "z_score": 4.0,
+    "spike_ratio": "549.2% of normal",
+    "severity": "HIGH (Emergency Hazmat Alert & Fire Dispatch)",
+    "action_protocol": "NTRO / NDMA Automated Notification Dispatched"
+  },
+  {
+    "alert_id": "TW-ALERT-2026002",
+    "location": {
+      "lat": 22.05355,
+      "lon": 88.12562
+    },
+    "frp_mw": 7.47,
+    "baseline_mean_mw": 2.7265865384615386,
+    "z_score": 3.0,
+    "spike_ratio": "274.0% of normal",
+    "severity": "HIGH (Emergency Hazmat Alert & Fire Dispatch)",
+    "action_protocol": "NTRO / NDMA Automated Notification Dispatched"
+  },
+  {
+    "alert_id": "TW-ALERT-2026003",
+    "location": {
+      "lat": 26.29334,
+      "lon": 71.11716
+    },
+    "frp_mw": 10.9,
+    "baseline_mean_mw": 6.640952380952381,
+    "z_score": 0.77,
+    "spike_ratio": "164.1% of normal",
+    "severity": "ELEVATED (Automated Drone Reconnaissance Triggered)",
+    "action_protocol": "NTRO / NDMA Automated Notification Dispatched"
+  },
+  {
+    "alert_id": "TW-ALERT-2026004",
+    "location": {
+      "lat": 22.79714,
+      "lon": 86.20763
+    },
+    "frp_mw": 18.49,
+    "baseline_mean_mw": 4.251121495327103,
+    "z_score": 3.32,
+    "spike_ratio": "434.9% of normal",
+    "severity": "HIGH (Emergency Hazmat Alert & Fire Dispatch)",
+    "action_protocol": "NTRO / NDMA Automated Notification Dispatched"
+  }
+]
