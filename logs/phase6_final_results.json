@@ -1,0 +1,22 @@
+{
+  "overall_accuracy": 99.96941708973026,
+  "balanced_accuracy": 99.92393993993994,
+  "macro_f1": 99.84052016800857,
+  "model1_xgboost_acc": 98.99076396109854,
+  "model2_1dcnn_acc": 100.0,
+  "model3_resnet18_acc": 82.70842253348829,
+  "per_class_recalls": {
+    "Wildfire": 100.0,
+    "Agricultural": 100.0,
+    "Industrial Persistent": 99.92,
+    "Gas Flare": 100.0,
+    "Accidental Fire": 99.69969969969969
+  },
+  "per_class_precisions": {
+    "Wildfire": 100.0,
+    "Agricultural": 100.0,
+    "Industrial Persistent": 99.97998799279569,
+    "Gas Flare": 100.0,
+    "Accidental Fire": 98.80952380952381
+  }
+}

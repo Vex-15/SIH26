@@ -1,0 +1,87 @@
+{
+  "phase": 5,
+  "model": "ResNet18+TabularFusion",
+  "timestamp": "2026-08-30T05:53:59.217266",
+  "total_training_time_min": 51.54,
+  "best_val_balanced_accuracy": 0.6642,
+  "best_val_macro_f1": 0.6682,
+  "per_class_recall": {
+    "Wildfire": 0.9404,
+    "Agricultural": 0.6546,
+    "Industrial": 0.9522,
+    "Gas Flare": 0.7736,
+    "Accidental": 0.0
+  },
+  "training_history": [
+    {
+      "epoch": 1,
+      "tr_loss": 0.7174382284137834,
+      "tr_bal": 0.8311896716703341,
+      "vl_loss": 0.7689759633503854,
+      "vl_bal": 0.6093486614173228,
+      "vl_f1": 0.6228362460881436,
+      "per_class_recall": [
+        0.936,
+        0.6434,
+        0.9388,
+        0.5285433070866141,
+        0.0
+      ],
+      "epoch_min": 16.41
+    },
+    {
+      "epoch": 2,
+      "tr_loss": 0.5808135979679466,
+      "tr_bal": 0.8591948246712846,
+      "vl_loss": 0.6853812206536531,
+      "vl_bal": 0.6641644094488189,
+      "vl_f1": 0.6681669053097699,
+      "per_class_recall": [
+        0.9404,
+        0.6546,
+        0.9522,
+        0.7736220472440944,
+        0.0
+      ],
+      "epoch_min": 16.99
+    },
+    {
+      "epoch": 3,
+      "tr_loss": 0.545060097238089,
+      "tr_bal": 0.8610135589283562,
+      "vl_loss": 0.6849363965447992,
+      "vl_bal": 0.636462845522688,
+      "vl_f1": 0.654306815194705,
+      "per_class_recall": [
+        0.9582,
+        0.652,
+        0.9508,
+        0.6062992125984252,
+        0.015015015015015015
+      ],
+      "epoch_min": 18.14
+    }
+  ],
+  "config": {
+    "master_csv": "master_2024_training (1).csv",
+    "tile_dir": "esa_worldcover",
+    "output_dir": "models",
+    "log_dir": "logs",
+    "batch_size": 64,
+    "num_epochs": 3,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.0001,
+    "num_workers": 0,
+    "max_per_class": 25000,
+    "chip_size": 224,
+    "val_split": 0.2,
+    "max_jitter": 15,
+    "focal_gamma": 1.5,
+    "label_smooth": 0.1,
+    "grad_clip": 1.0,
+    "early_stop": 3,
+    "cutmix_prob": 0.25,
+    "tta_passes": 1,
+    "random_seed": 42
+  }
+}
