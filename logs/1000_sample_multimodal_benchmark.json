@@ -1,0 +1,13 @@
+{
+  "overall_accuracy": 99.9,
+  "balanced_accuracy": 99.9,
+  "macro_f1": 99.8999993749961,
+  "total_samples": 1000,
+  "per_class_recalls": {
+    "Wildfire": 100.0,
+    "Agricultural": 100.0,
+    "Industrial Persistent": 99.5,
+    "Gas Flare": 100.0,
+    "Accidental Fire": 100.0
+  }
+}

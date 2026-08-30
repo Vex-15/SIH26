@@ -1,0 +1,452 @@
+[
+  {
+    "lat": 21.10652,
+    "lon": 72.63418,
+    "frp": 10.53,
+    "ground_truth": "Accidental Fire",
+    "predicted": "Accidental Fire",
+    "confidence": 0.9966982879567345,
+    "is_correct": true
+  },
+  {
+    "lat": 23.35235,
+    "lon": 88.16422,
+    "frp": 2.02,
+    "ground_truth": "Agricultural",
+    "predicted": "Agricultural",
+    "confidence": 0.999912206854884,
+    "is_correct": true
+  },
+  {
+    "lat": 23.88131,
+    "lon": 78.20271,
+    "frp": 7.98,
+    "ground_truth": "Agricultural",
+    "predicted": "Agricultural",
+    "confidence": 0.9999040546690556,
+    "is_correct": true
+  },
+  {
+    "lat": 21.74103,
+    "lon": 73.56601,
+    "frp": 4.17,
+    "ground_truth": "Wildfire",
+    "predicted": "Wildfire",
+    "confidence": 0.9999340835604763,
+    "is_correct": true
+  },
+  {
+    "lat": 27.60583,
+    "lon": 95.40498,
+    "frp": 0.47,
+    "ground_truth": "Gas Flare",
+    "predicted": "Gas Flare",
+    "confidence": 0.9997520612344584,
+    "is_correct": true
+  },
+  {
+    "lat": 20.99562,
+    "lon": 86.01285,
+    "frp": 2.31,
+    "ground_truth": "Industrial Persistent",
+    "predicted": "Industrial Persistent",
+    "confidence": 0.9999246035749134,
+    "is_correct": true
+  },
+  {
+    "lat": 21.37907,
+    "lon": 81.63934,
+    "frp": 1.32,
+    "ground_truth": "Industrial Persistent",
+    "predicted": "Industrial Persistent",
+    "confidence": 0.9999412608910897,
+    "is_correct": true
+  },
+  {
+    "lat": 27.22193,
+    "lon": 95.34454,
+    "frp": 0.61,
+    "ground_truth": "Gas Flare",
+    "predicted": "Gas Flare",
+    "confidence": 0.9997905710292853,
+    "is_correct": true
+  },
+  {
+    "lat": 23.75901,
+    "lon": 85.85446,
+    "frp": 3.43,
+    "ground_truth": "Agricultural",
+    "predicted": "Agricultural",
+    "confidence": 0.9999028027377465,
+    "is_correct": true
+  },
+  {
+    "lat": 22.12931,
+    "lon": 72.76679,
+    "frp": 0.79,
+    "ground_truth": "Gas Flare",
+    "predicted": "Gas Flare",
+    "confidence": 0.9997564395728338,
+    "is_correct": true
+  },
+  {
+    "lat": 13.18297,
+    "lon": 78.49343,
+    "frp": 2.5,
+    "ground_truth": "Agricultural",
+    "predicted": "Agricultural",
+    "confidence": 0.9999161745080715,
+    "is_correct": true
+  },
+  {
+    "lat": 18.69191,
+    "lon": 73.04156,
+    "frp": 8.75,
+    "ground_truth": "Accidental Fire",
+    "predicted": "Accidental Fire",
+    "confidence": 0.9999088100113506,
+    "is_correct": true
+  },
+  {
+    "lat": 18.11578,
+    "lon": 80.18526,
+    "frp": 5.01,
+    "ground_truth": "Wildfire",
+    "predicted": "Wildfire",
+    "confidence": 0.9999214885824477,
+    "is_correct": true
+  },
+  {
+    "lat": 16.71662,
+    "lon": 76.55342,
+    "frp": 6.33,
+    "ground_truth": "Agricultural",
+    "predicted": "Agricultural",
+    "confidence": 0.9998914907685738,
+    "is_correct": true
+  },
+  {
+    "lat": 27.59036,
+    "lon": 96.17076,
+    "frp": 39.2,
+    "ground_truth": "Wildfire",
+    "predicted": "Wildfire",
+    "confidence": 0.9999305321433514,
+    "is_correct": true
+  },
+  {
+    "lat": 31.87051,
+    "lon": 76.00004,
+    "frp": 13.42,
+    "ground_truth": "Wildfire",
+    "predicted": "Wildfire",
+    "confidence": 0.9999400095084825,
+    "is_correct": true
+  },
+  {
+    "lat": 26.12,
+    "lon": 90.24,
+    "frp": 2.4,
+    "ground_truth": "Agricultural",
+    "predicted": "Agricultural",
+    "confidence": 0.9998945458760418,
+    "is_correct": true
+  },
+  {
+    "lat": 28.34082,
+    "lon": 73.44249,
+    "frp": 19.65,
+    "ground_truth": "Accidental Fire",
+    "predicted": "Accidental Fire",
+    "confidence": 0.9997976319938253,
+    "is_correct": true
+  },
+  {
+    "lat": 14.918,
+    "lon": 78.2547,
+    "frp": 85.4,
+    "ground_truth": "Industrial Persistent",
+    "predicted": "Industrial Persistent",
+    "confidence": 0.9999234603296082,
+    "is_correct": true
+  },
+  {
+    "lat": 23.79376,
+    "lon": 91.86971,
+    "frp": 3.96,
+    "ground_truth": "Wildfire",
+    "predicted": "Wildfire",
+    "confidence": 0.9999229639876813,
+    "is_correct": true
+  },
+  {
+    "lat": 20.96733,
+    "lon": 85.17028,
+    "frp": 2.89,
+    "ground_truth": "Wildfire",
+    "predicted": "Wildfire",
+    "confidence": 0.9999505714254692,
+    "is_correct": true
+  },
+  {
+    "lat": 17.42873,
+    "lon": 80.34846,
+    "frp": 2.71,
+    "ground_truth": "Wildfire",
+    "predicted": "Wildfire",
+    "confidence": 0.9999327058113862,
+    "is_correct": true
+  },
+  {
+    "lat": 20.8668,
+    "lon": 84.9925,
+    "frp": 12.8,
+    "ground_truth": "Accidental Fire",
+    "predicted": "Accidental Fire",
+    "confidence": 0.9998953313118499,
+    "is_correct": true
+  },
+  {
+    "lat": 21.10829,
+    "lon": 72.6479,
+    "frp": 1.48,
+    "ground_truth": "Industrial Persistent",
+    "predicted": "Industrial Persistent",
+    "confidence": 0.9999655166206508,
+    "is_correct": true
+  },
+  {
+    "lat": 17.0884,
+    "lon": 75.8681,
+    "frp": 69.5,
+    "ground_truth": "Accidental Fire",
+    "predicted": "Accidental Fire",
+    "confidence": 0.9997233089861222,
+    "is_correct": true
+  },
+  {
+    "lat": 27.32002,
+    "lon": 95.26572,
+    "frp": 1.03,
+    "ground_truth": "Gas Flare",
+    "predicted": "Gas Flare",
+    "confidence": 0.9998347844125042,
+    "is_correct": true
+  },
+  {
+    "lat": 25.51264,
+    "lon": 84.31412,
+    "frp": 7.39,
+    "ground_truth": "Agricultural",
+    "predicted": "Agricultural",
+    "confidence": 0.9999167562246228,
+    "is_correct": true
+  },
+  {
+    "lat": 27.60405,
+    "lon": 95.40244,
+    "frp": 1.15,
+    "ground_truth": "Gas Flare",
+    "predicted": "Gas Flare",
+    "confidence": 0.9996678487808235,
+    "is_correct": true
+  },
+  {
+    "lat": 27.43824,
+    "lon": 95.37959,
+    "frp": 0.25,
+    "ground_truth": "Gas Flare",
+    "predicted": "Gas Flare",
+    "confidence": 0.9997676241311805,
+    "is_correct": true
+  },
+  {
+    "lat": 22.34282,
+    "lon": 69.88278,
+    "frp": 1.15,
+    "ground_truth": "Gas Flare",
+    "predicted": "Gas Flare",
+    "confidence": 0.9998138959592788,
+    "is_correct": true
+  },
+  {
+    "lat": 19.53252,
+    "lon": 73.35082,
+    "frp": 8.83,
+    "ground_truth": "Accidental Fire",
+    "predicted": "Accidental Fire",
+    "confidence": 0.997992086068534,
+    "is_correct": true
+  },
+  {
+    "lat": 23.16376,
+    "lon": 82.34233,
+    "frp": 5.55,
+    "ground_truth": "Wildfire",
+    "predicted": "Wildfire",
+    "confidence": 0.9999300531602721,
+    "is_correct": true
+  },
+  {
+    "lat": 21.10298,
+    "lon": 72.63381,
+    "frp": 8.43,
+    "ground_truth": "Industrial Persistent",
+    "predicted": "Industrial Persistent",
+    "confidence": 0.9999231326211875,
+    "is_correct": true
+  },
+  {
+    "lat": 21.76396,
+    "lon": 84.01873,
+    "frp": 9.32,
+    "ground_truth": "Accidental Fire",
+    "predicted": "Accidental Fire",
+    "confidence": 0.9999154020535054,
+    "is_correct": true
+  },
+  {
+    "lat": 17.17207,
+    "lon": 81.13566,
+    "frp": 10.15,
+    "ground_truth": "Wildfire",
+    "predicted": "Wildfire",
+    "confidence": 0.9999186282094416,
+    "is_correct": true
+  },
+  {
+    "lat": 22.32914,
+    "lon": 82.64983,
+    "frp": 0.5,
+    "ground_truth": "Industrial Persistent",
+    "predicted": "Industrial Persistent",
+    "confidence": 0.9999477684220164,
+    "is_correct": true
+  },
+  {
+    "lat": 26.45033,
+    "lon": 94.17012,
+    "frp": 0.42,
+    "ground_truth": "Gas Flare",
+    "predicted": "Gas Flare",
+    "confidence": 0.9998323534464731,
+    "is_correct": true
+  },
+  {
+    "lat": 27.22942,
+    "lon": 78.86197,
+    "frp": 1.86,
+    "ground_truth": "Agricultural",
+    "predicted": "Agricultural",
+    "confidence": 0.999906801063719,
+    "is_correct": true
+  },
+  {
+    "lat": 28.19967,
+    "lon": 73.33437,
+    "frp": 3.77,
+    "ground_truth": "Agricultural",
+    "predicted": "Agricultural",
+    "confidence": 0.999925567347665,
+    "is_correct": true
+  },
+  {
+    "lat": 23.04776,
+    "lon": 79.62079,
+    "frp": 9.47,
+    "ground_truth": "Agricultural",
+    "predicted": "Agricultural",
+    "confidence": 0.9999334499376872,
+    "is_correct": true
+  },
+  {
+    "lat": 14.27117,
+    "lon": 80.12854,
+    "frp": 33.27,
+    "ground_truth": "Accidental Fire",
+    "predicted": "Accidental Fire",
+    "confidence": 0.9997848107840717,
+    "is_correct": true
+  },
+  {
+    "lat": 22.85755,
+    "lon": 86.05739,
+    "frp": 1.09,
+    "ground_truth": "Industrial Persistent",
+    "predicted": "Industrial Persistent",
+    "confidence": 0.9999636757787351,
+    "is_correct": true
+  },
+  {
+    "lat": 22.78326,
+    "lon": 86.20187,
+    "frp": 1.36,
+    "ground_truth": "Industrial Persistent",
+    "predicted": "Industrial Persistent",
+    "confidence": 0.9999705841812705,
+    "is_correct": true
+  },
+  {
+    "lat": 20.8731,
+    "lon": 84.9933,
+    "frp": 10.7,
+    "ground_truth": "Accidental Fire",
+    "predicted": "Accidental Fire",
+    "confidence": 0.999802216598681,
+    "is_correct": true
+  },
+  {
+    "lat": 22.364,
+    "lon": 87.29917,
+    "frp": 3.11,
+    "ground_truth": "Industrial Persistent",
+    "predicted": "Industrial Persistent",
+    "confidence": 0.9999684618385785,
+    "is_correct": true
+  },
+  {
+    "lat": 22.13381,
+    "lon": 83.18573,
+    "frp": 4.74,
+    "ground_truth": "Wildfire",
+    "predicted": "Wildfire",
+    "confidence": 0.9999325756809088,
+    "is_correct": true
+  },
+  {
+    "lat": 22.3595,
+    "lon": 87.29059,
+    "frp": 3.73,
+    "ground_truth": "Industrial Persistent",
+    "predicted": "Industrial Persistent",
+    "confidence": 0.9999429828789247,
+    "is_correct": true
+  },
+  {
+    "lat": 27.26505,
+    "lon": 95.12396,
+    "frp": 0.77,
+    "ground_truth": "Gas Flare",
+    "predicted": "Gas Flare",
+    "confidence": 0.999792763394464,
+    "is_correct": true
+  },
+  {
+    "lat": 27.13179,
+    "lon": 82.66031,
+    "frp": 5.7,
+    "ground_truth": "Accidental Fire",
+    "predicted": "Accidental Fire",
+    "confidence": 0.9988635631210702,
+    "is_correct": true
+  },
+  {
+    "lat": 23.40741,
+    "lon": 72.41472,
+    "frp": 0.63,
+    "ground_truth": "Gas Flare",
+    "predicted": "Gas Flare",
+    "confidence": 0.999901260527543,
+    "is_correct": true
+  }
+]
