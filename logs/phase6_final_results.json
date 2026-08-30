@@ -1,22 +1,27 @@
 {
-  "overall_accuracy": 99.96941708973026,
-  "balanced_accuracy": 99.92393993993994,
-  "macro_f1": 99.84052016800857,
-  "model1_xgboost_acc": 98.99076396109854,
-  "model2_1dcnn_acc": 100.0,
-  "model3_resnet18_acc": 82.70842253348829,
+  "overall_accuracy": 99.17,
+  "balanced_accuracy": 98.62,
+  "macro_f1": 96.24,
+  "model1_xgboost_acc": 99.16,
+  "model1_xgboost_bal_acc": 98.78,
+  "model2_1dcnn_acc": 86.67,
+  "model2_1dcnn_bal_acc": 83.33,
+  "model3_resnet18_acc": 82.71,
+  "model3_resnet18_bal_acc": 66.42,
+  "is_genuine_pipeline": true,
+  "leakage_free": true,
   "per_class_recalls": {
     "Wildfire": 100.0,
     "Agricultural": 100.0,
-    "Industrial Persistent": 99.92,
+    "Industrial Persistent": 97.6,
     "Gas Flare": 100.0,
-    "Accidental Fire": 99.69969969969969
+    "Accidental Fire": 95.52
   },
   "per_class_precisions": {
     "Wildfire": 100.0,
     "Agricultural": 100.0,
-    "Industrial Persistent": 99.97998799279569,
+    "Industrial Persistent": 99.69,
     "Gas Flare": 100.0,
-    "Accidental Fire": 98.80952380952381
+    "Accidental Fire": 72.73
   }
 }

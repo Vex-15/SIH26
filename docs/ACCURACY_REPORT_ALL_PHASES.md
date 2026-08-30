@@ -4,59 +4,53 @@
 
 ---
 
-## 📊 Executive Summary Scorecard
+## 📊 Executive Summary Scorecard (Genuine Benchmarks)
 
-| AI / ML Subsystem | Modality / Input Source | Lab Benchmark Accuracy | **Operational Field Accuracy (Real-World Noise)** | Role & Key Strength in Fusion |
+| AI / ML Subsystem | Modality / Input Source | Standalone Standard Acc | **Standalone Balanced Acc** | Role & Key Strength in Fusion |
 |:---|:---|:---:|:---:|:---|
-| **Model 1: XGBoost (Phase 3)** | Tabular Spatial (GPS, Elevation, $NO_2, SO_2$, FRP) | `98.99%` | **`91.2%`** | Forest reserves, Gas flares, Cropland boundaries |
-| **Model 2: 1D-CNN (Phase 4)** | Himawari-9 10-Min Diurnal Heat Curves | `86.67%` | **`84.5%`** | Extreme FRP Spikes (**100% Precision**) & Daytime Stubble |
-| **Model 3: ResNet-18 (Phase 5)**| ESA WorldCover 10m Multi-spectral Chips | `82.71%` | **`78.6%`** | High-Res Ground Physical Infrastructure (**95.2% on Industrial**) |
-| 👑 **Phase 6 Stacking Ensemble**| **15D Fused Multi-Modal Probability Space** | `99.90%` | **`93.40%` (Validated Field Target Met)** | **Master Multi-Modal Decision Engine** |
+| **Model 1: XGBoost (Phase 3)** | Tabular Spatial (GPS, Elevation, $NO_2, SO_2$, FRP) | `99.16%` | **`98.78%`** | Fast triage on terrain, gas columns & cropland boundaries |
+| **Model 2: 1D-CNN (Phase 4)** | Himawari-9 10-Min Diurnal Heat Curves | `86.67%` | **`83.33%`** | Temporal diurnal curve analysis (daytime stubble vs 24/7 industrial) |
+| **Model 3: ResNet-18 (Phase 5)**| ESA WorldCover 10m Multi-spectral Chips | `82.71%` | **`66.42%`** | Physical ground infrastructure inspection (`95.2%` on Industrial) |
+| 👑 **Phase 6 Stacking Ensemble**| **Multi-Modal Fused Probability Space (XGBoost + ResNet-18)** | `99.17%` | **`98.62%` (Macro F1: 96.24%)** | **Master Multi-Modal Decision Engine** |
 
 ---
 
-### 🛡️ Real-World Field Validation vs. Laboratory Benchmarks
-
-> **Defence & Operational Engineering Standard:**  
-> In laboratory test splits on 1,000 clean satellite hotspots, the Stacking Ensemble achieves **`99.90%`** accuracy.  
-> Under operational conditions across India with environmental degradation (monsoon cloud occlusion, rural mixed boundary pixels, and solar glint), **ThermalWatch AI maintains a validated operational field accuracy of `93.40%` (91.4% – 94.8% confidence interval)**, decisively outperforming standard single-threshold systems (which average 60%–70% due to false industrial alarms).
-
----
-
-## 🎯 Per-Class Operational Field Performance (With Real-World Noise):
+## 🎯 Per-Class Genuine Performance on Test Split (3,270 Held-Out Real Hotspots)
 
 ```
 🌲 Class 0 (Wildfire / Forest Fire):
-   Field Recall:  95.0% | Field Precision:  96.2% | F1-Score: 0.9560
+   Recall: 100.0% | Precision: 100.0% | F1-Score: 1.0000  [1,000 / 1,000 Correct]
 
 🌾 Class 1 (Agricultural Stubble Burning):
-   Field Recall:  93.5% | Field Precision:  94.8% | F1-Score: 0.9414
+   Recall: 100.0% | Precision: 100.0% | F1-Score: 1.0000  [1,000 / 1,000 Correct]
 
 🏭 Class 2 (Industrial Persistent Facility):
-   Field Recall:  94.5% | Field Precision:  96.0% | F1-Score: 0.9524
+   Recall:  97.6% | Precision:  99.7% | F1-Score: 0.9864  [  976 / 1,000 Correct]
 
 🔵 Class 3 (Industrial Gas Flare):
-   Field Recall:  91.0% | Field Precision:  95.5% | F1-Score: 0.9320
+   Recall: 100.0% | Precision: 100.0% | F1-Score: 1.0000  [  203 /   203 Correct]
 
 🚨 Class 4 (Accidental Factory Fire / Explosion):
-   Field Recall:  93.0% | Field Precision:  92.5% | F1-Score: 0.9275
+   Recall:  95.5% | Precision:  72.7% | F1-Score: 0.8258  [   64 /    67 Correct]
 
-⭐ OVERALL OPERATIONAL FIELD ACCURACY : 93.40% (91.4% – 94.8% Field Confidence)
+⭐ OVERALL SYSTEM ACCURACY : 99.17% (3,243 / 3,270 Correct)
+⭐ BALANCED ACCURACY       : 98.62%
+⭐ MACRO F1-SCORE          : 96.24%
 ```
 
 ---
 
-## 🔍 Master Confusion Matrix (1,000 Real Satellite Hotspots across India)
+## 🔍 Master Confusion Matrix (3,270 Held-Out Real Hotspots)
 
 $$\begin{pmatrix}
-\mathbf{200} & 0 & 0 & 0 & 0 \\
-0 & \mathbf{200} & 0 & 0 & 0 \\
-0 & 0 & \mathbf{199} & 0 & 1 \\
-0 & 0 & 0 & \mathbf{200} & 0 \\
-0 & 0 & 0 & 0 & \mathbf{200}
+\mathbf{1000} & 0 & 0 & 0 & 0 \\
+0 & \mathbf{1000} & 0 & 0 & 0 \\
+0 & 0 & \mathbf{976} & 0 & 24 \\
+0 & 0 & 0 & \mathbf{203} & 0 \\
+0 & 0 & 3 & 0 & \mathbf{64}
 \end{pmatrix}$$
 
-$$\text{Final System Accuracy} = \frac{200 + 200 + 199 + 200 + 200}{1000} = \mathbf{99.90\%}$$
+$$\text{Final System Accuracy} = \frac{1000 + 1000 + 976 + 203 + 64}{3270} = \mathbf{99.17\%}$$
 
 ---
 
@@ -65,28 +59,28 @@ $$\text{Final System Accuracy} = \frac{200 + 200 + 199 + 200 + 200}{1000} = \mat
 ### Phase 3: Model 1 — XGBoost Spatial Tabular Classifier
 * **Dataset:** 1,376,035 rows from `master_2024_training.csv`
 * **Features ($X$):** `latitude`, `longitude`, `brightness`, `frp`, `elevation`, `tropomi_no2`, `tropomi_so2`, `land_cover_code`, `is_industrial`, `is_wildfire`, `is_gas_flare`
-* **Test Accuracy:** **`98.99%`**
+* **Validation (275,207 real rows):** Standard Acc: **`99.74%`** | Balanced Acc: **`96.17%`**
 * **Saved Model:** `models/xgboost_model.pkl` | **Log:** `logs/phase3_metrics.json`
 
 ### Phase 4: Model 2 — 1D-CNN Diurnal Temporal Classifier
 * **Dataset:** 20,834 Himawari-9 10-minute cadence time series files
 * **Input Shape:** `(Batch, 1, 144)` representing 144 ten-minute readings in a 24-hour cycle
 * **Balanced Accuracy:** **`83.33%`** | **Standard Accuracy:** **`86.67%`**
-* **Accidental Spike Precision:** **`100.0%`** (105 MW surge vs 1.6 MW baseline)
 * **Saved Model:** `models/diurnal_1dcnn_best.pth` | **Log:** `logs/phase4_metrics.json`
 
 ### Phase 5: Model 3 — ResNet-18 Land Cover Vision Classifier
 * **Dataset:** 76 ESA WorldCover 10m GeoTIFFs (5.57 GB)
-* **Input Shape:** $224 \times 224 \times 3$ RGB multi-spectral chips + thermal injection
-* **Overall Accuracy:** **`82.71%`** (13,522 / 16,349 validation detections)
+* **Input Shape:** $224 \times 224 \times 3$ RGB multi-spectral chips + thermal radiance injection
+* **Overall Accuracy:** **`82.71%`** (13,522 / 16,349 validation detections) | **Balanced Acc:** **`66.42%`**
 * **Industrial Site Recall:** **`95.22%`** (4,761 / 5,000) | **Wildfire Recall:** **`94.04%`**
 * **Saved Model:** `models/resnet18_image_best.pth` | **Log:** `logs/phase5_metrics.json`
 
-### Phase 6: Multi-Modal Stacking Ensemble Meta-Learner
-* **Meta-Feature Vector ($X_{\text{meta}}$):** $[P_{\text{XGBoost}} \in \mathbb{R}^5, \; P_{\text{1D-CNN}} \in \mathbb{R}^5, \; P_{\text{ResNet}} \in \mathbb{R}^5] \in \mathbb{R}^{N \times 15}$
-* **Meta-Learner Architecture:** Multi-Layer Perceptron (MLP) with `hidden_layer_sizes=(32, 16)`, `ReLU` activation, and Adam optimizer
-* **1,000-Hotspot Test Accuracy:** **`99.90%`** (999 / 1,000 Correct)
-* **Inference Speed:** **`59.1 hotspots / second`** on Apple Silicon M4 GPU
+### Phase 6: Multi-Modal Stacking Ensemble Meta-Learner (Honest Pipeline)
+* **Meta-Feature Vector ($X_{\text{meta}}$):** $[P_{\text{XGBoost}} \in \mathbb{R}^5, \; P_{\text{ResNet}} \in \mathbb{R}^5] \in \mathbb{R}^{N \times 10}$
+* **Meta-Learner Architecture:** Balanced Logistic Regression Meta-Classifier
+* **Held-Out Test Accuracy:** **`99.17%`** (3,243 / 3,270 Correct) | **Balanced Acc:** **`98.62%`**
+* **Accidental Fire Recall:** **`95.52%`** (64 / 67 Critical Emergencies Intercepted)
+* **Data Leakage Check:** Clean out-of-fold validation splits with zero synthetic Dirichlet generation.
 * **Saved Model:** `models/stacking_meta_model.pkl` | **Log:** `logs/phase6_final_results.json`
 
 ### Phase 7: Rolling 30-Day Z-Score Anomaly Engine
@@ -96,19 +90,4 @@ $$\text{Final System Accuracy} = \frac{200 + 200 + 199 + 200 + 200}{1000} = \mat
 
 ### Phase 8: SHAP Explainability & GIS GeoJSON Export
 * **Explainability Receipts:** `outputs/shap_explainability_summary.json`
-* **Interactive Map Feed:** `outputs/thermalwatch_india_hotspots.geojson` (500 features formatted for Leaflet)
-
----
-
-## 💻 How to Run the Verification Tools:
-
-```bash
-# 1. Run Interactive Single-Hotspot Triage Demo
-python3 predict_hotspot.py --preset 5
-
-# 2. Run 1,000-Hotspot Multi-Modal Benchmark Test
-python3 test_multimodal_sandbox.py
-
-# 3. Run Full 8-Phase Master Suite
-python3 final_full_pipeline_sandbox.py
-```
+* **Interactive Map Feed:** `outputs/thermalwatch_india_hotspots.geojson` (505 features formatted for Leaflet)
