@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Geist+Mono:wght@300;400;500;600;700&display=swap');
+
+/* ─── Reset & Base ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Surfaces */
+  --surface:        #18181b;
+  --surface-border: rgba(255, 255, 255, 0.07);
+  --map-bg:         #0d0d0d;
+
+  /* Text */
+  --text-primary:   #fafafa;
+  --text-muted:     #71717a;
+
+  /* Accent */
+  --accent:         #f59e0b;
+  --accent-subtle:  rgba(245, 158, 11, 0.12);
+
+  /* Class colours */
+  --wildfire:       #ef4444;
+  --agricultural:   #f97316;
+  --industrial:     #a855f7;
+  --gasflare:       #eab308;
+  --accidental:     #ff0000;
+
+  /* Radius */
+  --r-sm:   8px;
+  --r-md:   12px;
+  --r-lg:   16px;
+  --r-full: 9999px;
+
+  /* Typography */
+  --font-ui:   'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', 'Fira Code', monospace;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--map-bg);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── MapLibre overrides ────────────────────────────────────── */
+.maplibregl-map {
+  position: absolute;
+  inset: 0;
+}
+.maplibregl-ctrl-bottom-left,
+.maplibregl-ctrl-bottom-right,
+.maplibregl-ctrl-top-left,
+.maplibregl-ctrl-top-right {
+  display: none !important; /* hide default controls — we use ours */
+}
+/* Keep attribution discreetly visible bottom-right */
+.maplibregl-ctrl-attrib {
+  display: block !important;
+  font-size: 9px !important;
+  opacity: 0.4 !important;
+  background: transparent !important;
+  color: var(--text-muted) !important;
+  pointer-events: none;
+}
+.maplibregl-ctrl-attrib a { color: var(--text-muted) !important; }
+.maplibregl-ctrl-bottom-right { display: flex !important; }
+
+/* ─── Floating Panel Base ───────────────────────────────────── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--r-lg);
+}
+
+/* ─── View Transition (theme toggle) ───────────────────────── */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-new(root) {
+  z-index: 9999;
+}
