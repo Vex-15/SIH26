@@ -149,6 +149,7 @@ For government and defence audits, every prediction includes an itemized feature
 ---
 
 ## 👥 Contributors
-* **Aadesh Khande** ([@debugonaut](https://github.com/debugonaut))
 * **Anushka Kannanawar** ([@anushkakannawar](https://github.com/anushkakannawar))
+* **Vedant Kowdiki** ([@Vex-15](https://github.com/Vex-15))
+* **Aadesh Khande** ([@debugonaut](https://github.com/debugonaut))
 * **Team Vex-15 / SIH 2026**
