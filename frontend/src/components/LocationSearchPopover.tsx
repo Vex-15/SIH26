@@ -111,10 +111,10 @@ export function LocationSearchPopover() {
         <div style="
           width: 26px;
           height: 26px;
-          background: rgba(234, 88, 12, 0.9);
-          border: 2px solid #ffffff;
+          background: rgba(234, 88, 12, 0.95);
+          border: 2.5px solid #ffffff;
           border-radius: 50%;
-          box-shadow: 0 0 18px rgba(234, 88, 12, 0.9), 0 0 8px rgba(0,0,0,0.6);
+          box-shadow: 0 0 20px rgba(234, 88, 12, 0.9), 0 0 10px rgba(0,0,0,0.5);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -123,12 +123,12 @@ export function LocationSearchPopover() {
         </div>
       `;
 
-      // Attach marker to map
+      // Attach marker to map with high contrast popup
       const newMarker = new maplibregl.Marker({ element: el })
         .setLngLat([lonNum, latNum])
         .setPopup(
           new maplibregl.Popup({ offset: 25 }).setHTML(
-            `<b style="color:#0f172a;font-size:12px;">${name}</b><br/><span style="font-size:11px;color:#475569;">${latNum.toFixed(4)}, ${lonNum.toFixed(4)}</span>`
+            `<b style="color:#0f172a;font-size:13px;font-family:sans-serif;">${name}</b><br/><span style="font-size:11px;color:#475569;font-family:monospace;">${latNum.toFixed(4)}, ${lonNum.toFixed(4)}</span>`
           )
         )
         .addTo(map);
@@ -165,22 +165,22 @@ export function LocationSearchPopover() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.96 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.96 }}
-      transition={{ duration: 0.15 }}
+      initial={{ opacity: 0, scale: 0.95, y: -8 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95, y: -8 }}
+      transition={{ duration: 0.18, ease: 'easeOut' }}
       style={{
         position: 'fixed',
         top: 16,
         left: 72,
         zIndex: 50,
         width: 380,
-        backgroundColor: '#0b1928',
-        border: '1px solid #1c3552',
-        borderRadius: 6,
-        boxShadow: '0 12px 36px rgba(0,0,0,0.8)',
+        backgroundColor: '#ffffff',
+        border: '1px solid #e2e8f0',
+        borderRadius: 8,
+        boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.4), 0 8px 20px -6px rgba(0, 0, 0, 0.2)',
         fontFamily: 'Inter, system-ui, sans-serif',
-        color: '#e2e8f0',
+        color: '#0f172a',
         overflow: 'hidden',
       }}
     >
@@ -190,14 +190,14 @@ export function LocationSearchPopover() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '8px 12px',
-          backgroundColor: '#071322',
-          borderBottom: '1px solid #16293f',
+          padding: '10px 14px',
+          backgroundColor: '#ffffff',
+          borderBottom: '1px solid #f1f5f9',
         }}
       >
         <span
           style={{
-            color: '#f95700',
+            color: '#ea580c',
             fontWeight: 800,
             fontSize: 13,
             letterSpacing: '0.05em',
@@ -212,49 +212,52 @@ export function LocationSearchPopover() {
             backgroundColor: '#ea580c',
             color: '#ffffff',
             border: 'none',
-            borderRadius: 3,
-            width: 22,
-            height: 22,
+            borderRadius: 4,
+            width: 24,
+            height: 24,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
+            transition: 'background-color 0.15s ease',
           }}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#c2410c')}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#ea580c')}
           title="Close Location Tool"
         >
-          <X size={15} strokeWidth={3} />
+          <X size={15} strokeWidth={2.8} />
         </button>
       </div>
 
-      {/* ── 3 Tab Navigation Bar (Identical to NASA FIRMS UI) ── */}
+      {/* ── 3 Tab Navigation Bar (White & Light Slate Styling) ── */}
       <div
         style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr 1fr',
-          backgroundColor: '#102033',
-          borderBottom: '1px solid #1a324d',
+          backgroundColor: '#f1f5f9',
+          borderBottom: '1px solid #e2e8f0',
         }}
       >
         {/* Tab 1: Current Location */}
         <button
           onClick={() => setActiveTab('current')}
           style={{
-            padding: '8px 4px',
+            padding: '9px 4px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: 6,
-            backgroundColor: activeTab === 'current' ? '#071220' : '#14253b',
-            color: activeTab === 'current' ? '#ffffff' : '#8ba5bd',
+            backgroundColor: activeTab === 'current' ? '#ffffff' : '#f8fafc',
+            color: activeTab === 'current' ? '#0f172a' : '#64748b',
             border: 'none',
-            borderRight: '1px solid #0d1b2c',
-            borderBottom: activeTab === 'current' ? '2px solid #f95700' : 'none',
+            borderRight: '1px solid #e2e8f0',
+            borderBottom: activeTab === 'current' ? '3px solid #ea580c' : 'none',
             cursor: 'pointer',
             fontWeight: activeTab === 'current' ? 700 : 500,
             fontSize: 11,
           }}
         >
-          <Crosshair size={18} color={activeTab === 'current' ? '#ffffff' : '#8ba5bd'} />
+          <Crosshair size={18} color={activeTab === 'current' ? '#ea580c' : '#64748b'} />
           <div style={{ textAlign: 'left', lineHeight: 1.1 }}>
             <div>Current</div>
             <div>Location</div>
@@ -265,22 +268,22 @@ export function LocationSearchPopover() {
         <button
           onClick={() => setActiveTab('find')}
           style={{
-            padding: '8px 4px',
+            padding: '9px 4px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: 6,
-            backgroundColor: activeTab === 'find' ? '#071220' : '#14253b',
-            color: activeTab === 'find' ? '#ffffff' : '#8ba5bd',
+            backgroundColor: activeTab === 'find' ? '#ffffff' : '#f8fafc',
+            color: activeTab === 'find' ? '#0f172a' : '#64748b',
             border: 'none',
-            borderRight: '1px solid #0d1b2c',
-            borderBottom: activeTab === 'find' ? '2px solid #f95700' : 'none',
+            borderRight: '1px solid #e2e8f0',
+            borderBottom: activeTab === 'find' ? '3px solid #ea580c' : 'none',
             cursor: 'pointer',
             fontWeight: activeTab === 'find' ? 700 : 500,
             fontSize: 11,
           }}
         >
-          <Search size={22} color={activeTab === 'find' ? '#ffffff' : '#8ba5bd'} />
+          <Search size={20} color={activeTab === 'find' ? '#ea580c' : '#64748b'} />
           <div style={{ textAlign: 'left', lineHeight: 1.1 }}>
             <div style={{ fontSize: 13, fontWeight: 800 }}>Find</div>
             <div style={{ fontSize: 11, fontWeight: 700 }}>Location</div>
@@ -291,21 +294,21 @@ export function LocationSearchPopover() {
         <button
           onClick={() => setActiveTab('saved')}
           style={{
-            padding: '8px 4px',
+            padding: '9px 4px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: 6,
-            backgroundColor: activeTab === 'saved' ? '#071220' : '#14253b',
-            color: activeTab === 'saved' ? '#ffffff' : '#8ba5bd',
+            backgroundColor: activeTab === 'saved' ? '#ffffff' : '#f8fafc',
+            color: activeTab === 'saved' ? '#0f172a' : '#64748b',
             border: 'none',
-            borderBottom: activeTab === 'saved' ? '2px solid #f95700' : 'none',
+            borderBottom: activeTab === 'saved' ? '3px solid #ea580c' : 'none',
             cursor: 'pointer',
             fontWeight: activeTab === 'saved' ? 700 : 500,
             fontSize: 11,
           }}
         >
-          <Flag size={18} color={activeTab === 'saved' ? '#ffffff' : '#8ba5bd'} />
+          <Flag size={18} color={activeTab === 'saved' ? '#ea580c' : '#64748b'} />
           <div style={{ textAlign: 'left', lineHeight: 1.1 }}>
             <div>Saved</div>
             <div>Locations</div>
@@ -313,19 +316,21 @@ export function LocationSearchPopover() {
         </button>
       </div>
 
-      {/* ── Main Tab Content Area ── */}
-      <div style={{ padding: 12, backgroundColor: '#0b1928' }}>
+      {/* ── Main Content Body ── */}
+      <div style={{ padding: 14, backgroundColor: '#ffffff' }}>
         {/* ──────── TAB 1: FIND LOCATION ──────── */}
         {activeTab === 'find' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {/* Search Input with Attached Orange Clear Button */}
+            {/* Search Input Box */}
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 backgroundColor: '#ffffff',
-                borderRadius: 2,
+                border: '1.5px solid #cbd5e1',
+                borderRadius: 4,
                 overflow: 'hidden',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
               }}
             >
               <input
@@ -335,13 +340,13 @@ export function LocationSearchPopover() {
                 placeholder="Search for location or enter coordinates"
                 style={{
                   width: '100%',
-                  padding: '8px 10px',
+                  padding: '9px 12px',
                   backgroundColor: '#ffffff',
                   color: '#0f172a',
                   border: 'none',
                   outline: 'none',
                   fontSize: 12,
-                  fontWeight: 500,
+                  fontWeight: 600,
                 }}
                 autoFocus
               />
@@ -355,28 +360,29 @@ export function LocationSearchPopover() {
                     backgroundColor: '#ea580c',
                     color: '#ffffff',
                     border: 'none',
-                    padding: '8px 10px',
+                    padding: '9px 12px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     cursor: 'pointer',
                   }}
                 >
-                  <X size={16} strokeWidth={3} />
+                  <X size={16} strokeWidth={2.8} />
                 </button>
               )}
             </div>
 
-            {/* Active Coordinates Sub-Bar */}
+            {/* Coordinates Status Strip */}
             <div
               style={{
-                backgroundColor: '#08223e',
-                border: '1px solid #1a3c63',
-                borderRadius: 3,
-                padding: '6px 10px',
-                fontSize: 11,
+                backgroundColor: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: 4,
+                padding: '7px 12px',
+                fontSize: 12,
                 fontFamily: 'monospace',
-                color: '#93c5fd',
+                fontWeight: 600,
+                color: '#1e293b',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
@@ -397,7 +403,7 @@ export function LocationSearchPopover() {
                     color: '#ffffff',
                     border: 'none',
                     borderRadius: 3,
-                    padding: '2px 8px',
+                    padding: '3px 9px',
                     fontSize: 10,
                     fontWeight: 700,
                     cursor: 'pointer',
@@ -406,15 +412,15 @@ export function LocationSearchPopover() {
                     gap: 3,
                   }}
                 >
-                  <Plus size={11} /> SAVE
+                  <Plus size={12} /> SAVE
                 </button>
               )}
             </div>
 
             {/* Autocomplete Suggestions Box */}
             {isLoading && (
-              <div style={{ fontSize: 11, color: '#94a3b8', padding: '6px 0', textAlign: 'center' }}>
-                Searching location data...
+              <div style={{ fontSize: 11, color: '#64748b', padding: '6px 0', textAlign: 'center' }}>
+                Searching locations...
               </div>
             )}
 
@@ -423,9 +429,10 @@ export function LocationSearchPopover() {
                 style={{
                   maxHeight: 180,
                   overflowY: 'auto',
-                  backgroundColor: '#06111f',
-                  border: '1px solid #1e3a5f',
-                  borderRadius: 3,
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: 4,
+                  boxShadow: '0 8px 16px rgba(0,0,0,0.1)',
                 }}
               >
                 {results.map((res) => {
@@ -436,19 +443,20 @@ export function LocationSearchPopover() {
                       key={res.place_id}
                       onClick={() => handleSelectLocation(latNum, lonNum, res.display_name)}
                       style={{
-                        padding: '8px 10px',
-                        borderBottom: '1px solid #0d1e33',
+                        padding: '9px 12px',
+                        borderBottom: '1px solid #f1f5f9',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'flex-start',
                         gap: 8,
+                        transition: 'background-color 0.12s ease',
                       }}
-                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#11233b')}
-                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f1f5f9')}
+                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#ffffff')}
                     >
-                      <MapPin size={14} color="#f95700" style={{ marginTop: 2, flexShrink: 0 }} />
+                      <MapPin size={15} color="#ea580c" style={{ marginTop: 2, flexShrink: 0 }} />
                       <div>
-                        <div style={{ fontSize: 11, fontWeight: 600, color: '#f1f5f9' }}>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: '#0f172a' }}>
                           {res.display_name}
                         </div>
                         <div style={{ fontSize: 10, fontFamily: 'monospace', color: '#64748b', marginTop: 2 }}>
@@ -466,8 +474,8 @@ export function LocationSearchPopover() {
         {/* ──────── TAB 2: CURRENT LOCATION ──────── */}
         {activeTab === 'current' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, textAlign: 'center', padding: '6px 0' }}>
-            <div style={{ fontSize: 11, color: '#94a3b8' }}>
-              Pinpoint your browser's GPS hardware location on the map.
+            <div style={{ fontSize: 12, color: '#475569' }}>
+              Pinpoint your browser's GPS location on the map.
             </div>
             <button
               onClick={handleGetCurrentLocation}
@@ -476,7 +484,7 @@ export function LocationSearchPopover() {
                 backgroundColor: '#ea580c',
                 color: '#ffffff',
                 border: 'none',
-                borderRadius: 3,
+                borderRadius: 4,
                 padding: '10px',
                 fontSize: 12,
                 fontWeight: 700,
@@ -487,11 +495,11 @@ export function LocationSearchPopover() {
                 gap: 8,
               }}
             >
-              <Navigation size={15} />
+              <Navigation size={16} />
               {isLocating ? 'Acquiring GPS Fix...' : 'Use My GPS Location'}
             </button>
             {gpsError && (
-              <div style={{ fontSize: 11, color: '#f87171', backgroundColor: '#450a0a', padding: 6, borderRadius: 3 }}>
+              <div style={{ fontSize: 11, color: '#dc2626', backgroundColor: '#fef2f2', padding: 8, borderRadius: 4, border: '1px solid #fca5a5' }}>
                 {gpsError}
               </div>
             )}
@@ -502,8 +510,8 @@ export function LocationSearchPopover() {
         {activeTab === 'saved' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {savedLocations.length === 0 ? (
-              <div style={{ fontSize: 11, color: '#64748b', textAlign: 'center', padding: '12px 0' }}>
-                No saved locations.
+              <div style={{ fontSize: 12, color: '#94a3b8', textAlign: 'center', padding: '12px 0' }}>
+                No saved locations yet.
               </div>
             ) : (
               <div style={{ maxHeight: 180, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -511,10 +519,10 @@ export function LocationSearchPopover() {
                   <div
                     key={item.id}
                     style={{
-                      backgroundColor: '#071322',
-                      border: '1px solid #16293f',
-                      borderRadius: 3,
-                      padding: '6px 10px',
+                      backgroundColor: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: 4,
+                      padding: '7px 10px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
@@ -524,7 +532,7 @@ export function LocationSearchPopover() {
                       onClick={() => handleSelectLocation(item.lat, item.lon, item.name)}
                       style={{ cursor: 'pointer', overflow: 'hidden' }}
                     >
-                      <div style={{ fontSize: 11, fontWeight: 700, color: '#f1f5f9' }}>{item.name}</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: '#0f172a' }}>{item.name}</div>
                       <div style={{ fontSize: 10, fontFamily: 'monospace', color: '#64748b' }}>
                         {item.lat.toFixed(4)}, {item.lon.toFixed(4)}
                       </div>
@@ -537,8 +545,8 @@ export function LocationSearchPopover() {
                           backgroundColor: '#0284c7',
                           color: '#ffffff',
                           border: 'none',
-                          borderRadius: 2,
-                          padding: '3px 8px',
+                          borderRadius: 3,
+                          padding: '4px 9px',
                           fontSize: 10,
                           fontWeight: 700,
                           cursor: 'pointer',
@@ -557,7 +565,7 @@ export function LocationSearchPopover() {
                         }}
                         title="Remove"
                       >
-                        <Trash2 size={13} />
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </div>
@@ -568,12 +576,12 @@ export function LocationSearchPopover() {
         )}
       </div>
 
-      {/* ── Bottom Checkbox Bar (Identical to NASA FIRMS UI) ── */}
+      {/* ── Bottom Checkbox Bar ── */}
       <div
         style={{
-          backgroundColor: '#152438',
-          borderTop: '1px solid #1e3654',
-          padding: '10px 12px',
+          backgroundColor: '#f8fafc',
+          borderTop: '1px solid #e2e8f0',
+          padding: '11px 14px',
           display: 'flex',
           alignItems: 'center',
           gap: 10,
@@ -588,7 +596,7 @@ export function LocationSearchPopover() {
         />
         <label
           htmlFor="allow-multiple"
-          style={{ fontSize: 12, color: '#cbd5e1', cursor: 'pointer', userSelect: 'none' }}
+          style={{ fontSize: 12, fontWeight: 500, color: '#1e293b', cursor: 'pointer', userSelect: 'none' }}
         >
           Allow multiple location selection
         </label>
