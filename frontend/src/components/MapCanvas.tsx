@@ -579,23 +579,9 @@ export function MapCanvas() {
               'interpolate',
               ['linear'],
               ['zoom'],
-              3, [
-                'interpolate', ['linear'], ['get', 'b_x'],
-                207.0, 0.30,
-                320.0, 0.55,
-                332.0, 0.72,
-                345.0, 0.88,
-                370.0, 0.96,
-              ],
-              6.5, [
-                'interpolate', ['linear'], ['get', 'b_x'],
-                207.0, 0.20,
-                320.0, 0.45,
-                332.0, 0.65,
-                345.0, 0.82,
-                370.0, 0.94,
-              ],
-              7.2, 0.0,
+              3.0, 0.88,
+              6.5, 0.82,
+              7.5, 0.0,
             ],
           },
         });
@@ -1060,28 +1046,13 @@ export function MapCanvas() {
         // Player open: hide hexbins completely so only isolated day's points appear
         map.setPaintProperty('hexbins-fill', 'fill-opacity', 0);
       } else {
-        // Player closed: show hexbins at national zoom < 7.2, strictly 0 opacity at zoom >= 7.8
         map.setPaintProperty('hexbins-fill', 'fill-opacity', [
           'interpolate',
           ['linear'],
           ['zoom'],
-          3, [
-            'interpolate', ['linear'], ['get', 'b_x'],
-            207.0, 0.25 * diurnalFactor,
-            320.0, 0.50 * diurnalFactor,
-            332.0, 0.70 * diurnalFactor,
-            345.0, 0.88 * (0.6 + 0.4 * diurnalFactor),
-            370.0, 0.96,
-          ],
-          6.5, [
-            'interpolate', ['linear'], ['get', 'b_x'],
-            207.0, 0.20 * diurnalFactor,
-            320.0, 0.45 * diurnalFactor,
-            332.0, 0.65 * diurnalFactor,
-            345.0, 0.82 * (0.6 + 0.4 * diurnalFactor),
-            370.0, 0.94,
-          ],
-          7.2, 0.0,
+          3.0, 0.88 * (0.5 + 0.5 * diurnalFactor),
+          6.5, 0.82 * (0.5 + 0.5 * diurnalFactor),
+          7.5, 0.0,
         ]);
       }
 
