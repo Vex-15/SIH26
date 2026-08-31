@@ -235,12 +235,22 @@ class DiurnalTemporalCNN(nn.Module):
 
 ### PHASE 5: Model 3 — Multi-Spectral Satellite Image Classifier (ResNet-18)
 
+> [!IMPORTANT]
+> **Class Imbalance Critical Fix Required!** Phase 5 has severe class imbalance (Agricultural=77%, Accidental=0.1%). Without proper fixes, ResNet will achieve fake 77% accuracy by predicting Agricultural for everything. **All 4 pillars MUST be implemented:**
+> 1. ESA RGB Colormap Mapping
+> 2. Agricultural Capping (1.07M → 150K)
+> 3. WeightedRandomSampler
+> 4. Focal Loss with class weights
+>
+> **See:** [`PHASE5_CLASS_IMBALANCE_SOLUTION.md`](file:///c:/Users/Dell/Documents/GitHub/SIH26/PHASE5_CLASS_IMBALANCE_SOLUTION.md) for complete implementation guide.
+
 #### Concept
-Using ESA WorldCover 10m resolution raster tiles (located in [`ESA_WorldCover_India/`](file:///e:/SIH/ESA_WorldCover_India/)):
+Using ESA WorldCover 10m resolution raster tiles (located in [`esa_worldcover/`](file:///c:/Users/Dell/Documents/GitHub/SIH26/esa_worldcover/)):
 - Extract a **224x224 image chip** centered at each coordinate in [`master_2024_training (1).csv`](file:///c:/Users/Dell/Documents/GitHub/SIH26/master_2024_training%20(1).csv).
 - Classify the visual spatial texture and land cover context around the fire hotspot.
+- **Convert ESA integer codes to RGB using official colormap** (Pillar A)
 
-#### Custom ResNet-18 Architecture
+#### Custom ResNet-18 Architecture with Class Imbalance Fixes
 ```python
 import torchvision.models as models
 import torch.nn as nn
@@ -253,8 +263,23 @@ class FireImageResNet(nn.Module):
 
     def forward(self, x):
         return self.resnet(x)
+
+# Training with ALL 4 class imbalance fixes:
+# 1. ESA RGB colormap (in dataset)
+# 2. Agricultural capping (1.07M -> 150K samples)
+# 3. WeightedRandomSampler (balanced batches)
+# 4. Focal Loss with class weights [1.61, 0.26, 2.18, 54.22, 165.19]
 ```
-- **Expected Standalone Accuracy**: **76% – 80%**
+
+#### Training Script
+```bash
+python phase5_train_resnet.py
+```
+
+- **Expected Standalone Performance**:
+  - **Balanced Accuracy**: **74% – 81%** (NOT standard accuracy!)
+  - **Macro F1 Score**: **72% – 78%**
+  - **Accidental Fire Recall**: **>70%** (vs 0% without fixes)
 
 ---
 
@@ -599,3 +624,125 @@ README said `Gas Flare (Class 4 in master CSV)`. In the actual `master_2024_trai
 | Agricultural (1) | **0.60** | Some confusion with Industrial (both daytime peaks) |
 | Industrial (2) | **0.71** | Some confusion with Agricultural (expected overlap) |
 | Accidental (3) | **1.00** | Perfect — Z-score spike pattern is extreme (105 MW vs 1.6 MW baseline) |
+
+
+---
+
+## PHASE 5 PRE-TRAINING SOLUTION — SEVERE CLASS IMBALANCE & FAKE ACCURACY FIX
+
+> [!WARNING]
+> **Severe Dataset Imbalance Audit on `master_2024_training (1).csv` (1,376,035 rows):**
+> - Class 0 (Wildfire): 170,987 (12.43%)
+> - Class 1 (Agricultural): **1,072,341 (77.93%)** $\leftarrow$ Massive Majority
+> - Class 2 (Industrial): 125,965 (9.15%)
+> - Class 3 (Gas Flare): 5,076 (0.37%)
+> - Class 4 (Accidental): **1,666 (0.12%)** $\leftarrow$ Extreme Minority ($644\times$ smaller than Agricultural)
+
+### 1. The Fake Accuracy Trap Explained
+If ResNet-18 is trained using standard `CrossEntropyLoss` and random `DataLoader` sampling:
+- The network quickly learns that predicting **Class 1 (Agricultural)** for 100% of inputs yields a **77.93% Standard Accuracy**.
+- **The catch:** Standard Accuracy is **FAKE**. The model has learned zero features for Accidental or Gas Flare fires (Recall = 0.00%, Macro F1 $\approx$ 15.6%).
+
+---
+
+### 2. The Recommended 4-Pillar Fix Architecture
+
+To guarantee authentic multi-class discrimination and real accuracy on all 5 classes, Phase 5 training **MUST** combine the following 4 pillars:
+
+#### Pillar A: ESA 1-Band Integer Code to Official 3-Channel RGB Colormap Mapping
+ESA WorldCover `.tif` tiles contain raw integer land-use codes (`10`, `40`, `50`, etc.). Passing raw integers directly into ResNet causes numerical scaling corruption. We map each pixel to ESA's official 24-bit RGB palette:
+
+```python
+import numpy as np
+
+ESA_COLOR_PALETTE = {
+    10:  [0,   100, 0],      # Tree Cover (Wildfire Context) -> Dark Green
+    20:  [255, 187, 34],     # Shrubland                     -> Orange-Yellow
+    30:  [255, 255, 76],     # Grassland                     -> Bright Yellow
+    40:  [240, 150, 255],    # Cropland (Agricultural)       -> Magenta / Pink
+    50:  [250, 0,   0],      # Built-up (Industrial/Flare)   -> Red
+    60:  [180, 180, 180],    # Bare / Sparse                 -> Grey
+    70:  [240, 240, 240],    # Snow / Ice                    -> White
+    80:  [0,   100, 200],    # Permanent Water               -> Blue
+    90:  [0,   150, 160],    # Wetland                       -> Teal
+    95:  [0,   207, 117],    # Mangroves                     -> Light Green
+    100: [250, 230, 160]     # Moss / Lichen                 -> Cream
+}
+
+def esa_tile_to_rgb(chip_1band):
+    """Converts a 224x224 1-band ESA integer array into a 224x224x3 RGB image."""
+    H, W = chip_1band.shape
+    rgb = np.zeros((H, W, 3), dtype=np.uint8)
+    for code, color in ESA_COLOR_PALETTE.items():
+        mask = (chip_1band == code)
+        rgb[mask] = color
+    return rgb  # Shape: (224, 224, 3) suitable for ImageNet pre-trained ResNet
+```
+
+#### Pillar B: Agricultural Capping + Minority Augmentation
+1. **Majority Subsampling:** Cap Class 1 (Agricultural) from 1,072,341 to **150,000 samples** to prevent data dominance and speed up epoch throughput by $3\times$.
+2. **Minority Oversampling & Augmentation:** Apply spatial transforms (rotations, flips, color jitter) to Class 3 (Gas Flare) and Class 4 (Accidental) so the network sees fresh variations every epoch.
+
+#### Pillar C: WeightedRandomSampler (Equal Mini-Batch Balance)
+Forces every mini-batch of size 32 to sample equal proportions of all 5 classes (~6-7 images per class per batch):
+
+```python
+import torch
+from torch.utils.data import WeightedRandomSampler
+
+# Compute inverse frequency sample weights
+class_counts = np.bincount(y_train)  # [170987, 150000, 125965, 5076, 1666]
+class_weights = 1.0 / class_counts
+sample_weights = class_weights[y_train]
+
+sampler = WeightedRandomSampler(
+    weights=torch.DoubleTensor(sample_weights),
+    num_samples=len(sample_weights),
+    replacement=True
+)
+
+train_loader = DataLoader(
+    train_dataset,
+    batch_size=32,
+    sampler=sampler  # Overrides uniform random shuffle
+)
+```
+
+#### Pillar D: Focal Loss with Inverse-Frequency Penalties
+Replaces standard CrossEntropyLoss with Focal Loss ($\gamma = 2.0$), heavily penalizing errors on rare classes:
+
+```python
+import torch.nn as nn
+import torch.nn.functional as F
+
+class FocalLoss(nn.Module):
+    def __init__(self, alpha=None, gamma=2.0):
+        super(FocalLoss, self).__init__()
+        self.alpha = alpha  # Tensor of class weights: [1.61, 0.26, 2.18, 54.22, 165.19]
+        self.gamma = gamma
+
+    def forward(self, inputs, targets):
+        ce_loss = F.cross_entropy(inputs, targets, weight=self.alpha, reduction='none')
+        pt = torch.exp(-ce_loss)
+        focal_loss = ((1 - pt) ** self.gamma) * ce_loss
+        return focal_loss.mean()
+
+# Exact class weights computed from master CSV:
+weights = torch.tensor([1.6095, 0.2566, 2.1848, 54.2173, 165.1903], device=device)
+criterion = FocalLoss(alpha=weights, gamma=2.0)
+```
+
+---
+
+### 3. Evaluation Metric Standard for Phase 5
+
+> [!IMPORTANT]
+> **Never evaluate Phase 5 on Standard Accuracy alone.**
+> All Phase 5 benchmarks must track **Balanced Accuracy** and **Macro F1-Score**:
+>
+> $$\text{Balanced Accuracy} = \frac{1}{5} \sum_{c=0}^{4} \text{Recall}_c$$
+>
+> Target metrics for Phase 5 standalone ResNet-18:
+> - **Balanced Accuracy Target:** **74.0% – 81.0%**
+> - **Macro F1 Target:** **72.0% – 78.0%**
+> - **Accidental Fire (Class 4) Recall:** **> 70.0%** (vs 0% under naive training)

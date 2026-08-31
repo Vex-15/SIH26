@@ -58,7 +58,8 @@ export function ThermalLegend() {
         style={{
           position: 'fixed',
           top: 24,
-          left: 84,
+          left: '50%',
+          transform: 'translateX(-50%)',
           zIndex: 40,
           background: 'rgba(24, 24, 27, 0.95)',
           backdropFilter: 'blur(12px)',
@@ -116,7 +117,8 @@ export function ThermalLegend() {
       style={{
         position: 'fixed',
         top: 24,
-        left: 84,
+        left: '50%',
+        transform: 'translateX(-50%)',
         zIndex: 40,
         background: 'rgba(24, 24, 27, 0.95)',
         backdropFilter: 'blur(12px)',

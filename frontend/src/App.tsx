@@ -4,6 +4,7 @@ import { LeftDock } from './components/LeftDock';
 import { RightDock } from './components/RightDock';
 import { LayersPopover } from './components/LayersPopover';
 import { MetricSelectorPopover } from './components/MetricSelectorPopover';
+import { LocationSearchPopover } from './components/LocationSearchPopover';
 import { CalendarPopover } from './components/CalendarPopover';
 import { HotspotTooltip } from './components/HotspotTooltip';
 import { ThermalLegend } from './components/ThermalLegend';
@@ -19,7 +20,7 @@ import { useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 
 export default function App() {
-  const { theme, mapMode, isLayersOpen, isMetricSelectorOpen, isCalendarOpen } = useAppStore();
+  const { theme, mapMode, isLayersOpen, isMetricSelectorOpen, isLocationSearchOpen, isCalendarOpen } = useAppStore();
 
   // Sync theme to data attribute for potential CSS-level theming
   useEffect(() => {
@@ -46,6 +47,7 @@ export default function App() {
 
       {/* ── Layer 2: Popovers / Modals ── */}
       <AnimatePresence>
+        {isLocationSearchOpen && <LocationSearchPopover key="location-search-popover" />}
         {isLayersOpen && <LayersPopover key="layers-popover" />}
         {isMetricSelectorOpen && <MetricSelectorPopover key="metric-popover" />}
         {isCalendarOpen && <CalendarPopover key="calendar-popover" />}

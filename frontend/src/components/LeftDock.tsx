@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Home, Layers, SlidersHorizontal, Radio, Download, Settings } from 'lucide-react';
+import { Home, MapPin, Layers, SlidersHorizontal, Radio, Download, Settings } from 'lucide-react';
 import { Dock, DockIcon } from './Dock';
 import { useAppStore } from '../store/useAppStore';
 
@@ -14,6 +14,8 @@ export function LeftDock() {
     setLayersOpen, 
     isMetricSelectorOpen, 
     setMetricSelectorOpen,
+    isLocationSearchOpen,
+    setLocationSearchOpen,
     isEmergencySimulationOpen,
     setEmergencySimulationOpen,
     setCalendarOpen,
@@ -21,14 +23,13 @@ export function LeftDock() {
     setPlaybackControllerOpen,
   } = useAppStore();
 
-
-
   const [activeTab, setActiveTab] = useState<'home' | 'settings'>('home');
 
   const handleHomeClick = () => {
     setActiveTab('home');
     setLayersOpen(false);
     setMetricSelectorOpen(false);
+    setLocationSearchOpen(false);
     setCalendarOpen(false);
     if (map) {
       map.flyTo({
@@ -43,12 +44,27 @@ export function LeftDock() {
   return (
     <Dock side="left">
       <DockIcon
-        active={activeTab === 'home' && !isLayersOpen && !isMetricSelectorOpen && !isEmergencySimulationOpen && !isPlaybackControllerOpen}
+        active={activeTab === 'home' && !isLayersOpen && !isMetricSelectorOpen && !isLocationSearchOpen && !isEmergencySimulationOpen && !isPlaybackControllerOpen}
         onClick={handleHomeClick}
         ariaLabel="Zoom to India Home"
       >
-
         <Home size={18} strokeWidth={1.5} />
+      </DockIcon>
+
+      {/* ── Location Tool Trigger ── */}
+      <DockIcon
+        active={isLocationSearchOpen}
+        onClick={() => {
+          setLocationSearchOpen(!isLocationSearchOpen);
+          if (!isLocationSearchOpen) {
+            setLayersOpen(false);
+            setMetricSelectorOpen(false);
+            setCalendarOpen(false);
+          }
+        }}
+        ariaLabel="Location Search Tool"
+      >
+        <MapPin size={18} strokeWidth={1.5} color={isLocationSearchOpen ? '#f59e0b' : undefined} />
       </DockIcon>
       
       <DockIcon
@@ -57,6 +73,7 @@ export function LeftDock() {
           setLayersOpen(!isLayersOpen);
           if (!isLayersOpen) {
             setMetricSelectorOpen(false);
+            setLocationSearchOpen(false);
             setCalendarOpen(false);
           }
         }}
@@ -71,6 +88,7 @@ export function LeftDock() {
           setMetricSelectorOpen(!isMetricSelectorOpen);
           if (!isMetricSelectorOpen) {
             setLayersOpen(false);
+            setLocationSearchOpen(false);
             setCalendarOpen(false);
           }
         }}

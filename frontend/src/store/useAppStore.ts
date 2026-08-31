@@ -125,6 +125,12 @@ interface AppState {
   isPlaybackControllerOpen: boolean;
   hasAcknowledgedAnomaly: boolean;
 
+  // Location Search State
+  isLocationSearchOpen: boolean;
+  searchedLocation: { name: string; lat: number; lon: number } | null;
+  savedLocations: Array<{ id: string; name: string; lat: number; lon: number }>;
+  allowMultipleSelection: boolean;
+
   // Temporal Diurnal State (Prompt 7)
   startDate: string;
   endDate: string;
@@ -146,6 +152,11 @@ interface AppState {
   resetFilterSettings: () => void;
   setLayersOpen: (open: boolean) => void;
   setMetricSelectorOpen: (open: boolean) => void;
+  setLocationSearchOpen: (open: boolean) => void;
+  setSearchedLocation: (loc: { name: string; lat: number; lon: number } | null) => void;
+  addSavedLocation: (loc: { name: string; lat: number; lon: number }) => void;
+  removeSavedLocation: (id: string) => void;
+  setAllowMultipleSelection: (allow: boolean) => void;
   setHoveredCluster: (cluster: ClusterInfo | null, pos: { x: number; y: number } | null) => void;
   setSelectedCluster: (cluster: ClusterInfo | null) => void;
   setAnomalyAlertOpen: (open: boolean) => void;
@@ -212,6 +223,17 @@ export const useAppStore = create<AppState>((set) => ({
   isPlaybackControllerOpen: false,
   hasAcknowledgedAnomaly: false,
 
+  // Location Search State Initial Values
+  isLocationSearchOpen: false,
+  searchedLocation: null,
+  savedLocations: [
+    { id: '1', name: 'New Delhi, India', lat: 28.6139, lon: 77.2090 },
+    { id: '2', name: 'Mumbai, Maharashtra', lat: 19.0760, lon: 72.8777 },
+    { id: '3', name: 'Bengaluru, Karnataka', lat: 12.9716, lon: 77.5946 },
+    { id: '4', name: 'Kolkata, West Bengal', lat: 22.5726, lon: 88.3639 },
+  ],
+  allowMultipleSelection: false,
+
   startDate: defaultInitialDate,
   endDate: defaultInitialDate,
   selectedDate: defaultInitialDate,
@@ -244,13 +266,35 @@ export const useAppStore = create<AppState>((set) => ({
       isLayersOpen: open,
       isMetricSelectorOpen: open ? false : s.isMetricSelectorOpen,
       isCalendarOpen: open ? false : s.isCalendarOpen,
+      isLocationSearchOpen: open ? false : s.isLocationSearchOpen,
     })),
   setMetricSelectorOpen: (open) =>
     set((s) => ({
       isMetricSelectorOpen: open,
       isLayersOpen: open ? false : s.isLayersOpen,
       isCalendarOpen: open ? false : s.isCalendarOpen,
+      isLocationSearchOpen: open ? false : s.isLocationSearchOpen,
     })),
+  setLocationSearchOpen: (open) =>
+    set((s) => ({
+      isLocationSearchOpen: open,
+      isLayersOpen: open ? false : s.isLayersOpen,
+      isMetricSelectorOpen: open ? false : s.isMetricSelectorOpen,
+      isCalendarOpen: open ? false : s.isCalendarOpen,
+    })),
+  setSearchedLocation: (searchedLocation) => set({ searchedLocation }),
+  addSavedLocation: (loc) =>
+    set((s) => ({
+      savedLocations: [
+        ...s.savedLocations,
+        { ...loc, id: Date.now().toString() },
+      ],
+    })),
+  removeSavedLocation: (id) =>
+    set((s) => ({
+      savedLocations: s.savedLocations.filter((item) => item.id !== id),
+    })),
+  setAllowMultipleSelection: (allowMultipleSelection) => set({ allowMultipleSelection }),
   setHoveredCluster: (hoveredCluster, tooltipPos) => set({ hoveredCluster, tooltipPos }),
   setSelectedCluster: (selectedCluster) => set({ selectedCluster }),
   setAnomalyAlertOpen: (isAnomalyAlertOpen) => set({ isAnomalyAlertOpen }),
