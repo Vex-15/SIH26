@@ -3,9 +3,6 @@ import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useAppStore, CLASS_META, LAND_COVER_NAMES } from '../store/useAppStore';
 import type { ClusterInfo, VisualMetric } from '../store/useAppStore';
-import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
-
-maplibregl.setWorkerUrl(maplibreWorkerUrl);
 
 const STYLES = {
   dark:  'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
@@ -988,7 +985,10 @@ export function MapCanvas() {
     mapRef.current = map;
     useAppStore.getState().setMap(map);
 
-    map.on('load', () => initLayers(map));
+    map.on('load', () => {
+      map.resize();
+      initLayers(map);
+    });
 
     return () => {
       map.remove();
@@ -998,7 +998,12 @@ export function MapCanvas() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const isFirstThemeRender = useRef(true);
   useEffect(() => {
+    if (isFirstThemeRender.current) {
+      isFirstThemeRender.current = false;
+      return;
+    }
     const map = mapRef.current;
     if (!map) return;
 
