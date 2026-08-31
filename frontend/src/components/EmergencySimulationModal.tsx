@@ -255,6 +255,42 @@ export function EmergencySimulationModal() {
             <ExternalLink size={15} />
           </button>
 
+          {/* Feature 3 Action: Find Nearest Emergency Services (OSM + OSRM) */}
+          <button
+            onClick={() => {
+              const { setEmergencyServicesOpen, setActiveEmergencyIncident } = useAppStore.getState();
+              setActiveEmergencyIncident({
+                lat: 29.3909,
+                lon: 76.9635,
+                name: 'Panipat MIDC Industrial Complex, Haryana',
+                frp: 14.2,
+                zScore: 4.12,
+                cls: 4,
+              });
+              setEmergencyServicesOpen(true);
+            }}
+            style={{
+              width: '100%',
+              padding: '12px 18px',
+              borderRadius: 14,
+              border: '1px solid rgba(249, 115, 22, 0.5)',
+              background: 'rgba(249, 115, 22, 0.14)',
+              color: '#f97316',
+              fontSize: 12,
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              cursor: 'pointer',
+              boxShadow: '0 2px 14px rgba(249, 115, 22, 0.2)',
+              transition: 'all 0.15s',
+            }}
+          >
+            <span>🚒 FIND NEAREST EMERGENCY SERVICES & LIVE ETA (OSM + OSRM)</span>
+            <ExternalLink size={14} />
+          </button>
+
           {/* Secondary Action: Dispatch Emergency Webhook (Prompt 8 Spec) */}
           <button
             onClick={handleDispatchWebhook}

@@ -387,6 +387,54 @@ export function InspectorDrawer() {
           </div>
         </section>
 
+        {/* §5.5 – Feature 3: Nearest Emergency Services & Live Dispatch (OSM + OSRM) */}
+        <section>
+          <SectionLabel>Emergency Response Grid</SectionLabel>
+          <button
+            onClick={() => {
+              const { setEmergencyServicesOpen, setActiveEmergencyIncident } = useAppStore.getState();
+              setActiveEmergencyIncident({
+                lat: c.lat,
+                lon: c.lon,
+                name: c.landCover ? `${c.landCover} Cluster` : undefined,
+                frp: c.maxFrp,
+                zScore: c.zScore ?? undefined,
+                cls: c.primaryClass.id,
+              });
+              setEmergencyServicesOpen(true);
+            }}
+            style={{
+              width: '100%',
+              padding: '12px 16px',
+              borderRadius: 12,
+              background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.16) 0%, rgba(249, 115, 22, 0.12) 100%)',
+              border: '1px solid rgba(239, 68, 68, 0.35)',
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              cursor: 'pointer',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
+              transition: 'all 0.2s',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 20 }}>🚒</span>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#fca5a5' }}>
+                  Find Nearest Fire & Trauma Centers
+                </div>
+                <div style={{ fontSize: 11, color: 'rgba(255, 255, 255, 0.55)' }}>
+                  OSM Overpass (25km) · OSRM Drive Routes & Live ETA
+                </div>
+              </div>
+            </div>
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#ef4444', background: 'rgba(239, 68, 68, 0.2)', padding: '4px 8px', borderRadius: 6, border: '1px solid rgba(239, 68, 68, 0.4)' }}>
+              OPEN GRID →
+            </span>
+          </button>
+        </section>
+
         {/* §6 – Model confidence scores (from phase6_final_results.json per-class F1) */}
         <section>
           <SectionLabel>Model Pipeline Confidence</SectionLabel>

@@ -1091,6 +1091,151 @@ export function MapCanvas() {
     }
   }, [currentHour, isPlaybackControllerOpen]);
 
+  // ── Feature 3: Live Emergency Route & Station Markers Layer ──
+  const selectedEmergencyRoute = useAppStore((s) => s.selectedEmergencyRoute);
+  const emergencyServicesList = useAppStore((s) => s.emergencyServicesList);
+  const dispatchedStations = useAppStore((s) => s.dispatchedStations);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.isStyleLoaded()) return;
+
+    const sourceId = 'emergency-response-source';
+    const features: any[] = [];
+
+    // Add all stations in search grid
+    emergencyServicesList.forEach((st) => {
+      const isFire = st.type === 'fire_station';
+      const color = isFire ? '#f97316' : '#38bdf8';
+      const isSelected = selectedEmergencyRoute?.id === st.id;
+      const isDispatched = Boolean(dispatchedStations[st.id]);
+
+      features.push({
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [st.lon, st.lat],
+        },
+        properties: {
+          id: st.id,
+          name: st.name,
+          type: st.type,
+          color,
+          isSelected,
+          isDispatched,
+          eta: st.etaMinutes,
+          dist: st.distanceKm,
+        },
+      });
+    });
+
+    // Add active route LineString
+    if (selectedEmergencyRoute && selectedEmergencyRoute.routeGeometry.length > 1) {
+      const isFire = selectedEmergencyRoute.type === 'fire_station';
+      const color = isFire ? '#f97316' : '#38bdf8';
+
+      features.push({
+        type: 'Feature',
+        geometry: {
+          type: 'LineString',
+          coordinates: selectedEmergencyRoute.routeGeometry,
+        },
+        properties: {
+          id: `route-${selectedEmergencyRoute.id}`,
+          color,
+          name: selectedEmergencyRoute.name,
+        },
+      });
+    }
+
+    const geojsonData = {
+      type: 'FeatureCollection',
+      features,
+    };
+
+    const existingSource = map.getSource(sourceId) as maplibregl.GeoJSONSource;
+    if (existingSource) {
+      existingSource.setData(geojsonData as any);
+    } else {
+      map.addSource(sourceId, {
+        type: 'geojson',
+        data: geojsonData as any,
+      });
+
+      // Route Glow
+      if (!map.getLayer('emergency-route-glow')) {
+        map.addLayer({
+          id: 'emergency-route-glow',
+          type: 'line',
+          source: sourceId,
+          filter: ['==', '$type', 'LineString'],
+          layout: {
+            'line-cap': 'round',
+            'line-join': 'round',
+          },
+          paint: {
+            'line-color': ['get', 'color'],
+            'line-width': 10,
+            'line-blur': 6,
+            'line-opacity': 0.65,
+          },
+        });
+      }
+
+      // Route Solid Center Line
+      if (!map.getLayer('emergency-route-center')) {
+        map.addLayer({
+          id: 'emergency-route-center',
+          type: 'line',
+          source: sourceId,
+          filter: ['==', '$type', 'LineString'],
+          layout: {
+            'line-cap': 'round',
+            'line-join': 'round',
+          },
+          paint: {
+            'line-color': '#ffffff',
+            'line-width': 3,
+            'line-opacity': 0.95,
+          },
+        });
+      }
+
+      // Station Marker Outer Halo
+      if (!map.getLayer('emergency-stations-halo')) {
+        map.addLayer({
+          id: 'emergency-stations-halo',
+          type: 'circle',
+          source: sourceId,
+          filter: ['==', '$type', 'Point'],
+          paint: {
+            'circle-radius': 14,
+            'circle-color': ['get', 'color'],
+            'circle-opacity': 0.25,
+            'circle-stroke-width': 2,
+            'circle-stroke-color': ['get', 'color'],
+          },
+        });
+      }
+
+      // Station Marker Inner Dot
+      if (!map.getLayer('emergency-stations-dot')) {
+        map.addLayer({
+          id: 'emergency-stations-dot',
+          type: 'circle',
+          source: sourceId,
+          filter: ['==', '$type', 'Point'],
+          paint: {
+            'circle-radius': 7,
+            'circle-color': ['get', 'color'],
+            'circle-stroke-width': 2,
+            'circle-stroke-color': '#ffffff',
+          },
+        });
+      }
+    }
+  }, [selectedEmergencyRoute, emergencyServicesList, dispatchedStations]);
+
 
 
   // Map container remains stable and properly rendered at all times

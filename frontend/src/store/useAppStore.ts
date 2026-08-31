@@ -102,6 +102,8 @@ export const METRIC_CONFIGS: Record<VisualMetric, { label: string; unit: string;
   },
 };
 
+import type { EmergencyServiceStation } from '../utils/emergencyServices';
+
 export type TemporalScope = '24h' | '7d' | '30d' | '1h';
 export type TimeFilterMode = 'window' | 'cumulative' | 'all_day';
 
@@ -120,10 +122,18 @@ interface AppState {
   tooltipPos: { x: number; y: number } | null;
   isAnomalyAlertOpen: boolean;
   isEmergencySimulationOpen: boolean;
+  isEmergencyServicesOpen: boolean;
   isCalendarOpen: boolean;
   isExportOpen: boolean;
   isPlaybackControllerOpen: boolean;
   hasAcknowledgedAnomaly: boolean;
+
+  // Feature 3: Emergency Services & OSRM Dispatch State
+  activeEmergencyIncident: { lat: number; lon: number; name?: string; zScore?: number; frp?: number; cls?: number } | null;
+  emergencyServicesList: EmergencyServiceStation[];
+  selectedEmergencyRoute: EmergencyServiceStation | null;
+  dispatchedStations: Record<string, { timestamp: string; unitType: string; dispatchId: string }>;
+  isFetchingEmergencyServices: boolean;
 
   // Location Search State
   isLocationSearchOpen: boolean;
@@ -161,6 +171,12 @@ interface AppState {
   setSelectedCluster: (cluster: ClusterInfo | null) => void;
   setAnomalyAlertOpen: (open: boolean) => void;
   setEmergencySimulationOpen: (open: boolean) => void;
+  setEmergencyServicesOpen: (open: boolean) => void;
+  setActiveEmergencyIncident: (incident: { lat: number; lon: number; name?: string; zScore?: number; frp?: number; cls?: number } | null) => void;
+  setEmergencyServicesList: (list: EmergencyServiceStation[]) => void;
+  setSelectedEmergencyRoute: (route: EmergencyServiceStation | null) => void;
+  dispatchEmergencyStation: (stationId: string, dispatchInfo: { timestamp: string; unitType: string; dispatchId: string }) => void;
+  setIsFetchingEmergencyServices: (isFetching: boolean) => void;
   setCalendarOpen: (open: boolean) => void;
   setExportOpen: (open: boolean) => void;
   setPlaybackControllerOpen: (open: boolean) => void;
@@ -218,10 +234,18 @@ export const useAppStore = create<AppState>((set) => ({
   tooltipPos: null,
   isAnomalyAlertOpen: false,
   isEmergencySimulationOpen: false,
+  isEmergencyServicesOpen: false,
   isCalendarOpen: false,
   isExportOpen: false,
   isPlaybackControllerOpen: false,
   hasAcknowledgedAnomaly: false,
+
+  // Emergency Services & OSRM Dispatch State
+  activeEmergencyIncident: null,
+  emergencyServicesList: [],
+  selectedEmergencyRoute: null,
+  dispatchedStations: {},
+  isFetchingEmergencyServices: false,
 
   // Location Search State Initial Values
   isLocationSearchOpen: false,
@@ -299,6 +323,18 @@ export const useAppStore = create<AppState>((set) => ({
   setSelectedCluster: (selectedCluster) => set({ selectedCluster }),
   setAnomalyAlertOpen: (isAnomalyAlertOpen) => set({ isAnomalyAlertOpen }),
   setEmergencySimulationOpen: (isEmergencySimulationOpen) => set({ isEmergencySimulationOpen }),
+  setEmergencyServicesOpen: (isEmergencyServicesOpen) => set({ isEmergencyServicesOpen }),
+  setActiveEmergencyIncident: (activeEmergencyIncident) => set({ activeEmergencyIncident }),
+  setEmergencyServicesList: (emergencyServicesList) => set({ emergencyServicesList }),
+  setSelectedEmergencyRoute: (selectedEmergencyRoute) => set({ selectedEmergencyRoute }),
+  dispatchEmergencyStation: (stationId, dispatchInfo) =>
+    set((s) => ({
+      dispatchedStations: {
+        ...s.dispatchedStations,
+        [stationId]: dispatchInfo,
+      },
+    })),
+  setIsFetchingEmergencyServices: (isFetchingEmergencyServices) => set({ isFetchingEmergencyServices }),
   setCalendarOpen: (open) =>
     set((s) => ({
       isCalendarOpen: open,

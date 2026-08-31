@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Home, MapPin, Layers, SlidersHorizontal, Radio, Download, Settings } from 'lucide-react';
+import { Home, MapPin, Layers, SlidersHorizontal, Radio, Truck, Download, Settings } from 'lucide-react';
 import { Dock, DockIcon } from './Dock';
 import { useAppStore } from '../store/useAppStore';
 
@@ -18,6 +18,8 @@ export function LeftDock() {
     setLocationSearchOpen,
     isEmergencySimulationOpen,
     setEmergencySimulationOpen,
+    isEmergencyServicesOpen,
+    setEmergencyServicesOpen,
     setCalendarOpen,
     isPlaybackControllerOpen,
     setPlaybackControllerOpen,
@@ -44,7 +46,7 @@ export function LeftDock() {
   return (
     <Dock side="left">
       <DockIcon
-        active={activeTab === 'home' && !isLayersOpen && !isMetricSelectorOpen && !isLocationSearchOpen && !isEmergencySimulationOpen && !isPlaybackControllerOpen}
+        active={activeTab === 'home' && !isLayersOpen && !isMetricSelectorOpen && !isLocationSearchOpen && !isEmergencySimulationOpen && !isEmergencyServicesOpen && !isPlaybackControllerOpen}
         onClick={handleHomeClick}
         ariaLabel="Zoom to India Home"
       >
@@ -110,6 +112,22 @@ export function LeftDock() {
         className="text-red-500 hover:text-red-400"
       >
         <Radio size={18} strokeWidth={1.8} color={isEmergencySimulationOpen ? '#ef4444' : '#f87171'} />
+      </DockIcon>
+
+      {/* ── Feature 3: Nearest Emergency Services & First Responder Grid ── */}
+      <DockIcon
+        active={isEmergencyServicesOpen}
+        onClick={() => {
+          setEmergencyServicesOpen(!isEmergencyServicesOpen);
+          if (!isEmergencyServicesOpen) {
+            setLayersOpen(false);
+            setMetricSelectorOpen(false);
+            setCalendarOpen(false);
+          }
+        }}
+        ariaLabel="Nearest Emergency Services & First Responder Grid (OSM/OSRM)"
+      >
+        <Truck size={18} strokeWidth={1.6} color={isEmergencyServicesOpen ? '#f97316' : '#fb923c'} />
       </DockIcon>
 
       {/* ── Temporal Archive & Data Export Suite (Single Unified Trigger) ── */}

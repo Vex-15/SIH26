@@ -12,6 +12,7 @@ import { ModePill } from './components/ModePill';
 import { InspectorDrawer } from './components/InspectorDrawer';
 import { AnomalyAlertModal } from './components/AnomalyAlertModal';
 import { EmergencySimulationModal } from './components/EmergencySimulationModal';
+import { EmergencyServicesModal } from './components/EmergencyServicesModal';
 import { DiurnalPlaybackController } from './components/prompt7/DiurnalPlaybackController';
 import { SplitWipeView } from './components/prompt6/SplitWipeView';
 import { ExportModal } from './components/ExportModal';
@@ -68,6 +69,9 @@ export default function App() {
 
       {/* ── Layer 7: Emergency Simulation Prompt Modal ── */}
       <EmergencySimulationModal />
+
+      {/* ── Layer 7.5: Feature 3 Nearest Emergency Services Finder Modal (OSM + OSRM) ── */}
+      <EmergencyServicesModal />
 
       {/* ── Layer 8: Tactical Dossier & Data Export Modal ── */}
       <ExportModal />
