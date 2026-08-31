@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "thermalwatch-india-3591"
+  },
+  "targets": {
+    "thermalwatch-india-3591": {
+      "hosting": {
+        "sih26ekaant": [
+          "sih26ekaant"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

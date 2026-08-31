@@ -124,6 +124,7 @@ interface AppState {
   isExportOpen: boolean;
   isPlaybackControllerOpen: boolean;
   hasAcknowledgedAnomaly: boolean;
+  isMapReady: boolean;
 
   // Location Search State
   isLocationSearchOpen: boolean;
@@ -165,6 +166,7 @@ interface AppState {
   setExportOpen: (open: boolean) => void;
   setPlaybackControllerOpen: (open: boolean) => void;
   setHasAcknowledgedAnomaly: (ack: boolean) => void;
+  setIsMapReady: (ready: boolean) => void;
 
   setStartDate: (date: string) => void;
   setEndDate: (date: string) => void;
@@ -222,6 +224,7 @@ export const useAppStore = create<AppState>((set) => ({
   isExportOpen: false,
   isPlaybackControllerOpen: false,
   hasAcknowledgedAnomaly: false,
+  isMapReady: false,
 
   // Location Search State Initial Values
   isLocationSearchOpen: false,
@@ -308,6 +311,7 @@ export const useAppStore = create<AppState>((set) => ({
   setExportOpen: (isExportOpen) => set({ isExportOpen }),
   setPlaybackControllerOpen: (isPlaybackControllerOpen) => set({ isPlaybackControllerOpen }),
   setHasAcknowledgedAnomaly: (hasAcknowledgedAnomaly) => set({ hasAcknowledgedAnomaly }),
+  setIsMapReady: (isMapReady) => set({ isMapReady }),
 
   setStartDate: (startDate) => set({ startDate, selectedDate: startDate }),
   setEndDate: (endDate) => set({ endDate }),

@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","id":"pt_56675","geometry":{"type":"Point","coordinates":[70.5041,27.2955]},"properties":{"id":"pt_56675","brightness":337.9,"frp":5.2,"cls":1,"source":"VIIRS_SNPP","acq_date":"2024-07-06","elevation":174,"land_cover":"Shrubland","no2":0.06,"so2":0.04,"is_anomaly":false,"acq_hour":9,"acq_time":"09:05"}}]}

@@ -110,54 +110,99 @@ export function AnomalyAlertModal() {
             onClick={handleDismiss}
           />
 
-          {/* ── Alert Card ── */}
-          <motion.div
-            key="anomaly-card"
+          {/* ── Modal Container (Flexbox Centering & Scrollable if needed) ── */}
+          <div
             style={{
               position: 'fixed',
+              inset: 0,
               zIndex: 997,
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: 480,
-              maxWidth: 'calc(100vw - 2rem)',
-              pointerEvents: 'auto',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px',
+              pointerEvents: 'none',
             }}
-            initial={{ opacity: 0, scale: 0.92, y: 24 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 12 }}
-            transition={{ type: 'spring', stiffness: 340, damping: 26 }}
           >
-            <div
+            <motion.div
+              key="anomaly-card"
               style={{
-                background: '#0e0e12',
-                border: `1.5px solid ${color}`,
-                borderRadius: 20,
-                padding: '28px 24px',
+                width: 480,
+                maxWidth: 'min(480px, 92vw)',
+                maxHeight: 'calc(100vh - 32px)',
+                pointerEvents: 'auto',
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center',
-                boxShadow: `0 24px 60px rgba(0, 0, 0, 0.9), 0 0 30px ${color}30`,
               }}
+              initial={{ opacity: 0, scale: 0.94, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.94, y: 16 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 28 }}
             >
-              {/* Icon circle */}
               <div
                 style={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: '50%',
+                  position: 'relative',
+                  background: '#0e0e12',
+                  border: `1.5px solid ${color}`,
+                  borderRadius: 20,
+                  padding: '24px 22px',
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: 16,
-                  backgroundColor: color,
-                  color: '#ffffff',
-                  boxShadow: `0 0 16px ${color}60`,
-                  flexShrink: 0,
+                  boxShadow: `0 24px 60px rgba(0, 0, 0, 0.95), 0 0 35px ${color}35`,
+                  overflowY: 'auto',
                 }}
               >
-                {FireIcons[c.primaryClass.id] ?? FireIcons[4]}
-              </div>
+                {/* Close '×' button in top-right */}
+                <button
+                  onClick={handleDismiss}
+                  style={{
+                    position: 'absolute',
+                    top: 14,
+                    right: 14,
+                    width: 28,
+                    height: 28,
+                    borderRadius: '50%',
+                    background: 'rgba(255, 255, 255, 0.06)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    color: '#a1a1aa',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    fontSize: 14,
+                    lineHeight: 1,
+                    transition: 'all 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = '#ffffff';
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.14)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = '#a1a1aa';
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
+                  }}
+                >
+                  ✕
+                </button>
+
+                {/* Icon circle */}
+                <div
+                  style={{
+                    width: 52,
+                    height: 52,
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 14,
+                    backgroundColor: color,
+                    color: '#ffffff',
+                    boxShadow: `0 0 18px ${color}60`,
+                    flexShrink: 0,
+                  }}
+                >
+                  {FireIcons[c.primaryClass.id] ?? FireIcons[4]}
+                </div>
 
               {/* Title */}
               <h1
@@ -311,8 +356,9 @@ export function AnomalyAlertModal() {
               </p>
             </div>
           </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+        </div>
+      </>
+    )}
+  </AnimatePresence>
   );
 }

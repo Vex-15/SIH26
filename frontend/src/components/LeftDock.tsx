@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Home, MapPin, Layers, SlidersHorizontal, Radio, Download, Settings } from 'lucide-react';
+import { Home, MapPin, Layers, SlidersHorizontal, Radio, Download } from 'lucide-react';
 import { Dock, DockIcon } from './Dock';
 import { useAppStore } from '../store/useAppStore';
 
@@ -23,10 +22,7 @@ export function LeftDock() {
     setPlaybackControllerOpen,
   } = useAppStore();
 
-  const [activeTab, setActiveTab] = useState<'home' | 'settings'>('home');
-
   const handleHomeClick = () => {
-    setActiveTab('home');
     setLayersOpen(false);
     setMetricSelectorOpen(false);
     setLocationSearchOpen(false);
@@ -44,7 +40,7 @@ export function LeftDock() {
   return (
     <Dock side="left">
       <DockIcon
-        active={activeTab === 'home' && !isLayersOpen && !isMetricSelectorOpen && !isLocationSearchOpen && !isEmergencySimulationOpen && !isPlaybackControllerOpen}
+        active={!isLayersOpen && !isMetricSelectorOpen && !isLocationSearchOpen && !isEmergencySimulationOpen && !isPlaybackControllerOpen}
         onClick={handleHomeClick}
         ariaLabel="Zoom to India Home"
       >
@@ -127,21 +123,6 @@ export function LeftDock() {
       >
         <Download size={18} strokeWidth={1.5} color={isPlaybackControllerOpen ? '#f59e0b' : undefined} />
       </DockIcon>
-
-
-
-      <DockIcon
-        active={activeTab === 'settings'}
-        onClick={() => {
-          setActiveTab('settings');
-          setLayersOpen(false);
-          setMetricSelectorOpen(false);
-        }}
-        ariaLabel="System Config"
-      >
-        <Settings size={18} strokeWidth={1.5} />
-      </DockIcon>
-
     </Dock>
   );
 }

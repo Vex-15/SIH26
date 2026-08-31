@@ -26,3 +26,12 @@ __pycache__/
 
 # Training Logs (keep JSON metrics)
 logs/*.log
+
+# Large Map Binaries & Firebase Cache
+*.pmtiles
+.firebase/
+frontend/.firebase/
+frontend/scratch/
+scratch/
+
+

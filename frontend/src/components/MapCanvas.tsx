@@ -1,8 +1,14 @@
 import { useEffect, useRef, useCallback } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { Protocol } from 'pmtiles';
 import { useAppStore, CLASS_META, LAND_COVER_NAMES } from '../store/useAppStore';
 import type { ClusterInfo, VisualMetric } from '../store/useAppStore';
+
+// Register pmtiles:// protocol once — MapLibre will use HTTP Range Requests
+// to fetch only the tiles needed for the current viewport (sub-second loads).
+const _pmtilesProtocol = new Protocol();
+maplibregl.addProtocol('pmtiles', _pmtilesProtocol.tile);
 
 const STYLES = {
   dark:  'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
@@ -432,6 +438,7 @@ export function MapCanvas() {
   const mapRef = useRef<maplibregl.Map | null>(null);
   const hoveredHexIdRef = useRef<string | null>(null);
   const hoveredPointIdRef = useRef<string | null>(null);
+  const loadedPlaybackDateRef = useRef<string | null>(null);
   const { theme, activeFilters, filterSettings, activeMetric, setHoveredCluster } = useAppStore();
 
   const buildFilterExpression = useCallback(() => {
@@ -472,22 +479,18 @@ export function MapCanvas() {
     return ['all', ...clauses] as maplibregl.ExpressionSpecification;
   }, []);
 
-  const buildPointsFilterExpression = useCallback(() => {
-    const { activeFilters: f, filterSettings: s, startDate, endDate, isPlaybackControllerOpen } = useAppStore.getState();
-    
+  const buildTimelineFilterExpression = useCallback(() => {
+    const { activeFilters: f, filterSettings: s, currentHour, isPlaybackControllerOpen } = useAppStore.getState();
+
     const clauses: maplibregl.ExpressionSpecification[] = [];
 
-    // ── 1. Real Dataset Date Range Filtering (Only when Timeline Player is active) ──
+    // ── Hourly cumulative simulation: only show hotspots acquired at or before the current scrubbed hour ──
     if (isPlaybackControllerOpen) {
-      if (startDate === endDate) {
-        clauses.push(['==', ['get', 'acq_date'], startDate]);
-      } else {
-        clauses.push(['>=', ['get', 'acq_date'], startDate]);
-        clauses.push(['<=', ['get', 'acq_date'], endDate]);
-      }
+      const hourInt = Math.floor(currentHour);
+      clauses.push(['<=', ['get', 'acq_hour'], hourInt]);
     }
 
-    // ── 2. Fire Class Filters ──
+    // ── Fire Class Filters ──
     const allowedClasses: number[] = [];
     if (f.wildfire)     allowedClasses.push(0);
     if (f.agricultural) allowedClasses.push(1);
@@ -502,7 +505,42 @@ export function MapCanvas() {
       clauses.push(['in', ['get', 'cls'], ['literal', allowedClasses]] as maplibregl.ExpressionSpecification);
     }
 
-    // ── 3. Parameter Range Filters ──
+    // ── Parameter Range Filters ──
+    if (s.minBrightness > 300) clauses.push(['>=', ['get', 'brightness'], s.minBrightness]);
+    if (s.minFrp > 0)          clauses.push(['>=', ['get', 'frp'], s.minFrp]);
+    if (s.minElevation > 0)    clauses.push(['>=', ['get', 'elevation'], s.minElevation]);
+    if (s.maxElevation < 4000) clauses.push(['<=', ['get', 'elevation'], s.maxElevation]);
+    if (s.minNo2 > 0)          clauses.push(['>=', ['get', 'no2'], s.minNo2]);
+    if (s.minSo2 > 0)          clauses.push(['>=', ['get', 'so2'], s.minSo2]);
+    if (s.onlyAnomalies)       clauses.push(['==', ['get', 'cls'], 4]);
+
+    if (clauses.length === 0) {
+      return ['all'] as unknown as maplibregl.ExpressionSpecification;
+    }
+    return ['all', ...clauses] as maplibregl.ExpressionSpecification;
+  }, []);
+
+  const buildPointsFilterExpression = useCallback(() => {
+    const { activeFilters: f, filterSettings: s } = useAppStore.getState();
+
+    const clauses: maplibregl.ExpressionSpecification[] = [];
+
+    // ── Fire Class Filters ──
+    const allowedClasses: number[] = [];
+    if (f.wildfire)     allowedClasses.push(0);
+    if (f.agricultural) allowedClasses.push(1);
+    if (f.industrial)   allowedClasses.push(2);
+    if (f.gasflare)     allowedClasses.push(3);
+    if (f.accidental)   allowedClasses.push(4);
+
+    if (allowedClasses.length === 0) {
+      return ['==', ['get', 'cls'], -1] as maplibregl.ExpressionSpecification;
+    }
+    if (allowedClasses.length < 5) {
+      clauses.push(['in', ['get', 'cls'], ['literal', allowedClasses]] as maplibregl.ExpressionSpecification);
+    }
+
+    // ── Parameter Range Filters ──
     if (s.minBrightness > 300) clauses.push(['>=', ['get', 'brightness'], s.minBrightness]);
     if (s.minFrp > 0)          clauses.push(['>=', ['get', 'frp'], s.minFrp]);
     if (s.minElevation > 0)    clauses.push(['>=', ['get', 'elevation'], s.minElevation]);
@@ -522,10 +560,21 @@ export function MapCanvas() {
     if (!map) return;
     const hexFilter = buildFilterExpression();
     const ptFilter = buildPointsFilterExpression();
+    const tlFilter = buildTimelineFilterExpression();
+
+    // Yearlong hexbin mesh (visible when playback is closed)
     if (map.getLayer('hexbins-fill')) map.setFilter('hexbins-fill', hexFilter);
+
+    // High-zoom individual point icons (from PMTiles, shown at zoom >= 7.2 when playback closed)
     if (map.getLayer('points-symbols')) map.setFilter('points-symbols', ptFilter);
+
+    // PMTiles-based accidental radar rings (high zoom, playback closed)
     if (map.getLayer('accidental-radar-rings')) map.setFilter('accidental-radar-rings', ['all', ptFilter, ['==', ['get', 'cls'], 4]]);
-  }, [buildFilterExpression, buildPointsFilterExpression]);
+
+    // Daily GeoJSON timeline simulation layers (playback open, filtered by hour)
+    if (map.getLayer('timeline-symbols')) map.setFilter('timeline-symbols', tlFilter);
+    if (map.getLayer('timeline-accidental-radar')) map.setFilter('timeline-accidental-radar', ['all', tlFilter, ['==', ['get', 'cls'], 4]]);
+  }, [buildFilterExpression, buildPointsFilterExpression, buildTimelineFilterExpression]);
 
 
 
@@ -546,32 +595,41 @@ export function MapCanvas() {
 
       if (!map.getSource('india-hexbins')) {
         map.addSource('india-hexbins', {
-          type: 'geojson',
-          data: '/data/india_matched_hexbins.geojson',
-          promoteId: 'hex_id',
-          tolerance: 0.4,
-          buffer: 0,
-          generateId: false,
+          type: 'vector',
+          url: 'pmtiles:///data/india_matched_hexbins.pmtiles',
+          promoteId: { 'hexbins': 'hex_id' },
         });
       }
 
       if (!map.getSource('india-points')) {
+        // Use GeoJSON directly — the PMTiles build had tippecanoe clustering which generates
+        // cluster centroid features (no `cls` field) at low-zoom tiles, making all icons invisible.
+        // The GeoJSON is 2.1 MB gzipped on the wire; MapLibre tiles it internally at 60fps.
         map.addSource('india-points', {
           type: 'geojson',
           data: '/data/india_hotspots_precision_points.geojson',
-          promoteId: 'id',
-          tolerance: 0.4,
-          buffer: 0,
+          cluster: false,       // never merge — we need individual point properties
+          tolerance: 3.5,       // simplification tolerance (irrelevant for points, kept for perf)
+          buffer: 64,
           generateId: false,
         });
       }
 
-      // ── Layer 1: Hexbins Layer (Default at national zoom < 8.0) ──
+      // ── Playback Daily GeoJSON source (starts empty, loaded on demand) ──
+      if (!map.getSource('daily-timeline-source')) {
+        map.addSource('daily-timeline-source', {
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features: [] },
+        });
+      }
+
+      // ── Layer 1: Hexbins Layer (National overview zoom < 7.5) ──
       if (!map.getLayer('hexbins-fill')) {
         map.addLayer({
           id: 'hexbins-fill',
           type: 'fill',
           source: 'india-hexbins',
+          'source-layer': 'hexbins',
           maxzoom: 8.0,
           paint: {
             'fill-color': getMetricColorExpression(useAppStore.getState().activeMetric),
@@ -592,6 +650,7 @@ export function MapCanvas() {
           id: 'hexbins-hover-border',
           type: 'line',
           source: 'india-hexbins',
+          'source-layer': 'hexbins',
           maxzoom: 8.0,
           paint: {
             'line-color': [
@@ -623,6 +682,7 @@ export function MapCanvas() {
           id: 'accidental-radar-rings',
           type: 'circle',
           source: 'india-points',
+          // GeoJSON source — no source-layer needed
           filter: ['==', ['get', 'cls'], 4],
           paint: {
             'circle-color': 'transparent',
@@ -649,13 +709,17 @@ export function MapCanvas() {
         });
       }
 
-      // ── Layer 3: High-Zoom Class Icon Badge Symbol Layer (Hex-to-Icon transition at zoom >= 7.8) ──
+      // ── Layer 3: High-zoom individual coordinate-accurate AI class icons ──
+      // Clean separation: Hexbins govern country & regional overview (zoom < 7.5).
+      // Individual icons only reveal when inspecting closely at district/local level (zoom >= 7.2).
       if (!map.getLayer('points-symbols')) {
         map.addLayer({
           id: 'points-symbols',
           type: 'symbol',
           source: 'india-points',
+          minzoom: 7.2,
           layout: {
+            'symbol-placement': 'point',
             'icon-image': [
               'match', ['get', 'cls'],
               0, 'class-icon-0',
@@ -669,17 +733,15 @@ export function MapCanvas() {
               'interpolate',
               ['linear'],
               ['zoom'],
-              3, 0.35,
-              6, 0.45,
-              7.8, 0.55,
-              10, 0.70,
-              12, 0.85,
-              14, 1.0,
-              16, 1.15
+              7.2, 0.40,
+              8.0, 0.55,
+              10.0, 0.70,
+              12.0, 0.90,
+              14.0, 1.10,
             ],
-            'icon-allow-overlap': false,
-            'icon-ignore-placement': false,
-            'icon-padding': 2,
+            'icon-allow-overlap': true,
+            'icon-ignore-placement': true,
+            'icon-padding': 4,
           },
           paint: {
             'icon-opacity': [
@@ -693,6 +755,68 @@ export function MapCanvas() {
         });
       }
 
+      // ── Layer 4a: Daily Timeline Simulation — hotspot icons (playback mode, all zoom levels) ──
+      // Sourced from daily GeoJSON slice. Filtered by acq_hour <= currentHour.
+      if (!map.getLayer('timeline-symbols')) {
+        map.addLayer({
+          id: 'timeline-symbols',
+          type: 'symbol',
+          source: 'daily-timeline-source',
+          layout: {
+            'symbol-placement': 'point',
+            'icon-image': [
+              'match', ['get', 'cls'],
+              0, 'class-icon-0',
+              1, 'class-icon-1',
+              2, 'class-icon-2',
+              3, 'class-icon-3',
+              4, 'class-icon-4',
+              'class-icon-1',
+            ],
+            'icon-size': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              3.0, 0.30,
+              5.0, 0.42,
+              7.0, 0.55,
+              10.0, 0.75,
+              14.0, 1.10,
+            ],
+            'icon-allow-overlap': true,
+            'icon-ignore-placement': true,
+          },
+          paint: {
+            'icon-opacity': 1.0,
+          },
+        });
+      }
+
+      // ── Layer 4b: Daily Timeline — Accidental Fire radar rings (playback mode) ──
+      if (!map.getLayer('timeline-accidental-radar')) {
+        map.addLayer({
+          id: 'timeline-accidental-radar',
+          type: 'circle',
+          source: 'daily-timeline-source',
+          filter: ['==', ['get', 'cls'], 4],
+          paint: {
+            'circle-color': 'transparent',
+            'circle-stroke-color': '#ef4444',
+            'circle-stroke-width': 1.5,
+            'circle-radius': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              3.0, 6,
+              7.0, 14,
+              10.0, 22,
+              14.0, 36,
+            ],
+            'circle-stroke-opacity': 0.75,
+          },
+        });
+      }
+
       applyFilters();
       applyMetricColor();
 
@@ -700,7 +824,7 @@ export function MapCanvas() {
         if (map.getZoom() >= 7.8) {
           if (hoveredHexIdRef.current) {
             map.setFeatureState(
-              { source: 'india-hexbins', id: hoveredHexIdRef.current },
+              { source: 'india-hexbins', sourceLayer: 'hexbins', id: hoveredHexIdRef.current },
               { hover: false }
             );
             hoveredHexIdRef.current = null;
@@ -715,13 +839,13 @@ export function MapCanvas() {
         if (hoveredHexIdRef.current !== hexId) {
           if (hoveredHexIdRef.current) {
             map.setFeatureState(
-              { source: 'india-hexbins', id: hoveredHexIdRef.current },
+              { source: 'india-hexbins', sourceLayer: 'hexbins', id: hoveredHexIdRef.current },
               { hover: false }
             );
           }
           hoveredHexIdRef.current = hexId;
           map.setFeatureState(
-            { source: 'india-hexbins', id: hexId },
+            { source: 'india-hexbins', sourceLayer: 'hexbins', id: hexId },
             { hover: true }
           );
         }
@@ -829,7 +953,7 @@ export function MapCanvas() {
       map.on('mouseleave', 'hexbins-fill', () => {
         if (hoveredHexIdRef.current) {
           map.setFeatureState(
-            { source: 'india-hexbins', id: hoveredHexIdRef.current },
+            { source: 'india-hexbins', sourceLayer: 'hexbins', id: hoveredHexIdRef.current },
             { hover: false }
           );
           hoveredHexIdRef.current = null;
@@ -945,6 +1069,57 @@ export function MapCanvas() {
         map.getCanvas().style.cursor = '';
       });
 
+      // ── Timeline Playback Symbols Hover & Click ──
+      map.on('mousemove', 'timeline-symbols', (e) => {
+        if (!e.features || e.features.length === 0) return;
+        const feat = e.features[0];
+        const props = feat.properties as any;
+        const domClsId = Number(props.cls ?? 1);
+        const classMeta = CLASS_META[domClsId] ?? CLASS_META[1];
+        const point = e.point;
+
+        const cluster: ClusterInfo = {
+          totalHotspots: 1,
+          primaryClass: {
+            id: domClsId,
+            name: classMeta.name,
+            color: classMeta.color,
+          },
+          classCounts: {
+            wildfire:     domClsId === 0 ? 1 : 0,
+            agricultural: domClsId === 1 ? 1 : 0,
+            industrial:   domClsId === 2 ? 1 : 0,
+            gasflare:     domClsId === 3 ? 1 : 0,
+            accidental:   domClsId === 4 ? 1 : 0,
+          },
+          avgFrp:       Number(props.frp || 0),
+          maxFrp:       Number(props.frp || 0),
+          avgBrightness: Number(props.brightness || 330),
+          maxBrightness: Number(props.brightness || 330),
+          avgNo2:       Number(props.no2 || 0),
+          avgSo2:       Number(props.so2 || 0),
+          elevation:    Number(props.elevation || 0),
+          landCoverCode: 40,
+          landCover:    props.land_cover || 'Ground Surface',
+          isIndustrial: domClsId === 2 ? 1.0 : 0.0,
+          zScore:       props.is_anomaly ? 4.12 : null,
+          isAnomaly:    Boolean(props.is_anomaly),
+          baselineMeanFrp: null,
+          source:  props.source  || null,
+          acqDate: props.acq_date || useAppStore.getState().startDate,
+          lat: e.lngLat.lat,
+          lon: e.lngLat.lng,
+        };
+
+        setHoveredCluster(cluster, { x: point.x, y: point.y });
+        map.getCanvas().style.cursor = 'pointer';
+      });
+
+      map.on('mouseleave', 'timeline-symbols', () => {
+        setHoveredCluster(null, null);
+        map.getCanvas().style.cursor = '';
+      });
+
     } catch (err) {
       console.error('Failed to init map layers:', err);
     }
@@ -961,8 +1136,8 @@ export function MapCanvas() {
       minZoom: 3,
       maxZoom: 18,
       renderWorldCopies: false,       // ⚡ 50% reduction in WebGL vertex draw calls
-      fadeDuration: 0,                // ⚡ Zero tile opacity fade lag on slow integrated GPUs
-      maxTileCacheSize: 40,           // ⚡ Strict memory cap to prevent browser crashes on 2GB/4GB RAM PCs
+      fadeDuration: 0,                // ⚡ Zero tile opacity fade lag
+      maxTileCacheSize: 300,          // ⚡ Keep all India zoom levels in memory permanently (instant zoom, zero re-rendering)
       trackResize: true,
       attributionControl: false,
     });
@@ -974,9 +1149,23 @@ export function MapCanvas() {
     map.on('load', () => {
       map.resize();
       initLayers(map);
+      // Wait for MapLibre WebGL pipeline to render all initial tiles into buffer
+      map.once('idle', () => {
+        useAppStore.getState().setIsMapReady(true);
+      });
     });
 
+    // Fallback: If style loads or container layout shifts during initial bundle mounting
+    map.on('style.load', () => {
+      map.resize();
+    });
+
+    const resizeTimer = setTimeout(() => {
+      map.resize();
+    }, 250);
+
     return () => {
+      clearTimeout(resizeTimer);
       map.remove();
       mapRef.current = null;
       useAppStore.getState().setMap(null);
@@ -1013,10 +1202,49 @@ export function MapCanvas() {
   const startDate = useAppStore((s) => s.startDate);
   const endDate = useAppStore((s) => s.endDate);
   const isPlaybackControllerOpen = useAppStore((s) => s.isPlaybackControllerOpen);
+  const currentHourInt = Math.floor(useAppStore((s) => s.currentHour));
 
+  // ── Load/swap the daily GeoJSON slice when playback opens or date changes ──
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (!isPlaybackControllerOpen) {
+      // Clear the timeline source when player is closed
+      const src = map.getSource('daily-timeline-source') as maplibregl.GeoJSONSource | undefined;
+      if (src) src.setData({ type: 'FeatureCollection', features: [] });
+      loadedPlaybackDateRef.current = null;
+      return;
+    }
+
+    // Don't re-fetch if we already have this date loaded
+    if (loadedPlaybackDateRef.current === startDate) return;
+
+    fetch(`/data/daily_points/${startDate}.json`)
+      .then((r) => {
+        if (!r.ok) throw new Error(`No daily slice for ${startDate}`);
+        return r.json();
+      })
+      .then((geojson) => {
+        const src = mapRef.current?.getSource('daily-timeline-source') as maplibregl.GeoJSONSource | undefined;
+        if (src) {
+          src.setData(geojson);
+          loadedPlaybackDateRef.current = startDate;
+          // Apply hour filter immediately after loading
+          applyFilters();
+        }
+      })
+      .catch((err) => {
+        console.warn('Daily timeline slice not found:', err);
+        const src = mapRef.current?.getSource('daily-timeline-source') as maplibregl.GeoJSONSource | undefined;
+        if (src) src.setData({ type: 'FeatureCollection', features: [] });
+      });
+  }, [isPlaybackControllerOpen, startDate, applyFilters]);
+
+  // ── Re-apply filters whenever hour integer or class filters change ──
   useEffect(() => {
     applyFilters();
-  }, [activeFilters, filterSettings, startDate, endDate, isPlaybackControllerOpen, applyFilters]);
+  }, [activeFilters, filterSettings, startDate, endDate, isPlaybackControllerOpen, currentHourInt, applyFilters]);
 
 
   useEffect(() => {
@@ -1031,7 +1259,7 @@ export function MapCanvas() {
     const map = mapRef.current;
     if (!map || !map.isStyleLoaded() || !map.getLayer('hexbins-fill')) return;
 
-    // Diurnal factor: peaks during daytime 11:00-16:00 UTC
+    // Diurnal factor: peaks during daytime 11:00-16:00 UTC, subtle but visible
     const hour = currentHour;
     let diurnalFactor = 0.5;
     if (hour >= 6 && hour <= 18) {
@@ -1043,9 +1271,29 @@ export function MapCanvas() {
 
     try {
       if (isPlaybackControllerOpen) {
-        // Player open: hide hexbins completely so only isolated day's points appear
+        // ── PLAYBACK MODE ──
+        // Hide the yearlong hexbin mesh — dark map so individual daily hotspots are the star
         map.setPaintProperty('hexbins-fill', 'fill-opacity', 0);
+
+        // Hide high-zoom PMTiles points (we use timeline-symbols in playback mode instead)
+        if (map.getLayer('points-symbols')) {
+          map.setPaintProperty('points-symbols', 'icon-opacity', 0);
+        }
+        if (map.getLayer('accidental-radar-rings')) {
+          map.setPaintProperty('accidental-radar-rings', 'circle-stroke-opacity', 0);
+        }
+
+        // Show timeline simulation layers
+        if (map.getLayer('timeline-symbols')) {
+          map.setPaintProperty('timeline-symbols', 'icon-opacity', 1.0);
+        }
+        if (map.getLayer('timeline-accidental-radar')) {
+          map.setPaintProperty('timeline-accidental-radar', 'circle-stroke-opacity', 0.82);
+        }
+
       } else {
+        // ── NORMAL MODE ──
+        // Hexbins visible at national/macro zoom, fade out as user zooms in past 7.5
         map.setPaintProperty('hexbins-fill', 'fill-opacity', [
           'interpolate',
           ['linear'],
@@ -1054,14 +1302,9 @@ export function MapCanvas() {
           6.5, 0.82 * (0.5 + 0.5 * diurnalFactor),
           7.5, 0.0,
         ]);
-      }
 
-      if (map.getLayer('points-symbols')) {
-        if (isPlaybackControllerOpen) {
-          // Single-day timeline active: show class icon badges across all zoom levels
-          map.setPaintProperty('points-symbols', 'icon-opacity', 1.0);
-        } else {
-          // Hex to Icon Transition: exactly 0 opacity at zoom <= 7.2, resolves into icons at zoom >= 7.8
+        // Individual point icons appear only at high zoom (>= 7.2), after hexbins have faded
+        if (map.getLayer('points-symbols')) {
           map.setPaintProperty('points-symbols', 'icon-opacity', [
             'interpolate',
             ['linear'],
@@ -1070,12 +1313,8 @@ export function MapCanvas() {
             7.8, 1.0,
           ]);
         }
-      }
 
-      if (map.getLayer('accidental-radar-rings')) {
-        if (isPlaybackControllerOpen) {
-          map.setPaintProperty('accidental-radar-rings', 'circle-stroke-opacity', 0.85);
-        } else {
+        if (map.getLayer('accidental-radar-rings')) {
           map.setPaintProperty('accidental-radar-rings', 'circle-stroke-opacity', [
             'interpolate',
             ['linear'],
@@ -1084,6 +1323,14 @@ export function MapCanvas() {
             7.8, 0.75,
             12.0, 0.85,
           ]);
+        }
+
+        // Hide timeline simulation layers in normal mode
+        if (map.getLayer('timeline-symbols')) {
+          map.setPaintProperty('timeline-symbols', 'icon-opacity', 0);
+        }
+        if (map.getLayer('timeline-accidental-radar')) {
+          map.setPaintProperty('timeline-accidental-radar', 'circle-stroke-opacity', 0);
         }
       }
     } catch {
