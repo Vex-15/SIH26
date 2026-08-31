@@ -6,8 +6,8 @@ interface DockProps {
   side: 'left' | 'right';
 }
 
-const DOCK_WIDTH = 48;
-const GAP = 12;
+const DOCK_WIDTH = 52;
+const GAP = 10;
 
 export function Dock({ children, side }: DockProps) {
   const mouseRef = useMotionValue(Infinity);
@@ -16,7 +16,6 @@ export function Dock({ children, side }: DockProps) {
   const handleMouseMove = (e: React.MouseEvent) => {
     const rect = containerRef.current?.getBoundingClientRect();
     if (rect) {
-      // For vertical dock, track mouse Y relative to the container
       mouseRef.set(e.clientY - rect.top);
     }
   };
@@ -45,12 +44,13 @@ export function Dock({ children, side }: DockProps) {
           alignItems: 'center',
           justifyContent: 'center',
           gap: GAP,
-          background: 'var(--surface)',
-          border: '1px solid var(--surface-border)',
+          background: 'var(--neu-base)',
           borderRadius: 'var(--r-full)',
-          padding: '12px 6px',
+          padding: '14px 8px',
           width: DOCK_WIDTH,
-          boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.3)',
+          /* Neumorphic dual shadow — elevated pill */
+          boxShadow: 'var(--neu-shadow-out-lg)',
+          border: 'none',
         }}
       >
         {React.Children.map(children, (child) => {
@@ -73,6 +73,7 @@ interface DockIconProps {
   active?: boolean;
   className?: string;
   ariaLabel?: string;
+  accentColor?: string;
   // Injected by Dock parent component
   mouseRef?: any;
   containerRef?: React.RefObject<HTMLDivElement>;
@@ -84,34 +85,28 @@ export function DockIcon({
   active = false,
   className = '',
   ariaLabel,
+  accentColor,
   mouseRef,
   containerRef,
 }: DockIconProps) {
   const iconRef = useRef<HTMLButtonElement>(null);
 
-  // Compute distance from mouse to center of this specific icon element
   const distance = useTransform(mouseRef, (val: number) => {
     const bounds = iconRef.current?.getBoundingClientRect();
     const parentBounds = containerRef?.current?.getBoundingClientRect();
-
-    if (!bounds || !parentBounds || val === Infinity) {
-      return Infinity;
-    }
-
-    // Get vertical center of the icon relative to the parent container top
+    if (!bounds || !parentBounds || val === Infinity) return Infinity;
     const iconCenter = bounds.top + bounds.height / 2 - parentBounds.top;
     return val - iconCenter;
   });
 
-  // Calculate target scale (magnification) based on distance (range: -120 to +120 pixels)
-  const scaleTransform = useTransform(distance, [-120, 0, 120], [1.0, 1.4, 1.0]);
-
-  // Apply smooth spring physics to the scale transitions
+  const scaleTransform = useTransform(distance, [-120, 0, 120], [1.0, 1.35, 1.0]);
   const scale = useSpring(scaleTransform, {
     mass: 0.1,
     stiffness: 150,
     damping: 12,
   });
+
+  const resolvedAccent = accentColor ?? 'var(--accent)';
 
   return (
     <motion.button
@@ -120,25 +115,39 @@ export function DockIcon({
       aria-label={ariaLabel}
       style={{
         scale,
-        width: 36,
-        height: 36,
+        width: 38,
+        height: 38,
         borderRadius: '50%',
         border: 'none',
-        background: active ? 'var(--accent-subtle)' : 'transparent',
+        /* Active = inset (pressed); default = elevated */
+        background: 'var(--neu-base)',
+        boxShadow: active
+          ? `var(--neu-shadow-in-sm), 0 0 10px ${resolvedAccent}44`
+          : 'var(--neu-shadow-out-sm)',
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: active ? 'var(--accent)' : 'var(--text-muted)',
-        transition: 'background 200ms, color 200ms',
+        color: active ? resolvedAccent : 'var(--neu-text)',
+        transition: 'box-shadow 0.2s ease, color 0.2s ease',
         outline: 'none',
+        flexShrink: 0,
       }}
       className={className}
+      whileHover={{
+        color: active ? resolvedAccent : 'var(--neu-text-em)',
+      }}
       onMouseEnter={(e) => {
-        if (!active) e.currentTarget.style.color = 'var(--text-primary)';
+        if (!active) {
+          e.currentTarget.style.boxShadow = 'var(--neu-shadow-out)';
+          e.currentTarget.style.color = 'var(--neu-text-em)';
+        }
       }}
       onMouseLeave={(e) => {
-        if (!active) e.currentTarget.style.color = 'var(--text-muted)';
+        if (!active) {
+          e.currentTarget.style.boxShadow = 'var(--neu-shadow-out-sm)';
+          e.currentTarget.style.color = 'var(--neu-text)';
+        }
       }}
     >
       <div style={{ width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

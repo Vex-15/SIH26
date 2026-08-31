@@ -14,65 +14,76 @@ const FIRE_CLASSES: ClassRowConfig[] = [
   { id: 'agricultural', label: 'Agricultural', hex: '#f97316', dotColor: '#f97316' },
   { id: 'industrial',   label: 'Industrial',   hex: '#a855f7', dotColor: '#a855f7' },
   { id: 'gasflare',     label: 'Gas Flare',    hex: '#eab308', dotColor: '#eab308' },
-  { id: 'accidental',   label: 'Accidental',   hex: '#ff0000', dotColor: '#ff0000' },
+  { id: 'accidental',   label: 'Accidental',   hex: '#ff4444', dotColor: '#ff4444' },
 ];
 
 export function LayersPopover() {
-  const { 
-    activeFilters, 
-    toggleFilter, 
-  } = useAppStore();
+  const { activeFilters, toggleFilter } = useAppStore();
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -14, scale: 0.98 }}
+      initial={{ opacity: 0, x: -14, scale: 0.97 }}
       animate={{ opacity: 1, x: 0, scale: 1 }}
-      exit={{ opacity: 0, x: -14, scale: 0.98 }}
-      transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+      exit={{ opacity: 0, x: -14, scale: 0.97 }}
+      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
       style={{
         position: 'fixed',
-        left: 68,
+        left: 72,
         top: '50%',
         transform: 'translateY(-50%)',
         zIndex: 90,
-        width: 250,
-        background: 'rgba(18, 21, 28, 0.96)',
-        backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255, 255, 255, 0.12)',
-        borderRadius: 16,
-        padding: '16px 18px 18px',
-        boxShadow: '0 16px 40px rgba(0, 0, 0, 0.65), 0 0 1px rgba(255, 255, 255, 0.2)',
+        width: 260,
+        /* Neumorphic elevated panel */
+        background: 'var(--neu-base)',
+        boxShadow: 'var(--neu-shadow-out-lg)',
+        borderRadius: 'var(--r-lg)',
+        border: 'none',
+        padding: '20px 20px 22px',
         userSelect: 'none',
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: 'var(--font-ui)',
       }}
     >
-      {/* Header matching Flow screenshot */}
-      <div style={{ marginBottom: 14 }}>
-        <div
-          style={{
-            fontSize: 12,
-            fontWeight: 700,
-            letterSpacing: '0.04em',
-            textTransform: 'uppercase',
-            color: '#ffffff',
-            marginBottom: 3,
-          }}
-        >
-          FIRE CLASS FILTER
+      {/* Header */}
+      <div style={{ marginBottom: 18 }}>
+        <div style={{
+          fontSize: 10,
+          fontWeight: 700,
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          color: 'var(--neu-text-disabled)',
+          marginBottom: 4,
+        }}>
+          Fire Class Filter
         </div>
-        <div
-          style={{
-            fontSize: 11,
-            fontWeight: 400,
-            color: 'rgba(255, 255, 255, 0.45)',
-          }}
-        >
+        <div style={{
+          fontSize: 20,
+          fontWeight: 700,
+          color: 'var(--neu-text-strong)',
+          lineHeight: 1.2,
+        }}>
+          Event Layers
+        </div>
+        <div style={{
+          fontSize: 11,
+          fontWeight: 400,
+          color: 'var(--neu-text)',
+          marginTop: 4,
+        }}>
           1,372,035 anomalies · 5 classes
         </div>
       </div>
 
-      {/* Class Rows matching Flow screenshot */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {/* Divider inset line */}
+      <div style={{
+        height: 1,
+        background: 'transparent',
+        boxShadow: 'inset 0 1px 2px var(--neu-dark), inset 0 -1px 1px var(--neu-light)',
+        borderRadius: 1,
+        marginBottom: 16,
+      }} />
+
+      {/* Class Rows */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {FIRE_CLASSES.map((cls) => {
           const isActive = activeFilters[cls.id];
           return (
@@ -84,79 +95,70 @@ export function LayersPopover() {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 cursor: 'pointer',
-                padding: '3px 0',
+                /* Neumorphic row card */
+                background: 'var(--neu-base)',
+                boxShadow: isActive
+                  ? 'var(--neu-shadow-in-sm)'
+                  : 'var(--neu-shadow-out-sm)',
+                borderRadius: 'var(--r-sm)',
+                padding: '10px 12px',
+                transition: 'box-shadow 0.2s ease',
               }}
             >
-              {/* Left: Dot + Class Label */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-                <span
-                  style={{
-                    width: 9,
-                    height: 9,
-                    borderRadius: '50%',
-                    background: cls.dotColor,
-                    display: 'inline-block',
-                    flexShrink: 0,
-                    boxShadow: `0 0 6px ${cls.dotColor}88`,
-                  }}
-                />
-                <span
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 500,
-                    color: isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.4)',
-                    transition: 'color 0.15s ease',
-                  }}
-                >
+              {/* Left: Dot + Label */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: '50%',
+                  background: isActive ? cls.dotColor : 'var(--neu-text-disabled)',
+                  display: 'inline-block',
+                  flexShrink: 0,
+                  boxShadow: isActive ? `0 0 8px ${cls.dotColor}88` : 'none',
+                  transition: 'background 0.2s, box-shadow 0.2s',
+                }} />
+                <span style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: isActive ? 'var(--neu-text-strong)' : 'var(--neu-text)',
+                  transition: 'color 0.2s ease',
+                }}>
                   {cls.label}
                 </span>
               </div>
 
-              {/* Center/Right: Hex Code + macOS Amber Toggle Switch */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span
-                  style={{
-                    fontSize: 11,
-                    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-                    color: 'rgba(255, 255, 255, 0.4)',
-                    letterSpacing: '0.02em',
-                  }}
-                >
+              {/* Right: Hex + Toggle */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{
+                  fontSize: 10,
+                  fontFamily: 'var(--font-mono)',
+                  color: isActive ? cls.dotColor : 'var(--neu-text-disabled)',
+                  letterSpacing: '0.02em',
+                  transition: 'color 0.2s',
+                }}>
                   {cls.hex}
                 </span>
 
-                {/* Switch Capsule */}
-                <div
-                  style={{
-                    width: 32,
-                    height: 18,
-                    borderRadius: 10,
-                    background: isActive ? '#f97316' : 'rgba(255, 255, 255, 0.16)',
-                    position: 'relative',
-                    transition: 'background 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-                    boxShadow: isActive ? '0 0 8px rgba(249, 115, 22, 0.4)' : 'none',
-                    flexShrink: 0,
-                  }}
-                >
-                  {/* Switch Thumb */}
-                  <div
-                    style={{
-                      width: 14,
-                      height: 14,
-                      borderRadius: '50%',
-                      background: '#ffffff',
-                      position: 'absolute',
-                      top: 2,
-                      left: isActive ? 16 : 2,
-                      transition: 'left 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.4)',
-                    }}
-                  />
+                {/* Neumorphic toggle */}
+                <div className={`neu-toggle-track ${isActive ? 'on' : ''}`}
+                  style={{ '--accent': cls.dotColor } as React.CSSProperties}>
+                  <div className="neu-toggle-thumb" />
                 </div>
               </div>
             </div>
           );
         })}
+      </div>
+
+      {/* Footer hint */}
+      <div style={{
+        marginTop: 14,
+        fontSize: 10,
+        color: 'var(--neu-text-disabled)',
+        textAlign: 'center',
+        letterSpacing: '0.04em',
+      }}>
+        Click rows to toggle visibility
       </div>
     </motion.div>
   );

@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion';
-import { 
-  Thermometer, 
-  Flame, 
-  CloudFog, 
-  FlaskConical, 
-  Trees, 
-  Factory, 
-  Mountain, 
+import {
+  Thermometer,
+  Flame,
+  CloudFog,
+  FlaskConical,
+  Trees,
+  Factory,
+  Mountain,
   BrainCircuit,
   Check
 } from 'lucide-react';
@@ -29,66 +29,76 @@ export function MetricSelectorPopover() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -14, scale: 0.98 }}
+      initial={{ opacity: 0, x: -14, scale: 0.97 }}
       animate={{ opacity: 1, x: 0, scale: 1 }}
-      exit={{ opacity: 0, x: -14, scale: 0.98 }}
-      transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+      exit={{ opacity: 0, x: -14, scale: 0.97 }}
+      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
       style={{
         position: 'fixed',
-        left: 68,
+        left: 72,
         top: '50%',
         transform: 'translateY(-50%)',
         zIndex: 90,
-        width: 280,
-        maxHeight: 'min(480px, calc(100vh - 100px))',
-        background: 'rgba(18, 21, 28, 0.96)',
-        backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255, 255, 255, 0.12)',
-        borderRadius: 16,
-        padding: '16px 16px 14px',
-        boxShadow: '0 16px 40px rgba(0, 0, 0, 0.65), 0 0 1px rgba(255, 255, 255, 0.2)',
+        width: 290,
+        maxHeight: 'min(500px, calc(100vh - 100px))',
+        /* Neumorphic elevated panel */
+        background: 'var(--neu-base)',
+        boxShadow: 'var(--neu-shadow-out-lg)',
+        borderRadius: 'var(--r-lg)',
+        border: 'none',
+        padding: '20px 18px 18px',
         userSelect: 'none',
         display: 'flex',
         flexDirection: 'column',
-        fontFamily: "'Inter', system-ui, sans-serif",
+        fontFamily: 'var(--font-ui)',
       }}
     >
       {/* Header */}
-      <div style={{ marginBottom: 12, paddingBottom: 10, borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
-        <div
-          style={{
-            fontSize: 12,
-            fontWeight: 700,
-            letterSpacing: '0.04em',
-            textTransform: 'uppercase',
-            color: '#ffffff',
-            marginBottom: 3,
-          }}
-        >
-          TELEMETRY PARAMETER
+      <div style={{ marginBottom: 16 }}>
+        <div style={{
+          fontSize: 10,
+          fontWeight: 700,
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          color: 'var(--neu-text-disabled)',
+          marginBottom: 4,
+        }}>
+          Telemetry Parameter
         </div>
-        <div
-          style={{
-            fontSize: 11,
-            fontWeight: 400,
-            color: 'rgba(255, 255, 255, 0.45)',
-          }}
-        >
+        <div style={{
+          fontSize: 20,
+          fontWeight: 700,
+          color: 'var(--neu-text-strong)',
+          lineHeight: 1.2,
+        }}>
+          Hex Grid Metric
+        </div>
+        <div style={{
+          fontSize: 11,
+          color: 'var(--neu-text)',
+          marginTop: 4,
+        }}>
           Select metric to project on 1km hex grid
         </div>
       </div>
 
+      {/* Inset divider */}
+      <div style={{
+        height: 1,
+        background: 'transparent',
+        boxShadow: 'inset 0 1px 2px var(--neu-dark), inset 0 -1px 1px var(--neu-light)',
+        borderRadius: 1,
+        marginBottom: 14,
+      }} />
+
       {/* Metrics List */}
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 6,
-          overflowY: 'auto',
-          paddingRight: 4,
-          scrollbarWidth: 'none',
-        }}
-      >
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 7,
+        overflowY: 'auto',
+        paddingRight: 2,
+      }}>
         {(Object.keys(METRIC_CONFIGS) as VisualMetric[]).map((key) => {
           const config = METRIC_CONFIGS[key];
           const isSelected = activeMetric === key;
@@ -102,81 +112,79 @@ export function MetricSelectorPopover() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '8px 10px',
-                borderRadius: 10,
+                padding: '10px 12px',
+                borderRadius: 'var(--r-sm)',
                 cursor: 'pointer',
-                background: isSelected ? 'rgba(245, 158, 11, 0.14)' : 'rgba(255, 255, 255, 0.03)',
-                border: isSelected ? '1px solid #f59e0b' : '1px solid rgba(255, 255, 255, 0.06)',
-                transition: 'all 0.15s cubic-bezier(0.16, 1, 0.3, 1)',
+                /* Neumorphic: inset when selected, elevated when not */
+                background: 'var(--neu-base)',
+                boxShadow: isSelected
+                  ? `var(--neu-shadow-in-sm), 0 0 12px rgba(245,158,11,0.2)`
+                  : 'var(--neu-shadow-out-sm)',
+                transition: 'box-shadow 0.2s ease',
               }}
               onMouseEnter={(e) => {
                 if (!isSelected) {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.12)';
+                  e.currentTarget.style.boxShadow = 'var(--neu-shadow-out)';
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isSelected) {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)';
+                  e.currentTarget.style.boxShadow = 'var(--neu-shadow-out-sm)';
                 }
               }}
             >
-              {/* Left: Icon + Label */}
+              {/* Left: Icon + Labels */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-                <div
-                  style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: 7,
-                    background: isSelected ? '#f59e0b' : 'rgba(255, 255, 255, 0.08)',
-                    color: isSelected ? '#000000' : 'rgba(255, 255, 255, 0.7)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                    transition: 'all 0.15s ease',
-                  }}
-                >
-                  <Icon size={14} strokeWidth={2.2} />
+                <div style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 'var(--r-sm)',
+                  background: 'var(--neu-base)',
+                  boxShadow: isSelected
+                    ? `inset 2px 2px 5px var(--neu-dark), inset -2px -2px 5px var(--neu-light), 0 0 10px rgba(245,158,11,0.3)`
+                    : 'var(--neu-shadow-out-sm)',
+                  color: isSelected ? 'var(--accent)' : 'var(--neu-text)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  transition: 'box-shadow 0.2s, color 0.2s',
+                }}>
+                  <Icon size={15} strokeWidth={2} />
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                  <span
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: isSelected ? '#ffffff' : 'rgba(255, 255, 255, 0.8)',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
-                  >
+                  <span style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: isSelected ? 'var(--neu-text-strong)' : 'var(--neu-text-em)',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    transition: 'color 0.2s',
+                  }}>
                     {config.label}
                   </span>
-                  <span
-                    style={{
-                      fontSize: 10,
-                      color: 'rgba(255, 255, 255, 0.4)',
-                    }}
-                  >
+                  <span style={{
+                    fontSize: 10,
+                    color: isSelected ? 'var(--accent)' : 'var(--neu-text-disabled)',
+                    transition: 'color 0.2s',
+                  }}>
                     {config.unit}
                   </span>
                 </div>
               </div>
 
-              {/* Right: Checkmark for active selection */}
+              {/* Checkmark */}
               {isSelected && (
-                <div
-                  style={{
-                    color: '#f59e0b',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                    marginLeft: 6,
-                  }}
-                >
+                <div style={{
+                  color: 'var(--accent)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  marginLeft: 6,
+                }}>
                   <Check size={15} strokeWidth={2.5} />
                 </div>
               )}
