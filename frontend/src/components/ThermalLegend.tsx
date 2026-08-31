@@ -7,7 +7,6 @@ const LEGEND_GRADIENTS: Record<VisualMetric, { gradient: string; low: string; hi
     low: 'Wildfire',
     high: 'Accidental',
   },
-  // Matches new quantile-calibrated interpolate expression using b_x
   brightness: {
     gradient: 'linear-gradient(to right, #0d0221, #2d1160, #6b1f7a, #a0195a, #d62f2f, #e8621a, #f5961a, #fabb18, #fef08a, #ffffff)',
     low: '< 312 K',
@@ -51,7 +50,7 @@ export function ThermalLegend() {
   const cfg = METRIC_CONFIGS[activeMetric];
   const leg = LEGEND_GRADIENTS[activeMetric];
 
-  // If Target_Class is active, show discrete classification badge chips
+  // Discrete class classification view
   if (activeMetric === 'Target_Class') {
     return (
       <div
@@ -61,30 +60,31 @@ export function ThermalLegend() {
           left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 40,
-          background: 'rgba(24, 24, 27, 0.95)',
-          backdropFilter: 'blur(12px)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          borderRadius: 12,
-          padding: '8px 14px',
+          /* Neumorphic elevated pill */
+          background: 'var(--neu-base)',
+          boxShadow: 'var(--neu-shadow-out)',
+          borderRadius: 'var(--r-full)',
+          border: 'none',
+          padding: '8px 16px',
           pointerEvents: 'none',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
         }}
       >
         <div
           style={{
-            fontFamily: 'Space Grotesk, sans-serif',
-            fontSize: 9,
+            fontFamily: 'var(--font-mono)',
+            fontSize: 8,
             fontWeight: 700,
-            letterSpacing: '0.08em',
+            letterSpacing: '0.1em',
             textTransform: 'uppercase',
-            color: '#a1a1aa',
+            color: 'var(--neu-text-disabled)',
             marginBottom: 6,
+            textAlign: 'center',
           }}
         >
-          AI CLASSIFICATION CHANNELS
+          AI Classification Channels
         </div>
 
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           {Object.entries(CLASS_META).map(([id, meta]) => (
             <div key={id} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <span
@@ -93,14 +93,15 @@ export function ThermalLegend() {
                   height: 8,
                   borderRadius: 2,
                   backgroundColor: meta.color,
+                  boxShadow: `0 0 5px ${meta.color}88`,
                 }}
               />
               <span
                 style={{
-                  fontFamily: 'Space Grotesk, sans-serif',
+                  fontFamily: 'var(--font-ui)',
                   fontSize: 10,
                   fontWeight: 600,
-                  color: '#e5e2e1',
+                  color: 'var(--neu-text-em)',
                 }}
               >
                 {meta.name}
@@ -120,48 +121,58 @@ export function ThermalLegend() {
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 40,
-        background: 'rgba(24, 24, 27, 0.95)',
-        backdropFilter: 'blur(12px)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        borderRadius: 12,
-        padding: '8px 14px',
+        /* Neumorphic elevated pill */
+        background: 'var(--neu-base)',
+        boxShadow: 'var(--neu-shadow-out)',
+        borderRadius: 'var(--r-full)',
+        border: 'none',
+        padding: '10px 18px',
         pointerEvents: 'none',
-        boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
+        minWidth: 260,
       }}
     >
       <div
         style={{
-          fontFamily: 'Space Grotesk, sans-serif',
-          fontSize: 9,
+          fontFamily: 'var(--font-mono)',
+          fontSize: 8,
           fontWeight: 700,
-          letterSpacing: '0.08em',
+          letterSpacing: '0.1em',
           textTransform: 'uppercase',
-          color: '#a1a1aa',
-          marginBottom: 6,
+          color: 'var(--neu-text-disabled)',
+          marginBottom: 7,
         }}
       >
         {cfg.label} ({cfg.unit})
       </div>
 
-      {/* Dynamic gradient bar matching active metric */}
+      {/* Gradient bar in neumorphic inset trough */}
       <div
         style={{
-          width: 220,
-          height: 6,
-          borderRadius: 999,
-          background: leg.gradient,
-          marginBottom: 5,
-          transition: 'background 0.3s ease',
+          background: 'var(--neu-base)',
+          boxShadow: 'var(--neu-shadow-in-sm)',
+          borderRadius: 'var(--r-full)',
+          padding: 3,
+          marginBottom: 6,
+          transition: 'box-shadow 0.3s',
         }}
-      />
+      >
+        <div
+          style={{
+            height: 7,
+            borderRadius: 'var(--r-full)',
+            background: leg.gradient,
+            transition: 'background 0.4s ease',
+          }}
+        />
+      </div>
 
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          fontFamily: 'Geist Mono, monospace',
+          fontFamily: 'var(--font-mono)',
           fontSize: 9,
-          color: '#71717a',
+          color: 'var(--neu-text)',
         }}
       >
         <span>{leg.low}</span>
@@ -170,4 +181,3 @@ export function ThermalLegend() {
     </div>
   );
 }
-

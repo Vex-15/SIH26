@@ -130,29 +130,31 @@ export function AnomalyAlertModal() {
           >
             <div
               style={{
-                background: '#0e0e12',
-                border: `1.5px solid ${color}`,
-                borderRadius: 20,
+                background: 'var(--neu-base)',
+                borderRadius: 'var(--r-xl)',
                 padding: '28px 24px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                boxShadow: `0 24px 60px rgba(0, 0, 0, 0.9), 0 0 30px ${color}30`,
+                /* Neumorphic deep shadow + class accent glow */
+                boxShadow: `var(--neu-shadow-out-lg), 0 0 30px ${color}25`,
+                border: 'none',
               }}
             >
               {/* Icon circle */}
               <div
                 style={{
-                  width: 56,
-                  height: 56,
+                  width: 60,
+                  height: 60,
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   marginBottom: 16,
-                  backgroundColor: color,
-                  color: '#ffffff',
-                  boxShadow: `0 0 16px ${color}60`,
+                  /* Neumorphic inset icon circle with accent */
+                  background: 'var(--neu-base)',
+                  boxShadow: `var(--neu-shadow-in-sm), 0 0 20px ${color}50`,
+                  color: color,
                   flexShrink: 0,
                 }}
               >
@@ -162,10 +164,10 @@ export function AnomalyAlertModal() {
               {/* Title */}
               <h1
                 style={{
-                  fontFamily: 'Space Grotesk, sans-serif',
+                  fontFamily: 'var(--font-ui)',
                   fontSize: 20,
                   fontWeight: 800,
-                  color: '#ffffff',
+                  color: 'var(--neu-text-strong)',
                   textAlign: 'center',
                   lineHeight: 1.2,
                   marginBottom: 4,
@@ -177,9 +179,9 @@ export function AnomalyAlertModal() {
               </h1>
               <p
                 style={{
-                  fontFamily: 'Space Grotesk, sans-serif',
+                  fontFamily: 'var(--font-ui)',
                   fontSize: 11,
-                  color: 'rgba(255, 255, 255, 0.5)',
+                  color: 'var(--neu-text)',
                   textAlign: 'center',
                   marginBottom: 20,
                 }}
@@ -188,7 +190,7 @@ export function AnomalyAlertModal() {
               </p>
 
               {/* Divider */}
-              <div style={{ width: '100%', height: 1, marginBottom: 20, backgroundColor: `${color}40` }} />
+              <div style={{ width: '100%', height: 1, marginBottom: 20, background: 'transparent', boxShadow: `inset 0 1px 2px var(--neu-dark)` }} />
 
               {/* Key metrics */}
               <div style={{ display: 'flex', width: '100%', justifyContent: 'space-around', alignItems: 'flex-start', marginBottom: 24 }}>
@@ -204,7 +206,7 @@ export function AnomalyAlertModal() {
                   </div>
                 </div>
 
-                <div style={{ width: 1, height: 48, alignSelf: 'center', backgroundColor: `${color}30` }} />
+                <div style={{ width: 1, height: 48, alignSelf: 'center', background: 'transparent', boxShadow: `inset 1px 0 3px var(--neu-dark)` }} />
 
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                   <span style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 9, color: 'rgba(255, 255, 255, 0.4)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
@@ -249,23 +251,25 @@ export function AnomalyAlertModal() {
                   <div
                     key={label}
                     style={{
-                      borderRadius: 12,
+                      borderRadius: 'var(--r-sm)',
                       padding: '10px 12px',
                       display: 'flex',
                       flexDirection: 'column',
                       gap: 4,
-                      background: '#18181b',
-                      border: '1px solid rgba(255, 255, 255, 0.06)',
+                      /* Neumorphic inset metadata pill */
+                      background: 'var(--neu-base)',
+                      boxShadow: 'var(--neu-shadow-in-sm)',
+                      border: 'none',
                     }}
                   >
-                    <span style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 9, color: 'rgba(255, 255, 255, 0.4)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                    <span style={{ fontFamily: 'var(--font-ui)', fontSize: 9, color: 'var(--neu-text-disabled)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
                       {label}
                     </span>
                     <span
                       style={{
-                        fontFamily: mono ? 'Geist Mono, monospace' : 'Space Grotesk, sans-serif',
+                        fontFamily: mono ? 'var(--font-mono)' : 'var(--font-ui)',
                         fontSize: 11,
-                        color: 'rgba(255, 255, 255, 0.9)',
+                        color: 'var(--neu-text-em)',
                         lineHeight: 1.3,
                         fontWeight: mono ? 600 : 500,
                       }}
@@ -281,32 +285,35 @@ export function AnomalyAlertModal() {
                 onClick={handleAcknowledge}
                 style={{
                   width: '100%',
-                  height: 46,
-                  color: '#ffffff',
-                  fontFamily: 'Space Grotesk, sans-serif',
+                  height: 48,
+                  color: color,
+                  fontFamily: 'var(--font-ui)',
                   fontWeight: 700,
                   fontSize: 12,
                   textTransform: 'uppercase',
                   letterSpacing: '0.06em',
-                  borderRadius: 12,
+                  borderRadius: 'var(--r-md)',
                   border: 'none',
-                  backgroundColor: color,
-                  boxShadow: `0 0 18px ${color}50`,
+                  /* Neumorphic elevated button with accent glow */
+                  background: 'var(--neu-base)',
+                  boxShadow: `var(--neu-shadow-out), 0 0 18px ${color}30`,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: 8,
                   marginBottom: 8,
                   cursor: 'pointer',
-                  transition: 'all 0.15s ease',
+                  transition: 'box-shadow 0.15s ease, transform 0.1s ease',
                 }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.filter = 'brightness(1.15)'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.filter = ''; }}
+                onMouseEnter={e => { e.currentTarget.style.boxShadow = `var(--neu-shadow-out-lg), 0 0 24px ${color}40`; }}
+                onMouseLeave={e => { e.currentTarget.style.boxShadow = `var(--neu-shadow-out), 0 0 18px ${color}30`; }}
+                onMouseDown={e => { e.currentTarget.style.boxShadow = `var(--neu-shadow-in), 0 0 12px ${color}20`; e.currentTarget.style.transform = 'scale(0.98)'; }}
+                onMouseUp={e => { e.currentTarget.style.boxShadow = `var(--neu-shadow-out), 0 0 18px ${color}30`; e.currentTarget.style.transform = 'scale(1)'; }}
               >
                 Acknowledge &amp; Investigate
               </button>
 
-              <p style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 10, color: 'rgba(255, 255, 255, 0.35)', textAlign: 'center' }}>
+              <p style={{ fontFamily: 'var(--font-ui)', fontSize: 10, color: 'var(--neu-text-disabled)', textAlign: 'center' }}>
                 Opens detailed telemetry dossier · Silences this alert
               </p>
             </div>
