@@ -15,11 +15,7 @@ const STYLES = {
 const INDIA_CENTER: [number, number] = [78.9629, 20.5937];
 const INDIA_ZOOM = 4.6;
 
-async function fetchGeoJson(url: string): Promise<any> {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status} on ${url}`);
-  return res.json();
-}
+
 
 
 
@@ -545,21 +541,16 @@ export function MapCanvas() {
     }
   }, []);
 
-  const initLayers = useCallback(async (map: maplibregl.Map) => {
+  const initLayers = useCallback((map: maplibregl.Map) => {
     try {
       registerClassIcons(map);
-
-      const [hexData, pointsData] = await Promise.all([
-        fetchGeoJson('/data/india_matched_hexbins.geojson'),
-        fetchGeoJson('/data/india_hotspots_precision_points.geojson'),
-      ]);
 
       if (!mapRef.current) return;
 
       if (!map.getSource('india-hexbins')) {
         map.addSource('india-hexbins', {
           type: 'geojson',
-          data: hexData,
+          data: '/data/india_matched_hexbins.geojson',
           promoteId: 'hex_id',
           tolerance: 0.4,
           buffer: 0,
@@ -570,7 +561,7 @@ export function MapCanvas() {
       if (!map.getSource('india-points')) {
         map.addSource('india-points', {
           type: 'geojson',
-          data: pointsData,
+          data: '/data/india_hotspots_precision_points.geojson',
           promoteId: 'id',
           tolerance: 0.4,
           buffer: 0,
