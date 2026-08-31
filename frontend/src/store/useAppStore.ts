@@ -29,21 +29,35 @@ export interface FilterSettings {
 export interface ClusterInfo {
   totalHotspots: number;
   primaryClass: { id: number; name: string; color: string };
+  // Sub-class breakdown counts (from GeoJSON w_c / a_c / i_c / fl_c / ac_c)
+  classCounts: { wildfire: number; agricultural: number; industrial: number; gasflare: number; accidental: number };
   avgFrp: number;
   maxFrp: number;
   avgBrightness: number;
+  maxBrightness: number;
   avgNo2: number;
   avgSo2: number;
   elevation: number;
+  landCoverCode: number;
   landCover: string;
-  isIndustrial: number;
+  isIndustrial: number;   // 0.0 – 1.0 cluster ratio
   zScore: number | null;
   isAnomaly: boolean;
+  baselineMeanFrp: number | null;  // 30-day rolling baseline µ (MW)
   lat: number;
   lon: number;
+  // Point-level extras (null when clicked feature is a hexbin aggregate)
+  source: string | null;    // e.g. 'VIIRS_JPSS1' / 'MODIS'
+  acqDate: string | null;   // e.g. '2024-04-18'
 }
 
 export const METRIC_CONFIGS: Record<VisualMetric, { label: string; unit: string; description: string; icon: string }> = {
+  Target_Class: {
+    label: 'Fire Class Segregation',
+    unit: '5-Class Multi-Modal AI',
+    description: 'Master multi-modal AI classification (Wildfire, Stubble, Industrial, Flare, Accidental)',
+    icon: 'BrainCircuit',
+  },
   brightness: {
     label: 'Brightness Temperature',
     unit: 'Kelvin (K)',
@@ -86,13 +100,10 @@ export const METRIC_CONFIGS: Record<VisualMetric, { label: string; unit: string;
     description: 'Digital Elevation Model ground surface altitude',
     icon: 'Mountain',
   },
-  Target_Class: {
-    label: 'AI Classified Anomaly Type',
-    unit: 'Phase 6 Fused',
-    description: 'Master multi-modal stacking ensemble classification',
-    icon: 'BrainCircuit',
-  },
 };
+
+export type TemporalScope = '24h' | '7d' | '30d' | '1h';
+export type TimeFilterMode = 'window' | 'cumulative' | 'all_day';
 
 interface AppState {
   theme: Theme;
@@ -105,7 +116,24 @@ interface AppState {
   isLayersOpen: boolean;
   isMetricSelectorOpen: boolean;
   hoveredCluster: ClusterInfo | null;
+  selectedCluster: ClusterInfo | null;
   tooltipPos: { x: number; y: number } | null;
+  isAnomalyAlertOpen: boolean;
+  isEmergencySimulationOpen: boolean;
+  isCalendarOpen: boolean;
+  isExportOpen: boolean;
+  isPlaybackControllerOpen: boolean;
+  hasAcknowledgedAnomaly: boolean;
+
+  // Temporal Diurnal State (Prompt 7)
+  startDate: string;
+  endDate: string;
+  selectedDate: string;
+  currentHour: number; // 0 to 23.99
+  isPlaying: boolean;
+  playbackSpeed: number; // 1, 2, 5, 10
+  temporalScope: TemporalScope;
+  timeFilterMode: TimeFilterMode;
 
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
@@ -119,6 +147,24 @@ interface AppState {
   setLayersOpen: (open: boolean) => void;
   setMetricSelectorOpen: (open: boolean) => void;
   setHoveredCluster: (cluster: ClusterInfo | null, pos: { x: number; y: number } | null) => void;
+  setSelectedCluster: (cluster: ClusterInfo | null) => void;
+  setAnomalyAlertOpen: (open: boolean) => void;
+  setEmergencySimulationOpen: (open: boolean) => void;
+  setCalendarOpen: (open: boolean) => void;
+  setExportOpen: (open: boolean) => void;
+  setPlaybackControllerOpen: (open: boolean) => void;
+  setHasAcknowledgedAnomaly: (ack: boolean) => void;
+
+  setStartDate: (date: string) => void;
+  setEndDate: (date: string) => void;
+  setDateRange: (startDate: string, endDate: string) => void;
+  setSelectedDate: (date: string) => void;
+  setCurrentHour: (hour: number | ((prev: number) => number)) => void;
+  setIsPlaying: (playing: boolean) => void;
+  togglePlay: () => void;
+  setPlaybackSpeed: (speed: number) => void;
+  setTemporalScope: (scope: TemporalScope) => void;
+  setTimeFilterMode: (mode: TimeFilterMode) => void;
 }
 
 const DEFAULT_FILTER_SETTINGS: FilterSettings = {
@@ -130,6 +176,15 @@ const DEFAULT_FILTER_SETTINGS: FilterSettings = {
   minSo2: 0,
   onlyAnomalies: false,
 };
+
+export function getToday2024Date(): string {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `2024-${month}-${day}`;
+}
+
+const defaultInitialDate = getToday2024Date();
 
 export const useAppStore = create<AppState>((set) => ({
   theme: 'dark',
@@ -148,7 +203,23 @@ export const useAppStore = create<AppState>((set) => ({
   isLayersOpen: false,
   isMetricSelectorOpen: false,
   hoveredCluster: null,
+  selectedCluster: null,
   tooltipPos: null,
+  isAnomalyAlertOpen: false,
+  isEmergencySimulationOpen: false,
+  isCalendarOpen: false,
+  isExportOpen: false,
+  isPlaybackControllerOpen: false,
+  hasAcknowledgedAnomaly: false,
+
+  startDate: defaultInitialDate,
+  endDate: defaultInitialDate,
+  selectedDate: defaultInitialDate,
+  currentHour: 14.33, // 14:20 UTC
+  isPlaying: false,
+  playbackSpeed: 2,
+  temporalScope: '24h',
+  timeFilterMode: 'all_day',
 
   setTheme: (theme) => set({ theme }),
   toggleTheme: () => set((s) => ({ theme: s.theme === 'dark' ? 'light' : 'dark' })),
@@ -172,14 +243,44 @@ export const useAppStore = create<AppState>((set) => ({
     set((s) => ({
       isLayersOpen: open,
       isMetricSelectorOpen: open ? false : s.isMetricSelectorOpen,
+      isCalendarOpen: open ? false : s.isCalendarOpen,
     })),
   setMetricSelectorOpen: (open) =>
     set((s) => ({
       isMetricSelectorOpen: open,
       isLayersOpen: open ? false : s.isLayersOpen,
+      isCalendarOpen: open ? false : s.isCalendarOpen,
     })),
   setHoveredCluster: (hoveredCluster, tooltipPos) => set({ hoveredCluster, tooltipPos }),
+  setSelectedCluster: (selectedCluster) => set({ selectedCluster }),
+  setAnomalyAlertOpen: (isAnomalyAlertOpen) => set({ isAnomalyAlertOpen }),
+  setEmergencySimulationOpen: (isEmergencySimulationOpen) => set({ isEmergencySimulationOpen }),
+  setCalendarOpen: (open) =>
+    set((s) => ({
+      isCalendarOpen: open,
+      isLayersOpen: open ? false : s.isLayersOpen,
+      isMetricSelectorOpen: open ? false : s.isMetricSelectorOpen,
+    })),
+  setExportOpen: (isExportOpen) => set({ isExportOpen }),
+  setPlaybackControllerOpen: (isPlaybackControllerOpen) => set({ isPlaybackControllerOpen }),
+  setHasAcknowledgedAnomaly: (hasAcknowledgedAnomaly) => set({ hasAcknowledgedAnomaly }),
+
+  setStartDate: (startDate) => set({ startDate, selectedDate: startDate }),
+  setEndDate: (endDate) => set({ endDate }),
+  setDateRange: (startDate, endDate) => set({ startDate, endDate, selectedDate: startDate }),
+  setSelectedDate: (selectedDate) => set({ selectedDate, startDate: selectedDate, endDate: selectedDate }),
+  setCurrentHour: (hour) =>
+    set((s) => ({
+      currentHour: typeof hour === 'function' ? hour(s.currentHour) : hour,
+    })),
+  setIsPlaying: (isPlaying) => set({ isPlaying }),
+  togglePlay: () => set((s) => ({ isPlaying: !s.isPlaying })),
+  setPlaybackSpeed: (playbackSpeed) => set({ playbackSpeed }),
+  setTemporalScope: (temporalScope) => set({ temporalScope }),
+  setTimeFilterMode: (timeFilterMode) => set({ timeFilterMode }),
 }));
+
+
 
 export const CLASS_META: Record<number, { name: string; color: string; key: FireClass }> = {
   0: { name: 'Wildfire',             color: '#ef4444', key: 'wildfire'     },

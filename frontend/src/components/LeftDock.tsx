@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Home, Layers, SlidersHorizontal, Calendar, Settings } from 'lucide-react';
+import { Home, Layers, SlidersHorizontal, Radio, Download, Settings } from 'lucide-react';
 import { Dock, DockIcon } from './Dock';
 import { useAppStore } from '../store/useAppStore';
 
@@ -13,14 +13,23 @@ export function LeftDock() {
     isLayersOpen, 
     setLayersOpen, 
     isMetricSelectorOpen, 
-    setMetricSelectorOpen 
+    setMetricSelectorOpen,
+    isEmergencySimulationOpen,
+    setEmergencySimulationOpen,
+    setCalendarOpen,
+    isPlaybackControllerOpen,
+    setPlaybackControllerOpen,
   } = useAppStore();
-  const [activeTab, setActiveTab] = useState<'home' | 'calendar' | 'settings'>('home');
+
+
+
+  const [activeTab, setActiveTab] = useState<'home' | 'settings'>('home');
 
   const handleHomeClick = () => {
     setActiveTab('home');
     setLayersOpen(false);
     setMetricSelectorOpen(false);
+    setCalendarOpen(false);
     if (map) {
       map.flyTo({
         center: INDIA_CENTER,
@@ -34,10 +43,11 @@ export function LeftDock() {
   return (
     <Dock side="left">
       <DockIcon
-        active={activeTab === 'home' && !isLayersOpen && !isMetricSelectorOpen}
+        active={activeTab === 'home' && !isLayersOpen && !isMetricSelectorOpen && !isEmergencySimulationOpen && !isPlaybackControllerOpen}
         onClick={handleHomeClick}
         ariaLabel="Zoom to India Home"
       >
+
         <Home size={18} strokeWidth={1.5} />
       </DockIcon>
       
@@ -45,7 +55,10 @@ export function LeftDock() {
         active={isLayersOpen}
         onClick={() => {
           setLayersOpen(!isLayersOpen);
-          if (!isLayersOpen) setMetricSelectorOpen(false);
+          if (!isLayersOpen) {
+            setMetricSelectorOpen(false);
+            setCalendarOpen(false);
+          }
         }}
         ariaLabel="Fire Class Filter"
       >
@@ -56,24 +69,48 @@ export function LeftDock() {
         active={isMetricSelectorOpen}
         onClick={() => {
           setMetricSelectorOpen(!isMetricSelectorOpen);
-          if (!isMetricSelectorOpen) setLayersOpen(false);
+          if (!isMetricSelectorOpen) {
+            setLayersOpen(false);
+            setCalendarOpen(false);
+          }
         }}
         ariaLabel="Telemetry Parameter Coloring"
       >
         <SlidersHorizontal size={18} strokeWidth={1.5} />
       </DockIcon>
 
+      {/* ── Real-Time Emergency Simulation Trigger ── */}
       <DockIcon
-        active={activeTab === 'calendar'}
+        active={isEmergencySimulationOpen}
         onClick={() => {
-          setActiveTab('calendar');
+          setEmergencySimulationOpen(!isEmergencySimulationOpen);
           setLayersOpen(false);
           setMetricSelectorOpen(false);
+          setCalendarOpen(false);
         }}
-        ariaLabel="Temporal Select"
+        ariaLabel="Real-Time Emergency Warning Simulator"
+        className="text-red-500 hover:text-red-400"
       >
-        <Calendar size={18} strokeWidth={1.5} />
+        <Radio size={18} strokeWidth={1.8} color={isEmergencySimulationOpen ? '#ef4444' : '#f87171'} />
       </DockIcon>
+
+      {/* ── Temporal Archive & Data Export Suite (Single Unified Trigger) ── */}
+      <DockIcon
+        active={isPlaybackControllerOpen}
+        onClick={() => {
+          setPlaybackControllerOpen(!isPlaybackControllerOpen);
+          if (!isPlaybackControllerOpen) {
+            setLayersOpen(false);
+            setMetricSelectorOpen(false);
+            setCalendarOpen(false);
+          }
+        }}
+        ariaLabel="Temporal Playback & Export Suite"
+      >
+        <Download size={18} strokeWidth={1.5} color={isPlaybackControllerOpen ? '#f59e0b' : undefined} />
+      </DockIcon>
+
+
 
       <DockIcon
         active={activeTab === 'settings'}
@@ -86,6 +123,7 @@ export function LeftDock() {
       >
         <Settings size={18} strokeWidth={1.5} />
       </DockIcon>
+
     </Dock>
   );
 }

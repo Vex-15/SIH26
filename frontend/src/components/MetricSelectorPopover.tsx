@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { 
-  X, 
   Thermometer, 
   Flame, 
   CloudFog, 
@@ -26,189 +25,158 @@ const ICONS: Record<VisualMetric, React.ElementType> = {
 };
 
 export function MetricSelectorPopover() {
-  const { activeMetric, setActiveMetric, isMetricSelectorOpen, setMetricSelectorOpen } = useAppStore();
-
-  if (!isMetricSelectorOpen) return null;
+  const { activeMetric, setActiveMetric } = useAppStore();
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      transition={{ duration: 0.2, ease: 'easeOut' }}
+      initial={{ opacity: 0, x: -14, scale: 0.98 }}
+      animate={{ opacity: 1, x: 0, scale: 1 }}
+      exit={{ opacity: 0, x: -14, scale: 0.98 }}
+      transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
       style={{
         position: 'fixed',
-        left: 76,
+        left: 68,
         top: '50%',
         transform: 'translateY(-50%)',
         zIndex: 90,
-        width: 310,
-        maxHeight: 'min(480px, calc(100vh - 120px))',
-        background: '#18181b',
-        border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: 14,
+        width: 280,
+        maxHeight: 'min(480px, calc(100vh - 100px))',
+        background: 'rgba(18, 21, 28, 0.96)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255, 255, 255, 0.12)',
+        borderRadius: 16,
+        padding: '16px 16px 14px',
+        boxShadow: '0 16px 40px rgba(0, 0, 0, 0.65), 0 0 1px rgba(255, 255, 255, 0.2)',
+        userSelect: 'none',
         display: 'flex',
         flexDirection: 'column',
-        boxShadow: '0 12px 36px -4px rgba(0, 0, 0, 0.6)',
-        userSelect: 'none',
-        overflow: 'hidden',
+        fontFamily: "'Inter', system-ui, sans-serif",
       }}
     >
       {/* Header */}
+      <div style={{ marginBottom: 12, paddingBottom: 10, borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: '0.04em',
+            textTransform: 'uppercase',
+            color: '#ffffff',
+            marginBottom: 3,
+          }}
+        >
+          TELEMETRY PARAMETER
+        </div>
+        <div
+          style={{
+            fontSize: 11,
+            fontWeight: 400,
+            color: 'rgba(255, 255, 255, 0.45)',
+          }}
+        >
+          Select metric to project on 1km hex grid
+        </div>
+      </div>
+
+      {/* Metrics List */}
       <div
         style={{
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '12px 14px 10px',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
-          background: '#1c1b1b',
-          flexShrink: 0,
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <span
-            style={{
-              fontFamily: 'Space Grotesk, sans-serif',
-              fontSize: 10,
-              fontWeight: 700,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              color: '#f59e0b',
-            }}
-          >
-            Telemetry Visualization Parameter
-          </span>
-          <span
-            style={{
-              fontFamily: 'Space Grotesk, sans-serif',
-              fontSize: 11,
-              color: '#71717a',
-            }}
-          >
-            Select metric to project on 1km hex grid
-          </span>
-        </div>
-        <button
-          onClick={() => setMetricSelectorOpen(false)}
-          aria-label="Close Parameter Selector"
-          style={{
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            color: '#71717a',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'color 180ms',
-            outline: 'none',
-            padding: 4,
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = '#e5e2e1')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = '#71717a')}
-        >
-          <X size={15} strokeWidth={2} />
-        </button>
-      </div>
-
-      {/* Parameter List with bounded scrolling */}
-      <div 
-        style={{ 
-          display: 'flex', 
-          flexDirection: 'column', 
-          padding: 8, 
-          gap: 4, 
+          flexDirection: 'column',
+          gap: 6,
           overflowY: 'auto',
-          maxHeight: 'min(380px, calc(100vh - 200px))',
+          paddingRight: 4,
+          scrollbarWidth: 'none',
         }}
       >
         {(Object.keys(METRIC_CONFIGS) as VisualMetric[]).map((key) => {
-          const cfg = METRIC_CONFIGS[key];
+          const config = METRIC_CONFIGS[key];
+          const isSelected = activeMetric === key;
           const Icon = ICONS[key];
-          const isActive = activeMetric === key;
 
           return (
             <div
               key={key}
-              onClick={() => {
-                setActiveMetric(key);
-              }}
+              onClick={() => setActiveMetric(key)}
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '8px 10px',
-                borderRadius: 8,
+                borderRadius: 10,
                 cursor: 'pointer',
-                transition: 'all 150ms',
-                background: isActive ? 'rgba(245, 158, 11, 0.12)' : 'transparent',
-                border: '1px solid',
-                borderColor: isActive ? 'rgba(245, 158, 11, 0.35)' : 'transparent',
+                background: isSelected ? 'rgba(245, 158, 11, 0.14)' : 'rgba(255, 255, 255, 0.03)',
+                border: isSelected ? '1px solid #f59e0b' : '1px solid rgba(255, 255, 255, 0.06)',
+                transition: 'all 0.15s cubic-bezier(0.16, 1, 0.3, 1)',
               }}
               onMouseEnter={(e) => {
-                if (!isActive) e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
+                if (!isSelected) {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.12)';
+                }
               }}
               onMouseLeave={(e) => {
-                if (!isActive) e.currentTarget.style.background = 'transparent';
+                if (!isSelected) {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)';
+                }
               }}
             >
-              {/* Left Side: Icon + Label + Description */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              {/* Left: Icon + Label */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
                 <div
                   style={{
                     width: 28,
                     height: 28,
-                    borderRadius: 6,
-                    background: isActive ? 'rgba(245, 158, 11, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 7,
+                    background: isSelected ? '#f59e0b' : 'rgba(255, 255, 255, 0.08)',
+                    color: isSelected ? '#000000' : 'rgba(255, 255, 255, 0.7)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: isActive ? '#f59e0b' : '#a1a1aa',
                     flexShrink: 0,
+                    transition: 'all 0.15s ease',
                   }}
                 >
-                  <Icon size={15} strokeWidth={1.75} />
+                  <Icon size={14} strokeWidth={2.2} />
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span
-                      style={{
-                        fontFamily: 'Space Grotesk, sans-serif',
-                        fontSize: 12,
-                        fontWeight: 600,
-                        color: isActive ? '#fafafa' : '#e4e4e7',
-                      }}
-                    >
-                      {cfg.label}
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: 'Geist Mono, monospace',
-                        fontSize: 9,
-                        color: isActive ? '#f59e0b' : '#71717a',
-                        background: isActive ? 'rgba(245, 158, 11, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-                        padding: '1px 5px',
-                        borderRadius: 4,
-                      }}
-                    >
-                      {cfg.unit}
-                    </span>
-                  </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                   <span
                     style={{
-                      fontFamily: 'Space Grotesk, sans-serif',
-                      fontSize: 10,
-                      color: '#71717a',
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: isSelected ? '#ffffff' : 'rgba(255, 255, 255, 0.8)',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
                     }}
                   >
-                    {cfg.description}
+                    {config.label}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 10,
+                      color: 'rgba(255, 255, 255, 0.4)',
+                    }}
+                  >
+                    {config.unit}
                   </span>
                 </div>
               </div>
 
-              {/* Right Side: Checkmark if active */}
-              {isActive && (
-                <div style={{ color: '#f59e0b', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+              {/* Right: Checkmark for active selection */}
+              {isSelected && (
+                <div
+                  style={{
+                    color: '#f59e0b',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    marginLeft: 6,
+                  }}
+                >
                   <Check size={15} strokeWidth={2.5} />
                 </div>
               )}
