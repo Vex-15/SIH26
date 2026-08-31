@@ -5,7 +5,19 @@ Himawari 9 JAXA/
 Himawari_Dataset/
 !Himawari_Dataset/README.md
 ESA_WorldCover_India/
+esa_worldcover/
+*.tif
+*.tiff
+*.pth
+*.pkl
+*.npy
 __MACOSX/
+
+# Node & Build artifacts
+node_modules/
+dist/
+dist-ssr/
+*.local
 
 # Python & OS caches
 __pycache__/
@@ -14,4 +26,3 @@ __pycache__/
 
 # Training Logs (keep JSON metrics)
 logs/*.log
-
