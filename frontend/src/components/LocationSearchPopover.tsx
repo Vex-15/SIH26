@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { X, Search, Crosshair, Flag, MapPin, Trash2, Plus, Navigation } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
