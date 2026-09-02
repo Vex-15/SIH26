@@ -3,29 +3,28 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar as CalendarIcon, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 
-
 const PRESETS = [
   {
     start: '2024-06-23',
     end: '2024-06-23',
     title: 'Panipat Chemical Surge',
-    desc: 'Accidental Industrial spike +4.12σ',
+    desc: 'Accidental spike +4.12σ',
     tag: 'CRITICAL',
     tagColor: '#ef4444',
   },
   {
     start: '2024-11-01',
     end: '2024-11-07',
-    title: 'Peak Stubble Season (7-Day)',
-    desc: 'Punjab & Haryana intensive burning wave',
-    tag: 'AGRICULTURAL',
+    title: 'Peak Stubble Burning',
+    desc: 'Punjab & Haryana intensive wave',
+    tag: 'AGRI',
     tagColor: '#f59e0b',
   },
   {
     start: '2024-05-01',
     end: '2024-05-05',
     title: 'Uttarakhand Wildfires',
-    desc: 'Himalayan pine canopy fire outbreak (>900/day)',
+    desc: 'Himalayan canopy outbreak',
     tag: 'WILDFIRE',
     tagColor: '#ef4444',
   },
@@ -134,113 +133,110 @@ export function CalendarPopover() {
     <AnimatePresence>
       <motion.div
         key="calendar-popover"
-        initial={{ opacity: 0, x: -16, scale: 0.96 }}
+        initial={{ opacity: 0, x: -10, scale: 0.98 }}
         animate={{ opacity: 1, x: 0, scale: 1 }}
-        exit={{ opacity: 0, x: -16, scale: 0.96 }}
-        transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+        exit={{ opacity: 0, x: -10, scale: 0.98 }}
+        transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
         style={{
           position: 'fixed',
-          top: 80,
+          top: 70,
           left: 72,
-          zIndex: 60,
-          width: 340,
-          background: '#18181b',
-          border: '1px solid rgba(255, 255, 255, 0.12)',
-          borderRadius: 18,
-          padding: '16px 18px',
-          boxShadow: '0 4px 10px rgba(0, 0, 0, 0.4)',
-          fontFamily: 'Inter, system-ui, sans-serif',
-          color: '#fafafa',
+          zIndex: 95,
+          width: 320,
+          background: 'var(--neu-base)',
+          backdropFilter: 'var(--glass-blur)',
+          WebkitBackdropFilter: 'var(--glass-blur)',
+          border: '1px solid var(--border-subtle)',
+          borderRadius: 'var(--r-lg)',
+          padding: '14px 16px',
+          boxShadow: 'var(--neu-shadow-out)',
+          fontFamily: 'var(--font-ui)',
+          color: 'var(--neu-text-strong)',
         }}
       >
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <CalendarIcon size={16} color="#f59e0b" />
-            <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-              2024 TEMPORAL ARCHIVE
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <CalendarIcon size={14} color="var(--accent)" />
+            <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--neu-text-disabled)' }}>
+              Temporal Index
             </span>
           </div>
           <button
             onClick={() => setCalendarOpen(false)}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: '#71717a',
-              cursor: 'pointer',
-              padding: 2,
-            }}
+            className="neu-icon-btn"
+            style={{ width: 22, height: 22 }}
           >
-            <X size={16} />
+            <X size={12} strokeWidth={2} />
           </button>
         </div>
 
-        {/* Mode Selector: Single Day vs Date Range (A-B) */}
+        {/* Mode Selector */}
         <div
           style={{
             display: 'flex',
-            background: '#121214',
-            borderRadius: 8,
-            padding: 3,
-            marginBottom: 12,
-            border: '1px solid rgba(255, 255, 255, 0.05)',
+            background: 'var(--neu-base-raised)',
+            borderRadius: 'var(--r-sm)',
+            padding: 2,
+            marginBottom: 10,
+            border: '1px solid var(--border-subtle)',
           }}
         >
           <button
             onClick={() => { setRangeMode('single'); setSelectingEnd(false); }}
             style={{
               flex: 1,
-              background: rangeMode === 'single' ? '#f59e0b' : 'transparent',
-              color: rangeMode === 'single' ? '#0d0d0d' : '#a1a1aa',
-              border: 'none',
-              borderRadius: 6,
-              padding: '5px 0',
-              fontSize: 11,
-              fontWeight: 700,
+              background: rangeMode === 'single' ? 'var(--neu-base)' : 'transparent',
+              color: rangeMode === 'single' ? 'var(--neu-text-strong)' : 'var(--neu-text)',
+              border: rangeMode === 'single' ? '1px solid var(--border-subtle)' : '1px solid transparent',
+              borderRadius: 'var(--r-sm)',
+              padding: '4px 0',
+              fontSize: 10,
+              fontWeight: 600,
               cursor: 'pointer',
               transition: 'all 0.15s ease',
             }}
           >
-            SINGLE DAY
+            Single Day
           </button>
           <button
             onClick={() => { setRangeMode('range'); setSelectingEnd(false); }}
             style={{
               flex: 1,
-              background: rangeMode === 'range' ? '#f59e0b' : 'transparent',
-              color: rangeMode === 'range' ? '#0d0d0d' : '#a1a1aa',
-              border: 'none',
-              borderRadius: 6,
-              padding: '5px 0',
-              fontSize: 11,
-              fontWeight: 700,
+              background: rangeMode === 'range' ? 'var(--neu-base)' : 'transparent',
+              color: rangeMode === 'range' ? 'var(--neu-text-strong)' : 'var(--neu-text)',
+              border: rangeMode === 'range' ? '1px solid var(--border-subtle)' : '1px solid transparent',
+              borderRadius: 'var(--r-sm)',
+              padding: '4px 0',
+              fontSize: 10,
+              fontWeight: 600,
               cursor: 'pointer',
               transition: 'all 0.15s ease',
             }}
           >
-            DATE RANGE (A ➔ B)
+            Date Range
           </button>
         </div>
 
         {/* Selected Range Display Status */}
         <div
           style={{
-            background: 'rgba(245, 158, 11, 0.08)',
-            border: '1px solid rgba(245, 158, 11, 0.25)',
-            borderRadius: 8,
-            padding: '6px 10px',
-            marginBottom: 12,
+            background: 'var(--neu-base-raised)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 'var(--r-sm)',
+            padding: '5px 8px',
+            marginBottom: 10,
             fontSize: 11,
-            fontFamily: 'JetBrains Mono, Consolas, monospace',
-            color: '#f59e0b',
+            fontFamily: 'var(--font-mono)',
+            color: 'var(--accent)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
           }}
         >
-          <span>{startDate === endDate ? `Selected: ${startDate}` : `${startDate} ➔ ${endDate}`}</span>
+          <span>{startDate === endDate ? startDate : `${startDate} → ${endDate}`}</span>
           {rangeMode === 'range' && selectingEnd && (
-            <span style={{ fontSize: 9, color: '#fafafa', background: '#ef4444', padding: '1px 5px', borderRadius: 4 }}>
+            <span style={{ fontSize: 9, color: '#ef4444', fontWeight: 600 }}>
               Pick End Date
             </span>
           )}
@@ -252,27 +248,29 @@ export function CalendarPopover() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            background: '#121214',
-            padding: '6px 10px',
-            borderRadius: 10,
-            marginBottom: 10,
-            border: '1px solid rgba(255, 255, 255, 0.05)',
+            background: 'var(--neu-base-raised)',
+            padding: '4px 8px',
+            borderRadius: 'var(--r-sm)',
+            marginBottom: 8,
+            border: '1px solid var(--border-subtle)',
           }}
         >
           <button
             onClick={handlePrevMonth}
-            style={{ background: 'transparent', border: 'none', color: '#a1a1aa', cursor: 'pointer' }}
+            className="neu-icon-btn"
+            style={{ width: 20, height: 20, border: 'none' }}
           >
-            <ChevronLeft size={16} />
+            <ChevronLeft size={13} />
           </button>
-          <span style={{ fontSize: 13, fontWeight: 700, fontFamily: 'JetBrains Mono, Consolas, monospace' }}>
+          <span style={{ fontSize: 11, fontWeight: 600, fontFamily: 'var(--font-mono)' }}>
             {monthNames[activeMonth]} {activeYear}
           </span>
           <button
             onClick={handleNextMonth}
-            style={{ background: 'transparent', border: 'none', color: '#a1a1aa', cursor: 'pointer' }}
+            className="neu-icon-btn"
+            style={{ width: 20, height: 20, border: 'none' }}
           >
-            <ChevronRight size={16} />
+            <ChevronRight size={13} />
           </button>
         </div>
 
@@ -283,18 +281,18 @@ export function CalendarPopover() {
             gridTemplateColumns: 'repeat(7, 1fr)',
             textAlign: 'center',
             fontSize: 9,
-            color: '#71717a',
-            marginBottom: 6,
+            color: 'var(--neu-text-disabled)',
+            marginBottom: 4,
             fontWeight: 600,
           }}
         >
-          <span>SU</span>
-          <span>MO</span>
-          <span>TU</span>
-          <span>WE</span>
-          <span>TH</span>
-          <span>FR</span>
-          <span>SA</span>
+          <span>Su</span>
+          <span>Mo</span>
+          <span>Tu</span>
+          <span>We</span>
+          <span>Th</span>
+          <span>Fr</span>
+          <span>Sa</span>
         </div>
 
         {/* Days Grid */}
@@ -303,11 +301,11 @@ export function CalendarPopover() {
             display: 'grid',
             gridTemplateColumns: 'repeat(7, 1fr)',
             gap: 2,
-            marginBottom: 14,
+            marginBottom: 12,
           }}
         >
           {Array.from({ length: startDay }).map((_, idx) => (
-            <div key={`empty-${idx}`} style={{ height: 28 }} />
+            <div key={`empty-${idx}`} style={{ height: 24 }} />
           ))}
 
           {Array.from({ length: daysInMonth }).map((_, idx) => {
@@ -322,17 +320,17 @@ export function CalendarPopover() {
             const isHighDensity = dayData && dayData.total > 300;
 
             let bgColor = 'transparent';
-            let textColor = isHighDensity ? '#f87171' : '#d4d4d8';
-            let border = 'none';
+            let textColor = isHighDensity ? '#f87171' : 'var(--neu-text-em)';
+            let border = '1px solid transparent';
 
             if (isInRange) {
-              bgColor = isStart || isEnd ? '#f59e0b' : 'rgba(245, 158, 11, 0.25)';
-              textColor = isStart || isEnd ? '#0d0d0d' : '#f59e0b';
-              border = '1px solid #f59e0b';
+              bgColor = isStart || isEnd ? 'var(--accent)' : 'var(--accent-subtle)';
+              textColor = isStart || isEnd ? '#ffffff' : 'var(--accent)';
+              border = isStart || isEnd ? '1px solid var(--accent)' : '1px solid var(--border-subtle)';
             } else if (isHighDensity) {
-              bgColor = 'rgba(239, 68, 68, 0.15)';
+              bgColor = 'rgba(239, 68, 68, 0.08)';
             } else if (hasData) {
-              bgColor = 'rgba(255, 255, 255, 0.03)';
+              bgColor = 'var(--neu-base-raised)';
             }
 
             return (
@@ -341,47 +339,35 @@ export function CalendarPopover() {
                 onClick={() => handleDayClick(dateStr)}
                 title={hasData ? `${dayData.total} detections on ${dateStr}` : dateStr}
                 style={{
-                  height: 28,
-                  borderRadius: 6,
+                  height: 24,
+                  borderRadius: 4,
                   border,
                   background: bgColor,
                   color: textColor,
-                  fontSize: 11,
-                  fontFamily: 'JetBrains Mono, Consolas, monospace',
-                  fontWeight: isInRange || isHighDensity ? 700 : 400,
+                  fontSize: 10,
+                  fontFamily: 'var(--font-mono)',
+                  fontWeight: isInRange || isHighDensity ? 600 : 400,
                   cursor: 'pointer',
                   position: 'relative',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  transition: 'background 0.15s',
+                  transition: 'all 0.1s ease',
                 }}
               >
                 {day}
-                {hasData && !isInRange && (
-                  <span
-                    style={{
-                      position: 'absolute',
-                      bottom: 2,
-                      width: 3,
-                      height: 3,
-                      borderRadius: '50%',
-                      background: isHighDensity ? '#ef4444' : '#f59e0b',
-                    }}
-                  />
-                )}
               </button>
             );
           })}
         </div>
 
-        {/* Tactical Defense Historical Presets */}
-        <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: 10 }}>
-          <div style={{ fontSize: 9, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
-            QUICK DEFENSE PRESETS
+        {/* Quick Defense Historical Presets */}
+        <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 8 }}>
+          <div style={{ fontSize: 9, color: 'var(--neu-text-disabled)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
+            Presets
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {PRESETS.map((p) => {
               const isActive = startDate === p.start && endDate === p.end;
               return (
@@ -395,23 +381,24 @@ export function CalendarPopover() {
                     setPlaybackControllerOpen(true);
                   }}
                   style={{
-                    background: isActive ? 'rgba(245, 158, 11, 0.14)' : '#121214',
-                    border: isActive ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid rgba(255, 255, 255, 0.04)',
-                    borderRadius: 8,
-                    padding: '6px 10px',
+                    background: isActive ? 'var(--accent-subtle)' : 'var(--neu-base-raised)',
+                    border: '1px solid',
+                    borderColor: isActive ? 'var(--accent)' : 'var(--border-subtle)',
+                    borderRadius: 'var(--r-sm)',
+                    padding: '5px 8px',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    transition: 'all 0.15s ease',
+                    transition: 'all 0.12s ease',
                   }}
                 >
                   <div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: isActive ? '#f59e0b' : '#fafafa' }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: isActive ? 'var(--accent)' : 'var(--neu-text-strong)' }}>
                       {p.title}
                     </div>
-                    <div style={{ fontSize: 9, color: '#71717a', marginTop: 1 }}>
-                      {p.start === p.end ? p.start : `${p.start} ➔ ${p.end}`} · {p.desc}
+                    <div style={{ fontSize: 9, color: 'var(--neu-text-disabled)', marginTop: 1 }}>
+                      {p.start} · {p.desc}
                     </div>
                   </div>
 
@@ -420,10 +407,9 @@ export function CalendarPopover() {
                       fontSize: 8,
                       fontWeight: 700,
                       color: p.tagColor,
-                      background: `${p.tagColor}18`,
-                      padding: '2px 6px',
-                      borderRadius: 999,
-                      border: `1px solid ${p.tagColor}35`,
+                      background: `${p.tagColor}15`,
+                      padding: '1px 5px',
+                      borderRadius: 'var(--r-full)',
                     }}
                   >
                     {p.tag}

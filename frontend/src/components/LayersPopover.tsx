@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useAppStore } from '../store/useAppStore';
 import type { FireClass } from '../store/useAppStore';
+import { Eye, EyeOff } from 'lucide-react';
 
 interface ClassRowConfig {
   id: FireClass;
@@ -22,68 +23,60 @@ export function LayersPopover() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -14, scale: 0.97 }}
+      initial={{ opacity: 0, x: -10, scale: 0.98 }}
       animate={{ opacity: 1, x: 0, scale: 1 }}
-      exit={{ opacity: 0, x: -14, scale: 0.97 }}
-      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+      exit={{ opacity: 0, x: -10, scale: 0.98 }}
+      transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
       style={{
         position: 'fixed',
         left: 72,
         top: '50%',
         transform: 'translateY(-50%)',
         zIndex: 90,
-        width: 260,
-        /* Neumorphic elevated panel */
+        width: 250,
         background: 'var(--neu-base)',
-        boxShadow: 'var(--neu-shadow-out-lg)',
+        backdropFilter: 'var(--glass-blur)',
+        WebkitBackdropFilter: 'var(--glass-blur)',
+        boxShadow: 'var(--neu-shadow-out)',
         borderRadius: 'var(--r-lg)',
-        border: 'none',
-        padding: '20px 20px 22px',
+        border: '1px solid var(--border-subtle)',
+        padding: '16px',
         userSelect: 'none',
         fontFamily: 'var(--font-ui)',
       }}
     >
       {/* Header */}
-      <div style={{ marginBottom: 18 }}>
+      <div style={{ marginBottom: 12 }}>
         <div style={{
           fontSize: 10,
-          fontWeight: 700,
-          letterSpacing: '0.12em',
+          fontWeight: 600,
+          letterSpacing: '0.08em',
           textTransform: 'uppercase',
           color: 'var(--neu-text-disabled)',
-          marginBottom: 4,
+          marginBottom: 2,
         }}>
           Fire Class Filter
         </div>
         <div style={{
-          fontSize: 20,
+          fontSize: 15,
           fontWeight: 700,
           color: 'var(--neu-text-strong)',
-          lineHeight: 1.2,
         }}>
           Event Layers
         </div>
         <div style={{
           fontSize: 11,
-          fontWeight: 400,
           color: 'var(--neu-text)',
-          marginTop: 4,
+          marginTop: 2,
         }}>
           1,372,035 anomalies · 5 classes
         </div>
       </div>
 
-      {/* Divider inset line */}
-      <div style={{
-        height: 1,
-        background: 'transparent',
-        boxShadow: 'inset 0 1px 2px var(--neu-dark), inset 0 -1px 1px var(--neu-light)',
-        borderRadius: 1,
-        marginBottom: 16,
-      }} />
+      <div style={{ height: 1, background: 'var(--border-subtle)', marginBottom: 12 }} />
 
       {/* Class Rows */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         {FIRE_CLASSES.map((cls) => {
           const isActive = activeFilters[cls.id];
           return (
@@ -95,70 +88,54 @@ export function LayersPopover() {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 cursor: 'pointer',
-                /* Neumorphic row card */
-                background: 'var(--neu-base)',
-                boxShadow: isActive
-                  ? 'var(--neu-shadow-in-sm)'
-                  : 'var(--neu-shadow-out-sm)',
+                background: isActive ? 'var(--neu-base-raised)' : 'transparent',
+                border: '1px solid',
+                borderColor: isActive ? 'var(--border-subtle)' : 'transparent',
                 borderRadius: 'var(--r-sm)',
-                padding: '10px 12px',
-                transition: 'box-shadow 0.2s ease',
+                padding: '8px 10px',
+                transition: 'all 0.15s ease',
               }}
             >
               {/* Left: Dot + Label */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{
-                  width: 10,
-                  height: 10,
+                  width: 7,
+                  height: 7,
                   borderRadius: '50%',
                   background: isActive ? cls.dotColor : 'var(--neu-text-disabled)',
                   display: 'inline-block',
                   flexShrink: 0,
-                  boxShadow: isActive ? `0 0 8px ${cls.dotColor}88` : 'none',
-                  transition: 'background 0.2s, box-shadow 0.2s',
+                  transition: 'background 0.15s',
                 }} />
                 <span style={{
-                  fontSize: 13,
-                  fontWeight: 600,
+                  fontSize: 12,
+                  fontWeight: 500,
                   color: isActive ? 'var(--neu-text-strong)' : 'var(--neu-text)',
-                  transition: 'color 0.2s ease',
+                  transition: 'color 0.15s ease',
                 }}>
                   {cls.label}
                 </span>
               </div>
 
-              {/* Right: Hex + Toggle */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              {/* Right: Toggle status */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{
                   fontSize: 10,
                   fontFamily: 'var(--font-mono)',
                   color: isActive ? cls.dotColor : 'var(--neu-text-disabled)',
-                  letterSpacing: '0.02em',
-                  transition: 'color 0.2s',
+                  opacity: isActive ? 1 : 0.4,
                 }}>
                   {cls.hex}
                 </span>
-
-                {/* Neumorphic toggle */}
-                <div className={`neu-toggle-track ${isActive ? 'on' : ''}`}
-                  style={{ '--accent': cls.dotColor } as React.CSSProperties}>
-                  <div className="neu-toggle-thumb" />
-                </div>
+                {isActive ? (
+                  <Eye size={13} color="var(--neu-text)" />
+                ) : (
+                  <EyeOff size={13} color="var(--neu-text-disabled)" />
+                )}
               </div>
             </div>
           );
         })}
-      </div>
-
-      {/* Footer hint */}
-      <div style={{
-        marginTop: 14,
-        fontSize: 10,
-        color: 'var(--neu-text-disabled)',
-        textAlign: 'center',
-        letterSpacing: '0.04em',
-      }}>
-        Click rows to toggle visibility
       </div>
     </motion.div>
   );

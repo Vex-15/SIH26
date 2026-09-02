@@ -75,13 +75,11 @@ export function DiurnalPlaybackController() {
     const step = (time: number) => {
       if (lastTimeRef.current !== null) {
         const delta = (time - lastTimeRef.current) / 1000;
-        // At 1x speed: 24 hours takes ~24 seconds (1 hr per second)
         const advanceHours = delta * playbackSpeed * 0.8;
 
         setCurrentHour((prev) => {
           const next = prev + advanceHours;
           if (next >= 24) {
-            // Advance to next day in 2024 calendar
             const currDate = useAppStore.getState().startDate;
             const nextDate = shiftDate(currDate, 1);
             useAppStore.getState().setDateRange(nextDate, nextDate);
@@ -101,7 +99,7 @@ export function DiurnalPlaybackController() {
     };
   }, [isPlaying, playbackSpeed, setCurrentHour, shiftDate, isPlaybackControllerOpen, mapMode]);
 
-  // ── Stepper Handlers (crossing midnight advances/retreats day) ────────────
+  // ── Stepper Handlers ─────────────────────────────────────────────────────
   const handlePrevHour = () => {
     setCurrentHour((h) => {
       if (h <= 1) {
@@ -146,7 +144,6 @@ export function DiurnalPlaybackController() {
     window.addEventListener('pointerup', onUp);
   };
 
-  // ── Active Daily Profile from Real 2024 Dataset ──────────────────────────
   const dayStats = temporalIndex[startDate] || {
     total: 83,
     hourlyDistribution: [0, 0, 0, 0, 0, 2, 1, 1, 17, 13, 13, 3, 5, 10, 7, 5, 0, 0, 2, 0, 2, 1, 1, 0],
@@ -154,19 +151,15 @@ export function DiurnalPlaybackController() {
 
   const maxHourlyCount = Math.max(1, ...dayStats.hourlyDistribution);
 
-  // ── Time Formatting (UTC and IST) ─────────────────────────────────────────
   const hoursInt = Math.floor(currentHour);
   const minutesInt = Math.floor((currentHour - hoursInt) * 60);
-
   const utcString = `${String(hoursInt).padStart(2, '0')}:${String(minutesInt).padStart(2, '0')} UTC`;
 
-  // IST = UTC + 5 hours 30 minutes
   const totalIstMinutes = (hoursInt * 60 + minutesInt + 330) % 1440;
   const istHours = Math.floor(totalIstMinutes / 60);
   const istMinutes = totalIstMinutes % 60;
   const istString = `${String(istHours).padStart(2, '0')}:${String(istMinutes).padStart(2, '0')} IST`;
 
-  // Format Date Range string e.g. "31 Aug 2024" or "22 May 2024 — 29 May 2024"
   const formatDateLabel = (dStr: string) => {
     try {
       const [y, m, d] = dStr.split('-');
@@ -179,7 +172,7 @@ export function DiurnalPlaybackController() {
 
   const isSingleDay = startDate === endDate;
   const dateRangeDisplay = isSingleDay 
-    ? `${formatDateLabel(startDate)} (Single Day)` 
+    ? formatDateLabel(startDate) 
     : `${formatDateLabel(startDate)} — ${formatDateLabel(endDate)}`;
 
   const scrubPct = (currentHour / 24) * 100;
@@ -189,231 +182,148 @@ export function DiurnalPlaybackController() {
       {isPlaybackControllerOpen && mapMode !== 'optical' && (
         <motion.div
           key="diurnal-controller"
-          initial={{ opacity: 0, y: 30, x: '-50%', scale: 0.98 }}
+          initial={{ opacity: 0, y: 20, x: '-50%', scale: 0.98 }}
           animate={{ opacity: 1, y: 0, x: '-50%', scale: 1 }}
-          exit={{ opacity: 0, y: 30, x: '-50%', scale: 0.98 }}
-          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+          exit={{ opacity: 0, y: 20, x: '-50%', scale: 0.98 }}
+          transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
           style={{
             position: 'fixed',
-            bottom: 24,
+            bottom: 20,
             left: '50%',
             zIndex: 45,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: 12,
+            gap: 8,
             userSelect: 'none',
           }}
         >
-          {/* ── 1. Top Header Bar (docs/stitch/slider_redesign) ── */}
+          {/* ── 1. Minimalist Top Bar ── */}
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              background: '#1c1b1b',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: 9999,
-              padding: '6px 14px',
-              boxShadow: '0 12px 32px rgba(0, 0, 0, 0.65)',
-              gap: 12,
+              background: 'var(--neu-base)',
+              backdropFilter: 'var(--glass-blur)',
+              WebkitBackdropFilter: 'var(--glass-blur)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 'var(--r-full)',
+              padding: '4px 10px',
+              boxShadow: 'var(--neu-shadow-out)',
+              gap: 8,
             }}
           >
-            {/* Date Range Capsule Selector Button */}
+            {/* Date Range Selector Button */}
             <button
               onClick={() => setCalendarOpen(true)}
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 8,
-                background: '#1c1c1f',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                borderRadius: 9999,
-                padding: '6px 14px',
-                color: '#ffffff',
-                fontSize: 12,
-                fontFamily: 'Inter, system-ui, sans-serif',
+                gap: 6,
+                background: 'var(--neu-base-raised)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--r-full)',
+                padding: '4px 10px',
+                color: 'var(--neu-text-strong)',
+                fontSize: 11,
+                fontFamily: 'var(--font-ui)',
                 fontWeight: 500,
                 cursor: 'pointer',
-                transition: 'background 0.15s ease, border-color 0.15s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
-                e.currentTarget.style.borderColor = 'rgba(245, 158, 11, 0.5)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#1c1c1f';
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                transition: 'all 0.15s ease',
               }}
             >
-              <CalIcon size={14} color="#9ca3af" />
+              <CalIcon size={12} color="var(--neu-text)" />
               <span>{dateRangeDisplay}</span>
-              <span style={{ color: '#52525b', margin: '0 2px' }}>·</span>
-              <span style={{ color: '#f59e0b', fontFamily: 'JetBrains Mono, Consolas, monospace', fontWeight: 700 }}>
-                {dayStats.total.toLocaleString()} HOTSPOTS
+              <span style={{ color: 'var(--neu-text-disabled)' }}>•</span>
+              <span style={{ color: 'var(--accent)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
+                {dayStats.total.toLocaleString()} pts
               </span>
-              <ChevronDown size={14} color="#9ca3af" />
+              <ChevronDown size={12} color="var(--neu-text-disabled)" />
             </button>
 
-            {/* Actions: Export Dossier + Close Overlay */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                borderLeft: '1px solid rgba(255, 255, 255, 0.1)',
-                paddingLeft: 12,
-              }}
-            >
-              {/* Amber Download / Export Button */}
+            {/* Actions: Export & Close */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <button
                 onClick={() => setExportOpen(true)}
-                title="Export Filtered Telemetry (CSV / GeoJSON / PDF)"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: 32,
-                  height: 32,
-                  borderRadius: 8,
-                  border: '1px solid #f59e0b',
-                  background: 'transparent',
-                  color: '#f59e0b',
-                  cursor: 'pointer',
-                  transition: 'background 0.2s ease, transform 0.1s ease',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(245, 158, 11, 0.15)')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.92)')}
-                onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+                className="neu-icon-btn"
+                style={{ width: 26, height: 26 }}
+                title="Export Telemetry Data"
               >
-                <Download size={15} strokeWidth={2.2} />
+                <Download size={13} strokeWidth={2} />
               </button>
 
-              {/* Close Button: Restores full-year baseline */}
               <button
                 onClick={() => setPlaybackControllerOpen(false)}
-                title="Close Time-Series Player (Restore Year-Round Baseline)"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#9ca3af',
-                  cursor: 'pointer',
-                  padding: 4,
-                  borderRadius: 6,
-                  transition: 'color 0.15s ease',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                className="neu-icon-btn"
+                style={{ width: 26, height: 26 }}
+                title="Close Time Player"
               >
-                <X size={18} />
+                <X size={13} strokeWidth={2} />
               </button>
             </div>
           </div>
 
-          {/* ── 2. Main Player Controller (docs/stitch/slider_redesign2) ── */}
+          {/* ── 2. Minimalist Main Player Controller ── */}
           <div
             style={{
-              width: 'min(92vw, 864px)',
-              height: 64,
-              background: '#18181b',
-              border: '1px solid rgba(255, 255, 255, 0.06)',
-              borderRadius: 32,
-              padding: '8px 14px',
+              width: 'min(90vw, 780px)',
+              height: 52,
+              background: 'var(--neu-base)',
+              backdropFilter: 'var(--glass-blur)',
+              WebkitBackdropFilter: 'var(--glass-blur)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 'var(--r-full)',
+              padding: '6px 14px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0,0,0,0.5)',
+              boxShadow: 'var(--neu-shadow-out)',
             }}
           >
-            {/* LEFT: Playback Controls */}
+            {/* LEFT: Controls */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-              {/* Play / Pause Amber Engine Button */}
+              {/* Play / Pause Button */}
               <button
                 onClick={togglePlay}
-                aria-label={isPlaying ? 'Pause Playback' : 'Play Playback'}
+                aria-label={isPlaying ? 'Pause' : 'Play'}
                 style={{
-                  width: 42,
-                  height: 42,
+                  width: 34,
+                  height: 34,
                   borderRadius: '50%',
-                  background: '#f59e0b',
+                  background: 'var(--accent)',
                   border: 'none',
-                  color: '#0d0d0d',
+                  color: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
                   flexShrink: 0,
-                  transition: 'background 0.2s, transform 0.1s, box-shadow 0.2s',
-                  boxShadow: '0 0 14px rgba(245, 158, 11, 0.45)',
+                  transition: 'all 0.15s ease',
+                  boxShadow: 'var(--accent-glow)',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = '#fbbf24')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = '#f59e0b')}
-                onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.92)')}
-                onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
               >
-                {isPlaying ? <Pause size={18} fill="#0d0d0d" /> : <Play size={18} fill="#0d0d0d" style={{ marginLeft: 2 }} />}
+                {isPlaying ? <Pause size={14} fill="#ffffff" /> : <Play size={14} fill="#ffffff" style={{ marginLeft: 1 }} />}
               </button>
 
               {/* Step Backward */}
               <button
                 onClick={handlePrevHour}
-                title="Step Backward 1 Hour"
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: '50%',
-                  background: '#2a2a2a',
-                  border: 'none',
-                  color: '#9ca3af',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  transition: 'color 0.15s, background 0.15s',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = '#ffffff';
-                  e.currentTarget.style.background = '#333333';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = '#9ca3af';
-                  e.currentTarget.style.background = '#2a2a2a';
-                }}
+                className="neu-icon-btn"
+                style={{ width: 26, height: 26 }}
+                title="Step -1h"
               >
-                <ChevronLeft size={15} />
+                <ChevronLeft size={13} />
               </button>
 
               {/* Step Forward */}
               <button
                 onClick={handleNextHour}
-                title="Step Forward 1 Hour"
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: '50%',
-                  background: '#2a2a2a',
-                  border: 'none',
-                  color: '#9ca3af',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  transition: 'color 0.15s, background 0.15s',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = '#ffffff';
-                  e.currentTarget.style.background = '#333333';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = '#9ca3af';
-                  e.currentTarget.style.background = '#2a2a2a';
-                }}
+                className="neu-icon-btn"
+                style={{ width: 26, height: 26 }}
+                title="Step +1h"
               >
-                <ChevronRight size={15} />
+                <ChevronRight size={13} />
               </button>
 
               {/* Speed Multiplier Pill */}
@@ -422,64 +332,56 @@ export function DiurnalPlaybackController() {
                   const nextIdx = (SPEED_OPTIONS.indexOf(playbackSpeed) + 1) % SPEED_OPTIONS.length;
                   setPlaybackSpeed(SPEED_OPTIONS[nextIdx]);
                 }}
-                title="Toggle Speed (1×, 2×, 5×, 10×)"
+                className="neu-btn"
                 style={{
-                  background: '#2a2a2a',
-                  border: 'none',
-                  borderRadius: 9999,
-                  padding: '4px 12px',
-                  color: '#ffffff',
-                  fontSize: 12,
-                  fontFamily: 'JetBrains Mono, Consolas, monospace',
+                  padding: '3px 8px',
+                  borderRadius: 'var(--r-full)',
+                  fontSize: 10,
+                  fontFamily: 'var(--font-mono)',
                   fontWeight: 600,
-                  cursor: 'pointer',
-                  marginLeft: 4,
-                  transition: 'background 0.15s',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = '#383838')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = '#2a2a2a')}
               >
                 {playbackSpeed}x
               </button>
             </div>
 
-            {/* CENTER: Sparkline Diurnal Histogram with Playhead */}
+            {/* CENTER: Clean Histogram Bar Scrubber */}
             <div
               ref={histogramRef}
               onPointerDown={handlePointerDown}
               style={{
                 flex: 1,
-                height: 36,
+                height: 30,
                 position: 'relative',
                 display: 'flex',
                 alignItems: 'flex-end',
                 cursor: 'pointer',
-                margin: '0 24px',
-                paddingBottom: 4,
+                margin: '0 18px',
+                paddingBottom: 2,
               }}
             >
-              {/* 24 Hourly Diurnal Bars */}
+              {/* 24 Hourly Bars */}
               <div
                 style={{
                   width: '100%',
-                  height: 28,
+                  height: 22,
                   display: 'flex',
                   alignItems: 'flex-end',
-                  gap: 3,
+                  gap: 2,
                 }}
               >
                 {Array.from({ length: 24 }).map((_, h) => {
                   const count = dayStats.hourlyDistribution[h] || 0;
-                  const barHeightPct = Math.min(100, Math.max(18, (count / maxHourlyCount) * 100));
+                  const barHeightPct = Math.min(100, Math.max(15, (count / maxHourlyCount) * 100));
 
                   const isPeakHour = h >= 11 && h <= 18;
                   const isAnomalyHour = h === 9 && startDate === '2024-06-23';
 
-                  let barColor = '#2a2a2a';
+                  let barColor = 'rgba(255, 255, 255, 0.12)';
                   if (isAnomalyHour) {
                     barColor = '#ef4444';
                   } else if (isPeakHour) {
-                    barColor = '#f59e0b';
+                    barColor = 'var(--accent)';
                   }
 
                   const isCurrent = Math.floor(currentHour) === h;
@@ -497,27 +399,14 @@ export function DiurnalPlaybackController() {
                         position: 'relative',
                       }}
                     >
-                      {isAnomalyHour && (
-                        <div
-                          style={{
-                            width: 5,
-                            height: 5,
-                            borderRadius: '50%',
-                            background: '#ef4444',
-                            boxShadow: '0 0 6px #ef4444',
-                            marginBottom: 2,
-                          }}
-                        />
-                      )}
-
                       <div
                         style={{
                           width: '100%',
                           height: `${barHeightPct}%`,
                           background: barColor,
                           borderRadius: '1px 1px 0 0',
-                          opacity: isCurrent ? 1 : 0.85,
-                          transition: 'height 0.2s ease, opacity 0.15s ease',
+                          opacity: isCurrent ? 1 : 0.65,
+                          transition: 'height 0.15s ease, opacity 0.15s ease',
                         }}
                       />
                     </div>
@@ -525,11 +414,11 @@ export function DiurnalPlaybackController() {
                 })}
               </div>
 
-              {/* Playhead Needle and Glowing Pip */}
+              {/* Minimalist Needle */}
               <div
                 style={{
                   position: 'absolute',
-                  top: -2,
+                  top: 0,
                   bottom: 0,
                   left: `${scrubPct}%`,
                   width: 1.5,
@@ -545,70 +434,46 @@ export function DiurnalPlaybackController() {
                     top: 0,
                     left: '50%',
                     transform: 'translateX(-50%)',
-                    width: 7,
-                    height: 7,
+                    width: 5,
+                    height: 5,
                     borderRadius: '50%',
                     background: '#ffffff',
-                    boxShadow: '0 0 8px rgba(255, 255, 255, 0.9)',
+                    boxShadow: '0 0 4px rgba(255, 255, 255, 0.8)',
                   }}
                 />
               </div>
-
-              {/* Axis Labels */}
-              <div
-                style={{
-                  position: 'absolute',
-                  bottom: -14,
-                  left: 0,
-                  right: 0,
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  fontSize: 9,
-                  fontFamily: 'JetBrains Mono, Consolas, monospace',
-                  color: '#666666',
-                  pointerEvents: 'none',
-                }}
-              >
-                <span>00:00-23:00</span>
-                <span style={{ color: '#f59e0b' }}>11:00-18:00 (Peak)</span>
-                <span>00:00-22:00</span>
-              </div>
             </div>
 
-            {/* RIGHT: Telemetry Cluster (Dual Timezone Readout) */}
+            {/* RIGHT: Monospace Timestamps */}
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'flex-start',
+                alignItems: 'flex-end',
                 justifyContent: 'center',
                 flexShrink: 0,
-                paddingLeft: 16,
-                paddingRight: 8,
-                borderLeft: '1px solid rgba(255, 255, 255, 0.1)',
-                height: '100%',
+                paddingLeft: 12,
+                borderLeft: '1px solid var(--border-subtle)',
+                height: '80%',
               }}
             >
               <span
                 style={{
-                  fontFamily: 'JetBrains Mono, Consolas, monospace',
-                  fontSize: 15,
-                  fontWeight: 700,
-                  color: '#ffffff',
-                  letterSpacing: '0.02em',
-                  lineHeight: 1,
-                  marginBottom: 3,
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: 'var(--neu-text-strong)',
+                  lineHeight: 1.1,
                 }}
               >
                 {utcString}
               </span>
               <span
                 style={{
-                  fontFamily: 'JetBrains Mono, Consolas, monospace',
-                  fontSize: 11,
-                  fontWeight: 500,
-                  color: '#888888',
-                  lineHeight: 1,
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 10,
+                  color: 'var(--neu-text-disabled)',
+                  lineHeight: 1.1,
                 }}
               >
                 {istString}

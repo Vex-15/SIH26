@@ -5,12 +5,11 @@ function ClassDot({ color }: { color: string }) {
     <span
       style={{
         display: 'inline-block',
-        width: 8,
-        height: 8,
+        width: 6,
+        height: 6,
         borderRadius: '50%',
         background: color,
         flexShrink: 0,
-        boxShadow: `0 0 6px ${color}88`,
       }}
     />
   );
@@ -30,19 +29,19 @@ function Row({
   highlight?: boolean;
 }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-      <span style={{ fontSize: 10, color: highlight ? 'var(--accent)' : 'var(--neu-text)', fontFamily: 'var(--font-ui)' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <span style={{ fontSize: 11, color: highlight ? 'var(--accent)' : 'var(--neu-text)', fontFamily: 'var(--font-ui)' }}>
         {label}
       </span>
       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
         {warn && (
-          <span style={{ color: 'var(--accent)', fontSize: 10, lineHeight: 1 }}>⚠</span>
+          <span style={{ color: '#ef4444', fontSize: 10, lineHeight: 1 }}>⚠</span>
         )}
         <span
           style={{
             fontFamily: 'var(--font-mono)',
-            fontSize: accent ? 12 : 10,
-            fontWeight: accent || highlight ? 600 : 500,
+            fontSize: 11,
+            fontWeight: accent || highlight ? 600 : 400,
             color: accent ? 'var(--accent)' : highlight ? 'var(--neu-text-strong)' : 'var(--neu-text-em)',
           }}
         >
@@ -73,8 +72,8 @@ export function HotspotTooltip() {
     isAnomaly,
   } = hoveredCluster;
 
-  const left = tooltipPos.x + 18;
-  const top  = tooltipPos.y - 20;
+  const left = tooltipPos.x + 16;
+  const top  = tooltipPos.y - 10;
 
   return (
     <div
@@ -83,14 +82,15 @@ export function HotspotTooltip() {
         left,
         top,
         zIndex: 100,
-        width: 288,
-        /* Neumorphic elevated tooltip */
+        width: 250,
         background: 'var(--neu-base)',
-        boxShadow: 'var(--neu-shadow-out-lg)',
+        backdropFilter: 'var(--glass-blur)',
+        WebkitBackdropFilter: 'var(--glass-blur)',
+        boxShadow: 'var(--neu-shadow-out)',
         borderRadius: 'var(--r-md)',
         overflow: 'hidden',
         fontFamily: 'var(--font-ui)',
-        border: 'none',
+        border: '1px solid var(--border-subtle)',
         pointerEvents: 'none',
       }}
     >
@@ -100,110 +100,95 @@ export function HotspotTooltip() {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          padding: '10px 14px 9px',
-          background: 'var(--neu-base)',
-          boxShadow: '0 2px 6px var(--neu-dark)',
+          padding: '8px 12px',
+          background: 'var(--neu-base-raised)',
+          borderBottom: '1px solid var(--border-subtle)',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 9,
-              fontWeight: 700,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              color: 'var(--neu-text-disabled)',
-            }}
-          >
-            1km Cell Telemetry
-          </span>
-        </div>
+        <span
+          style={{
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
+            color: 'var(--neu-text-disabled)',
+          }}
+        >
+          1km Grid Cell
+        </span>
+
         {isAnomaly && (
           <span
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 4,
-              background: 'var(--neu-base)',
-              boxShadow: 'var(--neu-shadow-in-sm)',
-              color: 'var(--accent)',
-              padding: '2px 8px',
+              background: 'rgba(239, 68, 68, 0.12)',
+              color: '#ef4444',
+              padding: '1px 6px',
               borderRadius: 'var(--r-full)',
-              fontSize: 8,
-              fontFamily: 'var(--font-ui)',
-              fontWeight: 700,
-              letterSpacing: '0.05em',
+              fontSize: 9,
+              fontWeight: 600,
+              letterSpacing: '0.04em',
               textTransform: 'uppercase',
             }}
           >
-            ⚠ Anomaly
+            Spike
           </span>
         )}
       </div>
 
       {/* ── Metrics ── */}
-      <div style={{ padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 5 }}>
         <Row
-          label="Total Observations"
+          label="Observations"
           value={totalHotspots.toLocaleString()}
         />
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: 10, color: activeMetric === 'Target_Class' ? 'var(--accent)' : 'var(--neu-text)' }}>Primary Class</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontSize: 11, color: activeMetric === 'Target_Class' ? 'var(--accent)' : 'var(--neu-text)' }}>Class</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <ClassDot color={primaryClass.color} />
             <span style={{
               fontFamily: 'var(--font-ui)',
-              fontSize: 10,
+              fontSize: 11,
               fontWeight: 600,
-              color: 'var(--neu-text-em)',
-              textTransform: 'uppercase',
+              color: 'var(--neu-text-strong)',
             }}>
               {primaryClass.name}
             </span>
           </div>
         </div>
 
-        {/* Neumorphic inset divider */}
-        <div style={{
-          height: 1,
-          background: 'transparent',
-          boxShadow: 'inset 0 1px 2px var(--neu-dark)',
-          margin: '2px 0',
-        }} />
+        <div style={{ height: 1, background: 'var(--border-subtle)', margin: '2px 0' }} />
 
         <Row
-          label="Brightness Temp"
+          label="Peak Radiance"
           value={`${avgBrightness.toFixed(1)} K`}
           highlight={activeMetric === 'brightness'}
         />
         <Row
-          label="Avg / Max FRP"
+          label="FRP (Avg / Max)"
           value={`${avgFrp.toFixed(1)} / ${maxFrp.toFixed(1)} MW`}
           accent
           highlight={activeMetric === 'frp'}
         />
-        <Row
-          label="NO₂ Index"
-          value={`${avgNo2.toFixed(3)} mmol/m²`}
-          highlight={activeMetric === 'tropomi_no2'}
-        />
-        <Row
-          label="SO₂ Emissions"
-          value={`${avgSo2.toFixed(3)} mDU`}
-          highlight={activeMetric === 'tropomi_so2'}
-        />
+        {avgNo2 > 0 && (
+          <Row
+            label="NO₂ Column"
+            value={`${avgNo2.toFixed(3)}`}
+            highlight={activeMetric === 'tropomi_no2'}
+          />
+        )}
+        {avgSo2 > 0 && (
+          <Row
+            label="SO₂ Emissions"
+            value={`${avgSo2.toFixed(3)}`}
+            highlight={activeMetric === 'tropomi_so2'}
+          />
+        )}
 
-        <div style={{
-          height: 1,
-          background: 'transparent',
-          boxShadow: 'inset 0 1px 2px var(--neu-dark)',
-          margin: '2px 0',
-        }} />
+        <div style={{ height: 1, background: 'var(--border-subtle)', margin: '2px 0' }} />
 
         <Row
-          label="Land Cover"
+          label="Surface Type"
           value={landCover}
           highlight={activeMetric === 'land_cover_code'}
         />
@@ -212,20 +197,22 @@ export function HotspotTooltip() {
           value={`${elevation} m`}
           highlight={activeMetric === 'elevation'}
         />
-        <Row
-          label="Industrial Ratio"
-          value={`${(isIndustrial * 100).toFixed(0)}%`}
-          highlight={activeMetric === 'is_industrial'}
-        />
+        {isIndustrial > 0 && (
+          <Row
+            label="Industrial Index"
+            value={`${(isIndustrial * 100).toFixed(0)}%`}
+            highlight={activeMetric === 'is_industrial'}
+          />
+        )}
       </div>
 
       {/* ── Z-Score footer if anomaly ── */}
       {isAnomaly && zScore !== null && (
         <div
           style={{
-            background: 'var(--neu-base)',
-            boxShadow: 'inset 0 2px 6px var(--neu-dark)',
-            padding: '8px 14px',
+            background: 'rgba(239, 68, 68, 0.08)',
+            borderTop: '1px solid rgba(239, 68, 68, 0.2)',
+            padding: '6px 12px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -233,25 +220,23 @@ export function HotspotTooltip() {
         >
           <span
             style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 9,
-              fontWeight: 700,
-              letterSpacing: '0.06em',
+              fontSize: 10,
+              fontWeight: 600,
               textTransform: 'uppercase',
-              color: 'var(--accent)',
+              color: '#ef4444',
             }}
           >
-            Industrial Spike Z-Score
+            Anomaly Z-Score
           </span>
           <span
             style={{
               fontFamily: 'var(--font-mono)',
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: 700,
-              color: 'var(--accent)',
+              color: '#ef4444',
             }}
           >
-            {zScore.toFixed(2)}σ
+            +{zScore.toFixed(2)}σ
           </span>
         </div>
       )}

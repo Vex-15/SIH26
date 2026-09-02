@@ -44,7 +44,6 @@ const LEGEND_GRADIENTS: Record<VisualMetric, { gradient: string; low: string; hi
   },
 };
 
-
 export function ThermalLegend() {
   const { activeMetric } = useAppStore();
   const cfg = METRIC_CONFIGS[activeMetric];
@@ -56,51 +55,36 @@ export function ThermalLegend() {
       <div
         style={{
           position: 'fixed',
-          top: 24,
+          top: 20,
           left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 40,
-          /* Neumorphic elevated pill */
           background: 'var(--neu-base)',
-          boxShadow: 'var(--neu-shadow-out)',
+          backdropFilter: 'var(--glass-blur)',
+          WebkitBackdropFilter: 'var(--glass-blur)',
+          boxShadow: 'var(--neu-shadow-out-sm)',
           borderRadius: 'var(--r-full)',
-          border: 'none',
-          padding: '8px 16px',
+          border: '1px solid var(--border-subtle)',
+          padding: '6px 14px',
           pointerEvents: 'none',
         }}
       >
-        <div
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 8,
-            fontWeight: 700,
-            letterSpacing: '0.1em',
-            textTransform: 'uppercase',
-            color: 'var(--neu-text-disabled)',
-            marginBottom: 6,
-            textAlign: 'center',
-          }}
-        >
-          AI Classification Channels
-        </div>
-
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
           {Object.entries(CLASS_META).map(([id, meta]) => (
             <div key={id} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <span
                 style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 2,
+                  width: 6,
+                  height: 6,
+                  borderRadius: '50%',
                   backgroundColor: meta.color,
-                  boxShadow: `0 0 5px ${meta.color}88`,
                 }}
               />
               <span
                 style={{
                   fontFamily: 'var(--font-ui)',
-                  fontSize: 10,
-                  fontWeight: 600,
+                  fontSize: 11,
+                  fontWeight: 500,
                   color: 'var(--neu-text-em)',
                 }}
               >
@@ -117,54 +101,47 @@ export function ThermalLegend() {
     <div
       style={{
         position: 'fixed',
-        top: 24,
+        top: 20,
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 40,
-        /* Neumorphic elevated pill */
         background: 'var(--neu-base)',
-        boxShadow: 'var(--neu-shadow-out)',
-        borderRadius: 'var(--r-full)',
-        border: 'none',
-        padding: '10px 18px',
+        backdropFilter: 'var(--glass-blur)',
+        WebkitBackdropFilter: 'var(--glass-blur)',
+        boxShadow: 'var(--neu-shadow-out-sm)',
+        borderRadius: 'var(--r-md)',
+        border: '1px solid var(--border-subtle)',
+        padding: '8px 14px',
         pointerEvents: 'none',
-        minWidth: 260,
+        minWidth: 240,
       }}
     >
       <div
         style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: 8,
-          fontWeight: 700,
-          letterSpacing: '0.1em',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          fontSize: 10,
+          fontWeight: 600,
+          letterSpacing: '0.04em',
           textTransform: 'uppercase',
           color: 'var(--neu-text-disabled)',
-          marginBottom: 7,
+          marginBottom: 6,
         }}
       >
-        {cfg.label} ({cfg.unit})
+        <span>{cfg.label}</span>
+        <span style={{ color: 'var(--neu-text)', textTransform: 'none' }}>{cfg.unit}</span>
       </div>
 
-      {/* Gradient bar in neumorphic inset trough */}
       <div
         style={{
-          background: 'var(--neu-base)',
-          boxShadow: 'var(--neu-shadow-in-sm)',
-          borderRadius: 'var(--r-full)',
-          padding: 3,
-          marginBottom: 6,
-          transition: 'box-shadow 0.3s',
+          height: 5,
+          borderRadius: 3,
+          background: leg.gradient,
+          marginBottom: 5,
+          border: '1px solid rgba(255,255,255,0.06)',
         }}
-      >
-        <div
-          style={{
-            height: 7,
-            borderRadius: 'var(--r-full)',
-            background: leg.gradient,
-            transition: 'background 0.4s ease',
-          }}
-        />
-      </div>
+      />
 
       <div
         style={{

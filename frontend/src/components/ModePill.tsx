@@ -14,18 +14,19 @@ export function ModePill() {
     <div
       style={{
         position: 'fixed',
-        top: 24,
-        right: 88,
+        top: 20,
+        right: 80,
         zIndex: 40,
         display: 'flex',
         alignItems: 'center',
-        /* Neumorphic inset trough container */
         background: 'var(--neu-base)',
-        boxShadow: 'var(--neu-shadow-in-sm)',
+        backdropFilter: 'var(--glass-blur)',
+        WebkitBackdropFilter: 'var(--glass-blur)',
+        boxShadow: 'var(--neu-shadow-out-sm)',
         borderRadius: 'var(--r-full)',
-        padding: 5,
-        gap: 4,
-        border: 'none',
+        padding: 3,
+        gap: 2,
+        border: '1px solid var(--border-subtle)',
       }}
     >
       {MODES.map(({ id, label }) => {
@@ -35,18 +36,18 @@ export function ModePill() {
             key={id}
             onClick={() => setMapMode(id)}
             style={{
-              padding: '5px 16px',
+              padding: '4px 14px',
               borderRadius: 'var(--r-full)',
-              border: 'none',
+              border: '1px solid',
+              borderColor: isActive ? 'var(--border-subtle)' : 'transparent',
               cursor: id === 'thermal' ? 'default' : 'pointer',
-              /* Active segment = elevated neumorphic pill */
-              background: 'var(--neu-base)',
-              boxShadow: isActive ? 'var(--neu-shadow-out-sm)' : 'none',
-              color: isActive ? 'var(--neu-text-strong)' : 'var(--neu-text-disabled)',
+              background: isActive ? 'var(--neu-base-raised)' : 'transparent',
+              color: isActive ? 'var(--neu-text-strong)' : 'var(--neu-text)',
               fontFamily: 'var(--font-ui)',
               fontSize: 11,
               fontWeight: isActive ? 600 : 400,
-              transition: 'color 0.2s, box-shadow 0.2s',
+              letterSpacing: '-0.01em',
+              transition: 'all 0.15s ease',
               outline: 'none',
             }}
           >

@@ -6,8 +6,8 @@ interface DockProps {
   side: 'left' | 'right';
 }
 
-const DOCK_WIDTH = 52;
-const GAP = 10;
+const DOCK_WIDTH = 48;
+const GAP = 8;
 
 export function Dock({ children, side }: DockProps) {
   const mouseRef = useMotionValue(Infinity);
@@ -45,12 +45,13 @@ export function Dock({ children, side }: DockProps) {
           justifyContent: 'center',
           gap: GAP,
           background: 'var(--neu-base)',
+          backdropFilter: 'var(--glass-blur)',
+          WebkitBackdropFilter: 'var(--glass-blur)',
           borderRadius: 'var(--r-full)',
-          padding: '14px 8px',
+          padding: '10px 6px',
           width: DOCK_WIDTH,
-          /* Neumorphic dual shadow — elevated pill */
-          boxShadow: 'var(--neu-shadow-out-sm)',
-          border: 'none',
+          boxShadow: 'var(--neu-shadow-out)',
+          border: '1px solid var(--border-subtle)',
         }}
       >
         {React.Children.map(children, (child) => {
@@ -99,11 +100,11 @@ export function DockIcon({
     return val - iconCenter;
   });
 
-  const scaleTransform = useTransform(distance, [-120, 0, 120], [1.0, 1.35, 1.0]);
+  const scaleTransform = useTransform(distance, [-100, 0, 100], [1.0, 1.25, 1.0]);
   const scale = useSpring(scaleTransform, {
     mass: 0.1,
-    stiffness: 150,
-    damping: 12,
+    stiffness: 160,
+    damping: 14,
   });
 
   const resolvedAccent = accentColor ?? 'var(--accent)';
@@ -115,44 +116,43 @@ export function DockIcon({
       aria-label={ariaLabel}
       style={{
         scale,
-        width: 38,
-        height: 38,
+        width: 36,
+        height: 36,
         borderRadius: '50%',
-        border: 'none',
-        /* Active = inset (pressed); default = elevated */
-        background: 'var(--neu-base)',
-        boxShadow: active
-          ? `var(--neu-shadow-in-sm), 0 0 10px ${resolvedAccent}44`
-          : 'var(--neu-shadow-out-sm)',
+        border: active ? `1px solid ${resolvedAccent}` : '1px solid transparent',
+        background: active ? 'var(--accent-subtle)' : 'transparent',
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         color: active ? resolvedAccent : 'var(--neu-text)',
-        transition: 'box-shadow 0.2s ease, color 0.2s ease',
+        transition: 'all 0.15s ease',
         outline: 'none',
         flexShrink: 0,
+        position: 'relative',
       }}
       className={className}
       whileHover={{
-        color: active ? resolvedAccent : 'var(--neu-text-em)',
-      }}
-      onMouseEnter={(e) => {
-        if (!active) {
-          e.currentTarget.style.boxShadow = 'var(--neu-shadow-out)';
-          e.currentTarget.style.color = 'var(--neu-text-em)';
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (!active) {
-          e.currentTarget.style.boxShadow = 'var(--neu-shadow-out-sm)';
-          e.currentTarget.style.color = 'var(--neu-text)';
-        }
+        backgroundColor: active ? 'var(--accent-subtle)' : 'var(--neu-base-hover)',
+        color: active ? resolvedAccent : 'var(--neu-text-strong)',
       }}
     >
       <div style={{ width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {children}
       </div>
+
+      {active && (
+        <span style={{
+          position: 'absolute',
+          right: -2,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          width: 3,
+          height: 3,
+          borderRadius: '50%',
+          backgroundColor: resolvedAccent,
+        }} />
+      )}
     </motion.button>
   );
 }

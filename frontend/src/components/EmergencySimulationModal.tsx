@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ExternalLink, SendHorizontal, CheckCircle2, ShieldAlert, MapPin } from 'lucide-react';
+import { X, ExternalLink, SendHorizontal, CheckCircle2, ShieldAlert, MapPin, Radio } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { playTacticalAlertSound } from '../utils/windSpreadModel';
-
 
 export function EmergencySimulationModal() {
   const {
@@ -20,7 +19,6 @@ export function EmergencySimulationModal() {
   const handleLaunchOpticalRecon = () => {
     playTacticalAlertSound();
 
-    // Target the Panipat Industrial Accidental Incident
     setSelectedCluster({
       lat: 29.3909,
       lon: 76.9635,
@@ -74,279 +72,200 @@ export function EmergencySimulationModal() {
         style={{
           position: 'fixed',
           inset: 0,
-          background: 'rgba(0, 0, 0, 0.78)',
-          backdropFilter: 'none',
+          background: 'rgba(0, 0, 0, 0.65)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
           zIndex: 1005,
         }}
       />
 
-      {/* ── Emergency Anomaly Alert Screen (Stitch Prompt 5 / Prompt 8 Spec) ── */}
+      {/* ── Emergency Anomaly Alert Screen ── */}
       <motion.div
         key="emergency-modal"
-        initial={{ opacity: 0, scale: 0.94, y: '-48%', x: '-50%' }}
+        initial={{ opacity: 0, scale: 0.96, y: '-48%', x: '-50%' }}
         animate={{ opacity: 1, scale: 1, y: '-50%', x: '-50%' }}
-        exit={{ opacity: 0, scale: 0.94, y: '-48%', x: '-50%' }}
-        transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
+        exit={{ opacity: 0, scale: 0.96, y: '-48%', x: '-50%' }}
+        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
         style={{
           position: 'fixed',
           top: '50%',
           left: '50%',
           zIndex: 1006,
           width: '92%',
-          maxWidth: 620,
-          background: '#141416',
-          border: '1.5px solid rgba(239, 68, 68, 0.45)',
-          borderRadius: 22,
-          padding: '24px 28px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
-          fontFamily: 'Inter, system-ui, sans-serif',
-          color: '#fafafa',
+          maxWidth: 540,
+          background: 'var(--neu-base)',
+          backdropFilter: 'var(--glass-blur)',
+          WebkitBackdropFilter: 'var(--glass-blur)',
+          border: '1px solid rgba(239, 68, 68, 0.35)',
+          borderRadius: 'var(--r-xl)',
+          padding: '22px',
+          boxShadow: 'var(--neu-shadow-out-lg)',
+          fontFamily: 'var(--font-ui)',
+          color: 'var(--neu-text-strong)',
         }}
       >
-        {/* Top Header & Alert Banner */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 18 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        {/* Top Header */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div
               style={{
-                width: 48,
-                height: 48,
-                borderRadius: 14,
-                background: 'rgba(239, 68, 68, 0.16)',
-                border: '1.5px solid rgba(239, 68, 68, 0.5)',
+                width: 36,
+                height: 36,
+                borderRadius: 'var(--r-sm)',
+                background: 'rgba(239, 68, 68, 0.12)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: '#ef4444',
-                boxShadow: 'none',
+                flexShrink: 0,
               }}
             >
-              <ShieldAlert size={26} className="animate-pulse" />
+              <ShieldAlert size={20} />
             </div>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span
                   style={{
-                    fontSize: 10,
+                    fontSize: 9,
                     fontWeight: 700,
-                    letterSpacing: '0.1em',
+                    letterSpacing: '0.08em',
                     textTransform: 'uppercase',
                     color: '#ef4444',
-                    background: 'rgba(239, 68, 68, 0.15)',
-                    padding: '2px 8px',
-                    borderRadius: 999,
-                    border: '1px solid rgba(239, 68, 68, 0.35)',
                   }}
                 >
                   CRITICAL DEFENSE ALERT · CLASS 4
                 </span>
-                <span style={{ fontSize: 11, fontFamily: 'JetBrains Mono, Consolas, monospace', color: '#71717a' }}>
-                  TW-INCIDENT-8842
+                <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--neu-text-disabled)' }}>
+                  TW-8842
                 </span>
               </div>
-              <h1 style={{ fontSize: 19, fontWeight: 700, margin: '4px 0 0', color: '#ffffff', letterSpacing: '-0.01em' }}>
-                Accidental Industrial Chemical Fire Surge
-              </h1>
+              <h2 style={{ fontSize: 16, fontWeight: 700, margin: '2px 0 0', color: 'var(--neu-text-strong)', letterSpacing: '-0.01em' }}>
+                Accidental Chemical Fire Surge
+              </h2>
             </div>
           </div>
           <button
             onClick={handleDismiss}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: '#71717a',
-              cursor: 'pointer',
-              padding: 4,
-              borderRadius: 6,
-            }}
+            className="neu-icon-btn"
+            style={{ width: 26, height: 26 }}
           >
-            <X size={20} />
+            <X size={14} strokeWidth={2} />
           </button>
         </div>
 
-        {/* Location & Geographic Context Card */}
+        {/* Location Context Card */}
         <div
           style={{
-            background: '#19191d',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            borderRadius: 14,
-            padding: '14px 16px',
-            marginBottom: 16,
+            background: 'var(--neu-base-raised)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 'var(--r-md)',
+            padding: '12px 14px',
+            marginBottom: 14,
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <MapPin size={15} color="#ef4444" />
-            <span style={{ fontSize: 13, fontWeight: 600, color: '#fafafa' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+            <MapPin size={13} color="#ef4444" />
+            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--neu-text-strong)' }}>
               Panipat MIDC Industrial Complex, Haryana
             </span>
-            <span style={{ fontSize: 11, fontFamily: 'JetBrains Mono, Consolas, monospace', color: '#a1a1aa', marginLeft: 'auto' }}>
+            <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--neu-text-disabled)', marginLeft: 'auto' }}>
               29.3909° N, 76.9635° E
             </span>
           </div>
-          <p style={{ fontSize: 12, lineHeight: 1.5, color: '#a1a1aa', margin: 0 }}>
-            Non-cyclical thermal spike detected in high-density manufacturing zone. High co-located Sentinel-5P <strong style={{ color: '#fafafa' }}>SO₂ emissions (0.23 mol/m²)</strong> confirm hazardous material combustion.
+          <p style={{ fontSize: 11, lineHeight: 1.4, color: 'var(--neu-text)', margin: 0 }}>
+            Non-cyclical thermal spike in manufacturing zone. Sentinel-5P <strong style={{ color: 'var(--neu-text-strong)' }}>SO₂ (0.23 mol/m²)</strong> indicates hazardous material combustion.
           </p>
         </div>
 
-        {/* AI Diagnostics & Anomaly Metrics Matrix */}
+        {/* AI Diagnostics Matrix */}
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 10,
-            marginBottom: 18,
+            gap: 8,
+            marginBottom: 16,
           }}
         >
-          <div style={{ background: '#1c1c20', borderRadius: 12, padding: '12px 14px', borderLeft: '3px solid #ef4444' }}>
-            <div style={{ fontSize: 9, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              ANOMALY Z-SCORE
+          <div style={{ background: 'var(--neu-base-raised)', borderRadius: 'var(--r-sm)', padding: '10px 12px', border: '1px solid var(--border-subtle)' }}>
+            <div style={{ fontSize: 9, color: 'var(--neu-text-disabled)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>
+              Z-SCORE
             </div>
-            <div style={{ fontSize: 20, fontWeight: 800, color: '#ef4444', fontFamily: 'JetBrains Mono, Consolas, monospace', marginTop: 2 }}>
+            <div style={{ fontSize: 17, fontWeight: 700, color: '#ef4444', fontFamily: 'var(--font-mono)', marginTop: 2 }}>
               +4.12σ
             </div>
-            <div style={{ fontSize: 9, color: '#71717a', marginTop: 2 }}>Baseline: &lt; 3.0σ normal</div>
+            <div style={{ fontSize: 9, color: 'var(--neu-text-disabled)', marginTop: 1 }}>Baseline &lt; 3.0σ</div>
           </div>
 
-          <div style={{ background: '#1c1c20', borderRadius: 12, padding: '12px 14px', borderLeft: '3px solid #f59e0b' }}>
-            <div style={{ fontSize: 9, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              FIRE RADIATIVE POWER
+          <div style={{ background: 'var(--neu-base-raised)', borderRadius: 'var(--r-sm)', padding: '10px 12px', border: '1px solid var(--border-subtle)' }}>
+            <div style={{ fontSize: 9, color: 'var(--neu-text-disabled)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>
+              RADIATIVE POWER
             </div>
-            <div style={{ fontSize: 20, fontWeight: 800, color: '#fafafa', fontFamily: 'JetBrains Mono, Consolas, monospace', marginTop: 2 }}>
+            <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--neu-text-strong)', fontFamily: 'var(--font-mono)', marginTop: 2 }}>
               14.2 MW
             </div>
-            <div style={{ fontSize: 9, color: '#22c55e', marginTop: 2 }}>Peak: 368.2 K Temp</div>
+            <div style={{ fontSize: 9, color: 'var(--neu-text-disabled)', marginTop: 1 }}>Peak 368.2 K</div>
           </div>
 
-          <div style={{ background: '#1c1c20', borderRadius: 12, padding: '12px 14px', borderLeft: '3px solid #38bdf8' }}>
-            <div style={{ fontSize: 9, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              AI META-CONFIDENCE
+          <div style={{ background: 'var(--neu-base-raised)', borderRadius: 'var(--r-sm)', padding: '10px 12px', border: '1px solid var(--border-subtle)' }}>
+            <div style={{ fontSize: 9, color: 'var(--neu-text-disabled)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>
+              AI CONFIDENCE
             </div>
-            <div style={{ fontSize: 20, fontWeight: 800, color: '#38bdf8', fontFamily: 'JetBrains Mono, Consolas, monospace', marginTop: 2 }}>
+            <div style={{ fontSize: 17, fontWeight: 700, color: '#38bdf8', fontFamily: 'var(--font-mono)', marginTop: 2 }}>
               99.8%
             </div>
-            <div style={{ fontSize: 9, color: '#71717a', marginTop: 2 }}>Phase 6 Fused Stacking</div>
+            <div style={{ fontSize: 9, color: 'var(--neu-text-disabled)', marginTop: 1 }}>Phase 6 Fused</div>
           </div>
         </div>
 
-        {/* Action Controls & Dispatch Buttons */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {/* Primary Action: Launch Optical Recon & Wind Spread */}
+        {/* Action Controls */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <button
             onClick={handleLaunchOpticalRecon}
+            className="neu-btn-accent"
             style={{
               width: '100%',
-              padding: '13px 20px',
-              borderRadius: 14,
-              border: 'none',
+              padding: '11px',
               background: '#ef4444',
-              color: '#ffffff',
-              fontSize: 13,
-              fontWeight: 700,
-              letterSpacing: '0.04em',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8,
-              cursor: 'pointer',
-              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
-              transition: 'transform 0.1s, background 0.15s',
-            }}
-          >
-            <span>🛰️ LAUNCH SENTINEL-2 OPTICAL RECON & WIND SPREAD</span>
-            <ExternalLink size={15} />
-          </button>
-
-          {/* Feature 3 Action: Find Nearest Emergency Services (OSM + OSRM) */}
-          <button
-            onClick={() => {
-              const { setEmergencyServicesOpen, setActiveEmergencyIncident } = useAppStore.getState();
-              setActiveEmergencyIncident({
-                lat: 29.3909,
-                lon: 76.9635,
-                name: 'Panipat MIDC Industrial Complex, Haryana',
-                frp: 14.2,
-                zScore: 4.12,
-                cls: 4,
-              });
-              setEmergencyServicesOpen(true);
-            }}
-            style={{
-              width: '100%',
-              padding: '12px 18px',
-              borderRadius: 14,
-              border: '1px solid rgba(249, 115, 22, 0.5)',
-              background: 'rgba(249, 115, 22, 0.14)',
-              color: '#f97316',
+              boxShadow: '0 0 16px rgba(239, 68, 68, 0.3)',
               fontSize: 12,
-              fontWeight: 700,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8,
-              cursor: 'pointer',
-              boxShadow: '0 1px 4px rgba(0, 0, 0, 0.25)',
-              transition: 'all 0.15s',
             }}
           >
-            <span>🚒 FIND NEAREST EMERGENCY SERVICES & LIVE ETA (OSM + OSRM)</span>
             <ExternalLink size={14} />
+            <span>Launch High-Res Recon &amp; Plume Dispersion</span>
           </button>
 
-          {/* Secondary Action: Dispatch Emergency Webhook (Prompt 8 Spec) */}
           <button
             onClick={handleDispatchWebhook}
-            disabled={dispatchStage === 'delivered'}
+            disabled={dispatchStage !== 'idle'}
+            className="neu-btn"
             style={{
               width: '100%',
-              padding: '12px 18px',
-              borderRadius: 14,
-              border: dispatchStage === 'delivered'
-                ? '1px solid rgba(34, 197, 94, 0.4)'
-                : '1px solid rgba(239, 68, 68, 0.3)',
-              background: dispatchStage === 'delivered'
-                ? 'rgba(34, 197, 94, 0.08)'
-                : 'rgba(239, 68, 68, 0.06)',
-              color: dispatchStage === 'delivered' ? '#22c55e' : '#ef4444',
+              padding: '10px',
               fontSize: 12,
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8,
-              cursor: dispatchStage === 'delivered' ? 'default' : 'pointer',
-              transition: 'all 0.2s',
             }}
           >
             {dispatchStage === 'idle' && (
               <>
                 <SendHorizontal size={14} />
-                <span>DISPATCH EMERGENCY WEBHOOK (SDMA / NDRF COMMAND)</span>
+                <span>Simulate Automated NDMA Dispatch Webhook</span>
               </>
             )}
             {dispatchStage === 'transmitting' && (
               <>
-                <div style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid rgba(239,68,68,0.3)', borderTopColor: '#ef4444' }} className="animate-spin" />
-                <span style={{ fontFamily: 'JetBrains Mono, Consolas, monospace' }}>TRANSMITTING ENCRYPTED TELEMETRY...</span>
+                <Radio size={14} className="animate-spin" />
+                <span>Transmitting Encrypted Payload...</span>
               </>
             )}
             {dispatchStage === 'delivered' && (
               <>
-                <CheckCircle2 size={15} color="#22c55e" />
-                <span style={{ fontFamily: 'JetBrains Mono, Consolas, monospace', fontWeight: 700 }}>PAYLOAD DELIVERED · SDMA ACKNOWLEDGED</span>
+                <CheckCircle2 size={14} color="#22c55e" />
+                <span style={{ color: '#22c55e' }}>Payload Dispatched Successfully</span>
               </>
             )}
           </button>
-        </div>
-
-        {/* Footer Audit Metadata */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, fontSize: 10, color: '#52525b', fontFamily: 'JetBrains Mono, Consolas, monospace' }}>
-          <span>LIVE SATELLITE AUDIT · VIIRS JPSS-1 · OPEN-METEO SYNC</span>
-          <span onClick={handleDismiss} style={{ color: '#71717a', cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 11 }}>
-            Dismiss
-          </span>
         </div>
       </motion.div>
     </AnimatePresence>
   );
 }
-
-

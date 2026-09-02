@@ -29,24 +29,25 @@ export function MetricSelectorPopover() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -14, scale: 0.97 }}
+      initial={{ opacity: 0, x: -10, scale: 0.98 }}
       animate={{ opacity: 1, x: 0, scale: 1 }}
-      exit={{ opacity: 0, x: -14, scale: 0.97 }}
-      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+      exit={{ opacity: 0, x: -10, scale: 0.98 }}
+      transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
       style={{
         position: 'fixed',
         left: 72,
         top: '50%',
         transform: 'translateY(-50%)',
         zIndex: 90,
-        width: 290,
-        maxHeight: 'min(500px, calc(100vh - 100px))',
-        /* Neumorphic elevated panel */
+        width: 280,
+        maxHeight: 'min(480px, calc(100vh - 80px))',
         background: 'var(--neu-base)',
-        boxShadow: 'var(--neu-shadow-out-lg)',
+        backdropFilter: 'var(--glass-blur)',
+        WebkitBackdropFilter: 'var(--glass-blur)',
+        boxShadow: 'var(--neu-shadow-out)',
         borderRadius: 'var(--r-lg)',
-        border: 'none',
-        padding: '20px 18px 18px',
+        border: '1px solid var(--border-subtle)',
+        padding: '16px',
         userSelect: 'none',
         display: 'flex',
         flexDirection: 'column',
@@ -54,48 +55,40 @@ export function MetricSelectorPopover() {
       }}
     >
       {/* Header */}
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 12 }}>
         <div style={{
           fontSize: 10,
-          fontWeight: 700,
-          letterSpacing: '0.12em',
+          fontWeight: 600,
+          letterSpacing: '0.08em',
           textTransform: 'uppercase',
           color: 'var(--neu-text-disabled)',
-          marginBottom: 4,
+          marginBottom: 2,
         }}>
           Telemetry Parameter
         </div>
         <div style={{
-          fontSize: 20,
+          fontSize: 15,
           fontWeight: 700,
           color: 'var(--neu-text-strong)',
-          lineHeight: 1.2,
         }}>
           Hex Grid Metric
         </div>
         <div style={{
           fontSize: 11,
           color: 'var(--neu-text)',
-          marginTop: 4,
+          marginTop: 2,
         }}>
-          Select metric to project on 1km hex grid
+          Select metric to project on 1km grid
         </div>
       </div>
 
-      {/* Inset divider */}
-      <div style={{
-        height: 1,
-        background: 'transparent',
-        boxShadow: 'inset 0 1px 2px var(--neu-dark), inset 0 -1px 1px var(--neu-light)',
-        borderRadius: 1,
-        marginBottom: 14,
-      }} />
+      <div style={{ height: 1, background: 'var(--border-subtle)', marginBottom: 10 }} />
 
       {/* Metrics List */}
       <div style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: 7,
+        gap: 4,
         overflowY: 'auto',
         paddingRight: 2,
       }}>
@@ -112,63 +105,46 @@ export function MetricSelectorPopover() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '10px 12px',
+                padding: '8px 10px',
                 borderRadius: 'var(--r-sm)',
                 cursor: 'pointer',
-                /* Neumorphic: inset when selected, elevated when not */
-                background: 'var(--neu-base)',
-                boxShadow: isSelected
-                  ? `var(--neu-shadow-in-sm), 0 0 12px rgba(245,158,11,0.2)`
-                  : 'var(--neu-shadow-out-sm)',
-                transition: 'box-shadow 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                if (!isSelected) {
-                  e.currentTarget.style.boxShadow = 'var(--neu-shadow-out)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isSelected) {
-                  e.currentTarget.style.boxShadow = 'var(--neu-shadow-out-sm)';
-                }
+                background: isSelected ? 'var(--neu-base-raised)' : 'transparent',
+                border: '1px solid',
+                borderColor: isSelected ? 'var(--accent)' : 'transparent',
+                transition: 'all 0.15s ease',
               }}
             >
               {/* Left: Icon + Labels */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
                 <div style={{
-                  width: 32,
-                  height: 32,
+                  width: 26,
+                  height: 26,
                   borderRadius: 'var(--r-sm)',
-                  background: 'var(--neu-base)',
-                  boxShadow: isSelected
-                    ? `inset 2px 2px 5px var(--neu-dark), inset -2px -2px 5px var(--neu-light), 0 0 10px rgba(245,158,11,0.3)`
-                    : 'var(--neu-shadow-out-sm)',
+                  background: isSelected ? 'var(--accent-subtle)' : 'var(--neu-base-raised)',
                   color: isSelected ? 'var(--accent)' : 'var(--neu-text)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0,
-                  transition: 'box-shadow 0.2s, color 0.2s',
+                  transition: 'all 0.15s ease',
                 }}>
-                  <Icon size={15} strokeWidth={2} />
+                  <Icon size={14} strokeWidth={2} />
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                   <span style={{
                     fontSize: 12,
-                    fontWeight: 600,
+                    fontWeight: isSelected ? 600 : 500,
                     color: isSelected ? 'var(--neu-text-strong)' : 'var(--neu-text-em)',
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
-                    transition: 'color 0.2s',
                   }}>
                     {config.label}
                   </span>
                   <span style={{
                     fontSize: 10,
-                    color: isSelected ? 'var(--accent)' : 'var(--neu-text-disabled)',
-                    transition: 'color 0.2s',
+                    color: 'var(--neu-text-disabled)',
                   }}>
                     {config.unit}
                   </span>
@@ -185,7 +161,7 @@ export function MetricSelectorPopover() {
                   flexShrink: 0,
                   marginLeft: 6,
                 }}>
-                  <Check size={15} strokeWidth={2.5} />
+                  <Check size={14} strokeWidth={2.5} />
                 </div>
               )}
             </div>
