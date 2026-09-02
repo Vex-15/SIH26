@@ -84,7 +84,7 @@ function ClassIcon({ clsId, size = 64 }: { clsId: number; size?: number }) {
   };
 
   return (
-    <div style={{ filter: `drop-shadow(0 0 10px ${meta.color}66)` }}>
+    <div>
       {icons[clsId] ?? icons[0]}
     </div>
   );
@@ -487,17 +487,17 @@ export function InspectorDrawer() {
               fontFamily: 'var(--font-ui)',
             }}
             onMouseEnter={e => {
-              e.currentTarget.style.boxShadow = 'var(--neu-shadow-out-lg), 0 0 24px rgba(239,68,68,0.25)';
+              e.currentTarget.style.boxShadow = 'var(--neu-shadow-out-lg)';
             }}
             onMouseLeave={e => {
-              e.currentTarget.style.boxShadow = 'var(--neu-shadow-out), 0 0 20px rgba(239,68,68,0.15)';
+              e.currentTarget.style.boxShadow = 'var(--neu-shadow-out)';
             }}
             onMouseDown={e => {
-              e.currentTarget.style.boxShadow = 'var(--neu-shadow-in), 0 0 16px rgba(239,68,68,0.2)';
+              e.currentTarget.style.boxShadow = 'var(--neu-shadow-in)';
               e.currentTarget.style.transform = 'scale(0.98)';
             }}
             onMouseUp={e => {
-              e.currentTarget.style.boxShadow = 'var(--neu-shadow-out), 0 0 20px rgba(239,68,68,0.15)';
+              e.currentTarget.style.boxShadow = 'var(--neu-shadow-out)';
               e.currentTarget.style.transform = 'scale(1)';
             }}
           >

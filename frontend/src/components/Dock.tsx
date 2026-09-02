@@ -49,7 +49,7 @@ export function Dock({ children, side }: DockProps) {
           padding: '14px 8px',
           width: DOCK_WIDTH,
           /* Neumorphic dual shadow — elevated pill */
-          boxShadow: 'var(--neu-shadow-out-lg)',
+          boxShadow: 'var(--neu-shadow-out-sm)',
           border: 'none',
         }}
       >

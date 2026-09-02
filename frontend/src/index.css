@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Geist+Mono:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* ─── Reset & Base ─────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -14,23 +14,23 @@
   --neu-light:         #3d3f46;   /* top-left highlight */
   --neu-dark:          #16171a;   /* bottom-right shadow */
 
-  /* ── Dual-Shadow System ── */
-  --neu-shadow-out:    6px 6px 14px #16171a, -6px -6px 14px #3d3f46;
-  --neu-shadow-out-sm: 3px 3px 8px  #16171a, -3px -3px 8px  #3d3f46;
-  --neu-shadow-out-lg: 10px 10px 24px #16171a, -10px -10px 24px #3d3f46;
-  --neu-shadow-in:     inset 4px 4px 10px #16171a, inset -4px -4px 10px #3d3f46;
-  --neu-shadow-in-sm:  inset 2px 2px 6px  #16171a, inset -2px -2px 6px  #3d3f46;
+  /* ── Muted Dual-Shadow System (real neumorphism, not AI-glow) ── */
+  --neu-shadow-out:    4px 4px 10px #16171a, -4px -4px 10px #3d3f46;
+  --neu-shadow-out-sm: 2px 2px 6px  #16171a, -2px -2px 6px  #3d3f46;
+  --neu-shadow-out-lg: 6px 6px 14px #16171a, -6px -6px 14px #3d3f46;
+  --neu-shadow-in:     inset 3px 3px 7px #16171a, inset -3px -3px 7px #3d3f46;
+  --neu-shadow-in-sm:  inset 1px 1px 4px #16171a, inset -1px -1px 4px #3d3f46;
 
   /* ── Typography ── */
-  --neu-text:          #8b9098;   /* muted body */
+  --neu-text:          #9aa0aa;   /* muted body */
   --neu-text-em:       #c8cdd6;   /* emphasized */
   --neu-text-strong:   #e4e8f0;   /* headings / values */
   --neu-text-disabled: #555860;
 
-  /* ── Accent colours (preserved from original) ── */
-  --accent:            #f59e0b;
-  --accent-subtle:     rgba(245, 158, 11, 0.15);
-  --accent-glow:       0 0 16px rgba(245, 158, 11, 0.35);
+  /* ── Accent colours ── */
+  --accent:            #c98a2c;
+  --accent-subtle:     rgba(201, 138, 44, 0.12);
+  --accent-glow:       none;
 
   /* ── Class colours ── */
   --wildfire:          #ef4444;
@@ -47,8 +47,8 @@
   --r-full: 9999px;
 
   /* ── Typography ── */
-  --font-ui:   'Space Grotesk', system-ui, sans-serif;
-  --font-mono: 'Geist Mono', 'Fira Code', monospace;
+  --font-ui:   'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Consolas', 'Fira Code', monospace;
 
   /* ── Map / Legacy ── */
   --map-bg:            #0d0d0f;
@@ -67,20 +67,20 @@
   --neu-light:         #ffffff;
   --neu-dark:          #b8bec9;
 
-  --neu-shadow-out:    6px 6px 14px #b8bec9, -6px -6px 14px #ffffff;
-  --neu-shadow-out-sm: 3px 3px 8px  #b8bec9, -3px -3px 8px  #ffffff;
-  --neu-shadow-out-lg: 10px 10px 24px #b8bec9, -10px -10px 24px #ffffff;
-  --neu-shadow-in:     inset 4px 4px 10px #b8bec9, inset -4px -4px 10px #ffffff;
-  --neu-shadow-in-sm:  inset 2px 2px 6px  #b8bec9, inset -2px -2px 6px  #ffffff;
+  --neu-shadow-out:    4px 4px 10px #b8bec9, -4px -4px 10px #ffffff;
+  --neu-shadow-out-sm: 2px 2px 6px  #b8bec9, -2px -2px 6px  #ffffff;
+  --neu-shadow-out-lg: 6px 6px 14px #b8bec9, -6px -6px 14px #ffffff;
+  --neu-shadow-in:     inset 3px 3px 7px #b8bec9, inset -3px -3px 7px #ffffff;
+  --neu-shadow-in-sm:  inset 1px 1px 4px #b8bec9, inset -1px -1px 4px #ffffff;
 
   --neu-text:          #6b7280;
   --neu-text-em:       #374151;
   --neu-text-strong:   #1f2937;
   --neu-text-disabled: #9ca3af;
 
-  --accent:            #d97706;
-  --accent-subtle:     rgba(217, 119, 6, 0.12);
-  --accent-glow:       0 0 16px rgba(217, 119, 6, 0.3);
+  --accent:            #b45309;
+  --accent-subtle:     rgba(180, 83, 9, 0.12);
+  --accent-glow:       none;
 
   --map-bg:            #1a1a2e;
   --surface:           var(--neu-base);

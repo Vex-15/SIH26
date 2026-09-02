@@ -115,10 +115,10 @@ export function DiurnalHeatRadar({
         <line x1={center - maxRadius} y1={center} x2={center + maxRadius} y2={center} stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
 
         {/* ── Hour Cardinal Labels ── */}
-        <text x={center} y={center - maxRadius - 4} fill="#71717a" fontSize="8" fontFamily="Geist Mono, monospace" textAnchor="middle">00h</text>
-        <text x={center + maxRadius + 7} y={center + 3} fill="#71717a" fontSize="8" fontFamily="Geist Mono, monospace" textAnchor="start">06h</text>
-        <text x={center} y={center + maxRadius + 11} fill="#71717a" fontSize="8" fontFamily="Geist Mono, monospace" textAnchor="middle">12h</text>
-        <text x={center - maxRadius - 7} y={center + 3} fill="#71717a" fontSize="8" fontFamily="Geist Mono, monospace" textAnchor="end">18h</text>
+        <text x={center} y={center - maxRadius - 4} fill="#71717a" fontSize="8" fontFamily="JetBrains Mono, Consolas, monospace" textAnchor="middle">00h</text>
+        <text x={center + maxRadius + 7} y={center + 3} fill="#71717a" fontSize="8" fontFamily="JetBrains Mono, Consolas, monospace" textAnchor="start">06h</text>
+        <text x={center} y={center + maxRadius + 11} fill="#71717a" fontSize="8" fontFamily="JetBrains Mono, Consolas, monospace" textAnchor="middle">12h</text>
+        <text x={center - maxRadius - 7} y={center + 3} fill="#71717a" fontSize="8" fontFamily="JetBrains Mono, Consolas, monospace" textAnchor="end">18h</text>
 
         {/* ── 3PM Peak Burning Window Marker ── */}
         <text
@@ -126,7 +126,7 @@ export function DiurnalHeatRadar({
           y={center - maxRadius * 0.72}
           fill="#a1a1aa"
           fontSize="7"
-          fontFamily="Geist Mono, monospace"
+          fontFamily="JetBrains Mono, Consolas, monospace"
           textAnchor="start"
         >
           3PM
@@ -199,7 +199,7 @@ export function DiurnalHeatRadar({
             display: 'flex',
             alignItems: 'center',
             gap: 6,
-            fontFamily: 'Geist Mono, monospace',
+            fontFamily: 'JetBrains Mono, Consolas, monospace',
             fontSize: 10,
             color: activePoint ? color : '#71717a',
             transition: 'color 0.2s',

@@ -101,7 +101,7 @@ export function AnomalyAlertModal() {
               inset: 0,
               zIndex: 996,
               background: 'rgba(0, 0, 0, 0.65)',
-              backdropFilter: 'blur(4px)',
+              backdropFilter: 'none',
               pointerEvents: 'auto',
             }}
             initial={{ opacity: 0 }}
@@ -136,8 +136,8 @@ export function AnomalyAlertModal() {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                /* Neumorphic deep shadow + class accent glow */
-                boxShadow: `var(--neu-shadow-out-lg), 0 0 30px ${color}25`,
+                /* Pure neumorphism — no accent glow */
+                boxShadow: 'var(--neu-shadow-out)',
                 border: 'none',
               }}
             >
@@ -153,7 +153,7 @@ export function AnomalyAlertModal() {
                   marginBottom: 16,
                   /* Neumorphic inset icon circle with accent */
                   background: 'var(--neu-base)',
-                  boxShadow: `var(--neu-shadow-in-sm), 0 0 20px ${color}50`,
+                  boxShadow: 'var(--neu-shadow-in-sm)',
                   color: color,
                   flexShrink: 0,
                 }}
@@ -195,32 +195,32 @@ export function AnomalyAlertModal() {
               {/* Key metrics */}
               <div style={{ display: 'flex', width: '100%', justifyContent: 'space-around', alignItems: 'flex-start', marginBottom: 24 }}>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                  <span style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 9, color: 'rgba(255, 255, 255, 0.4)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  <span style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: 9, color: 'rgba(255, 255, 255, 0.4)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                     Max FRP
                   </span>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                    <span style={{ fontFamily: 'Geist Mono, monospace', fontSize: 32, fontWeight: 700, lineHeight: 1, color }}>
+                    <span style={{ fontFamily: 'JetBrains Mono, Consolas, monospace', fontSize: 32, fontWeight: 700, lineHeight: 1, color }}>
                       <AnimatedNumber to={c.maxFrp} decimals={1} />
                     </span>
-                    <span style={{ fontFamily: 'Geist Mono, monospace', fontSize: 13, color: 'rgba(255, 255, 255, 0.4)' }}>MW</span>
+                    <span style={{ fontFamily: 'JetBrains Mono, Consolas, monospace', fontSize: 13, color: 'rgba(255, 255, 255, 0.4)' }}>MW</span>
                   </div>
                 </div>
 
                 <div style={{ width: 1, height: 48, alignSelf: 'center', background: 'transparent', boxShadow: `inset 1px 0 3px var(--neu-dark)` }} />
 
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                  <span style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 9, color: 'rgba(255, 255, 255, 0.4)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  <span style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: 9, color: 'rgba(255, 255, 255, 0.4)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                     Z-Score Deviation
                   </span>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                    <span style={{ fontFamily: 'Geist Mono, monospace', fontSize: 32, fontWeight: 700, lineHeight: 1, color }}>
+                    <span style={{ fontFamily: 'JetBrains Mono, Consolas, monospace', fontSize: 32, fontWeight: 700, lineHeight: 1, color }}>
                       <AnimatedNumber to={c.zScore ?? 3.5} decimals={2} />
                     </span>
-                    <span style={{ fontFamily: 'Geist Mono, monospace', fontSize: 26, fontWeight: 700, lineHeight: 1, color }}>
+                    <span style={{ fontFamily: 'JetBrains Mono, Consolas, monospace', fontSize: 26, fontWeight: 700, lineHeight: 1, color }}>
                       σ
                     </span>
                   </div>
-                  <span style={{ fontFamily: 'Geist Mono, monospace', fontSize: 9, color: 'rgba(255, 255, 255, 0.3)' }}>Normal: &lt; 3.00σ</span>
+                  <span style={{ fontFamily: 'JetBrains Mono, Consolas, monospace', fontSize: 9, color: 'rgba(255, 255, 255, 0.3)' }}>Normal: &lt; 3.00σ</span>
                 </div>
               </div>
 
@@ -294,9 +294,9 @@ export function AnomalyAlertModal() {
                   letterSpacing: '0.06em',
                   borderRadius: 'var(--r-md)',
                   border: 'none',
-                  /* Neumorphic elevated button with accent glow */
+                  /* Pure neumorphism — no accent glow */
                   background: 'var(--neu-base)',
-                  boxShadow: `var(--neu-shadow-out), 0 0 18px ${color}30`,
+                  boxShadow: 'var(--neu-shadow-out)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -305,10 +305,10 @@ export function AnomalyAlertModal() {
                   cursor: 'pointer',
                   transition: 'box-shadow 0.15s ease, transform 0.1s ease',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.boxShadow = `var(--neu-shadow-out-lg), 0 0 24px ${color}40`; }}
-                onMouseLeave={e => { e.currentTarget.style.boxShadow = `var(--neu-shadow-out), 0 0 18px ${color}30`; }}
-                onMouseDown={e => { e.currentTarget.style.boxShadow = `var(--neu-shadow-in), 0 0 12px ${color}20`; e.currentTarget.style.transform = 'scale(0.98)'; }}
-                onMouseUp={e => { e.currentTarget.style.boxShadow = `var(--neu-shadow-out), 0 0 18px ${color}30`; e.currentTarget.style.transform = 'scale(1)'; }}
+                onMouseEnter={e => { e.currentTarget.style.boxShadow = 'var(--neu-shadow-out-lg)'; }}
+                onMouseLeave={e => { e.currentTarget.style.boxShadow = 'var(--neu-shadow-out)'; }}
+                onMouseDown={e => { e.currentTarget.style.boxShadow = 'var(--neu-shadow-in)'; e.currentTarget.style.transform = 'scale(0.98)'; }}
+                onMouseUp={e => { e.currentTarget.style.boxShadow = 'var(--neu-shadow-out)'; e.currentTarget.style.transform = 'scale(1)'; }}
               >
                 Acknowledge &amp; Investigate
               </button>

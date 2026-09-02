@@ -265,7 +265,7 @@ export function ExportModal() {
           inset: 0,
           zIndex: 100,
           background: 'rgba(0, 0, 0, 0.75)',
-          backdropFilter: 'blur(10px)',
+          backdropFilter: 'none',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -286,8 +286,8 @@ export function ExportModal() {
             border: '1px solid rgba(255, 255, 255, 0.1)',
             borderRadius: 20,
             padding: '24px 26px',
-            boxShadow: '0 24px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(0, 0, 0, 0.5)',
-            fontFamily: 'Space Grotesk, sans-serif',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
+            fontFamily: 'Inter, system-ui, sans-serif',
             color: '#fafafa',
           }}
         >
@@ -347,7 +347,7 @@ export function ExportModal() {
                 <div style={{ fontSize: 10, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                   ACTIVE TARGET FILTER
                 </div>
-                <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'Geist Mono, monospace', color: '#f59e0b', marginTop: 2 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'JetBrains Mono, Consolas, monospace', color: '#f59e0b', marginTop: 2 }}>
                   {dateRangeLabel} · {String(activeHour).padStart(2, '0')}:00 UTC
                 </div>
 
@@ -357,7 +357,7 @@ export function ExportModal() {
                 <div style={{ fontSize: 10, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                   MATCHED DETECTIONS
                 </div>
-                <div style={{ fontSize: 16, fontWeight: 800, fontFamily: 'Geist Mono, monospace', color: '#ffffff', marginTop: 2 }}>
+                <div style={{ fontSize: 16, fontWeight: 800, fontFamily: 'JetBrains Mono, Consolas, monospace', color: '#ffffff', marginTop: 2 }}>
                   {totalCount.toLocaleString()} Hotspots
                 </div>
               </div>

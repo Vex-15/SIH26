@@ -75,7 +75,7 @@ export function EmergencySimulationModal() {
           position: 'fixed',
           inset: 0,
           background: 'rgba(0, 0, 0, 0.78)',
-          backdropFilter: 'blur(8px)',
+          backdropFilter: 'none',
           zIndex: 1005,
         }}
       />
@@ -98,8 +98,8 @@ export function EmergencySimulationModal() {
           border: '1.5px solid rgba(239, 68, 68, 0.45)',
           borderRadius: 22,
           padding: '24px 28px',
-          boxShadow: '0 30px 80px rgba(0, 0, 0, 0.85), 0 0 40px rgba(239, 68, 68, 0.2)',
-          fontFamily: 'Space Grotesk, sans-serif',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
+          fontFamily: 'Inter, system-ui, sans-serif',
           color: '#fafafa',
         }}
       >
@@ -117,7 +117,7 @@ export function EmergencySimulationModal() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: '#ef4444',
-                boxShadow: '0 0 20px rgba(239, 68, 68, 0.3)',
+                boxShadow: 'none',
               }}
             >
               <ShieldAlert size={26} className="animate-pulse" />
@@ -139,7 +139,7 @@ export function EmergencySimulationModal() {
                 >
                   CRITICAL DEFENSE ALERT · CLASS 4
                 </span>
-                <span style={{ fontSize: 11, fontFamily: 'Geist Mono, monospace', color: '#71717a' }}>
+                <span style={{ fontSize: 11, fontFamily: 'JetBrains Mono, Consolas, monospace', color: '#71717a' }}>
                   TW-INCIDENT-8842
                 </span>
               </div>
@@ -178,7 +178,7 @@ export function EmergencySimulationModal() {
             <span style={{ fontSize: 13, fontWeight: 600, color: '#fafafa' }}>
               Panipat MIDC Industrial Complex, Haryana
             </span>
-            <span style={{ fontSize: 11, fontFamily: 'Geist Mono, monospace', color: '#a1a1aa', marginLeft: 'auto' }}>
+            <span style={{ fontSize: 11, fontFamily: 'JetBrains Mono, Consolas, monospace', color: '#a1a1aa', marginLeft: 'auto' }}>
               29.3909° N, 76.9635° E
             </span>
           </div>
@@ -200,7 +200,7 @@ export function EmergencySimulationModal() {
             <div style={{ fontSize: 9, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               ANOMALY Z-SCORE
             </div>
-            <div style={{ fontSize: 20, fontWeight: 800, color: '#ef4444', fontFamily: 'Geist Mono, monospace', marginTop: 2 }}>
+            <div style={{ fontSize: 20, fontWeight: 800, color: '#ef4444', fontFamily: 'JetBrains Mono, Consolas, monospace', marginTop: 2 }}>
               +4.12σ
             </div>
             <div style={{ fontSize: 9, color: '#71717a', marginTop: 2 }}>Baseline: &lt; 3.0σ normal</div>
@@ -210,7 +210,7 @@ export function EmergencySimulationModal() {
             <div style={{ fontSize: 9, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               FIRE RADIATIVE POWER
             </div>
-            <div style={{ fontSize: 20, fontWeight: 800, color: '#fafafa', fontFamily: 'Geist Mono, monospace', marginTop: 2 }}>
+            <div style={{ fontSize: 20, fontWeight: 800, color: '#fafafa', fontFamily: 'JetBrains Mono, Consolas, monospace', marginTop: 2 }}>
               14.2 MW
             </div>
             <div style={{ fontSize: 9, color: '#22c55e', marginTop: 2 }}>Peak: 368.2 K Temp</div>
@@ -220,7 +220,7 @@ export function EmergencySimulationModal() {
             <div style={{ fontSize: 9, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               AI META-CONFIDENCE
             </div>
-            <div style={{ fontSize: 20, fontWeight: 800, color: '#38bdf8', fontFamily: 'Geist Mono, monospace', marginTop: 2 }}>
+            <div style={{ fontSize: 20, fontWeight: 800, color: '#38bdf8', fontFamily: 'JetBrains Mono, Consolas, monospace', marginTop: 2 }}>
               99.8%
             </div>
             <div style={{ fontSize: 9, color: '#71717a', marginTop: 2 }}>Phase 6 Fused Stacking</div>
@@ -247,7 +247,7 @@ export function EmergencySimulationModal() {
               justifyContent: 'center',
               gap: 8,
               cursor: 'pointer',
-              boxShadow: '0 4px 20px rgba(239, 68, 68, 0.45)',
+              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
               transition: 'transform 0.1s, background 0.15s',
             }}
           >
@@ -283,7 +283,7 @@ export function EmergencySimulationModal() {
               justifyContent: 'center',
               gap: 8,
               cursor: 'pointer',
-              boxShadow: '0 2px 14px rgba(249, 115, 22, 0.2)',
+              boxShadow: '0 1px 4px rgba(0, 0, 0, 0.25)',
               transition: 'all 0.15s',
             }}
           >
@@ -325,22 +325,22 @@ export function EmergencySimulationModal() {
             {dispatchStage === 'transmitting' && (
               <>
                 <div style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid rgba(239,68,68,0.3)', borderTopColor: '#ef4444' }} className="animate-spin" />
-                <span style={{ fontFamily: 'Geist Mono, monospace' }}>TRANSMITTING ENCRYPTED TELEMETRY...</span>
+                <span style={{ fontFamily: 'JetBrains Mono, Consolas, monospace' }}>TRANSMITTING ENCRYPTED TELEMETRY...</span>
               </>
             )}
             {dispatchStage === 'delivered' && (
               <>
                 <CheckCircle2 size={15} color="#22c55e" />
-                <span style={{ fontFamily: 'Geist Mono, monospace', fontWeight: 700 }}>PAYLOAD DELIVERED · SDMA ACKNOWLEDGED</span>
+                <span style={{ fontFamily: 'JetBrains Mono, Consolas, monospace', fontWeight: 700 }}>PAYLOAD DELIVERED · SDMA ACKNOWLEDGED</span>
               </>
             )}
           </button>
         </div>
 
         {/* Footer Audit Metadata */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, fontSize: 10, color: '#52525b', fontFamily: 'Geist Mono, monospace' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, fontSize: 10, color: '#52525b', fontFamily: 'JetBrains Mono, Consolas, monospace' }}>
           <span>LIVE SATELLITE AUDIT · VIIRS JPSS-1 · OPEN-METEO SYNC</span>
-          <span onClick={handleDismiss} style={{ color: '#71717a', cursor: 'pointer', fontFamily: 'Space Grotesk, sans-serif', fontSize: 11 }}>
+          <span onClick={handleDismiss} style={{ color: '#71717a', cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 11 }}>
             Dismiss
           </span>
         </div>

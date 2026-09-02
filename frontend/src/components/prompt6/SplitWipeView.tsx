@@ -446,7 +446,7 @@ export function SplitWipeView() {
       >
         <span
           style={{
-            fontFamily: 'Space Grotesk, sans-serif',
+            fontFamily: 'Inter, system-ui, sans-serif',
             fontSize: 11,
             fontWeight: 700,
             letterSpacing: '0.08em',
@@ -461,7 +461,7 @@ export function SplitWipeView() {
 
         <span
           style={{
-            fontFamily: 'Space Grotesk, sans-serif',
+            fontFamily: 'Inter, system-ui, sans-serif',
             fontSize: 11,
             fontWeight: 500,
             letterSpacing: '0.08em',
@@ -479,7 +479,7 @@ export function SplitWipeView() {
               <Wind size={12} color="#38bdf8" />
               <span
                 style={{
-                  fontFamily: 'Geist Mono, ui-monospace, monospace',
+                  fontFamily: 'JetBrains Mono, Consolas, ui-monospace, monospace',
                   fontSize: 10,
                   color: '#38bdf8',
                   fontWeight: 600,
@@ -505,11 +505,11 @@ export function SplitWipeView() {
             zIndex: 45,
             width: 270,
             background: 'rgba(24, 24, 27, 0.94)',
-            backdropFilter: 'blur(12px)',
+            backdropFilter: 'none',
             border: '1px solid rgba(255, 255, 255, 0.1)',
             borderRadius: 16,
             padding: '14px 16px',
-            fontFamily: 'Space Grotesk, sans-serif',
+            fontFamily: 'Inter, system-ui, sans-serif',
             color: '#fafafa',
             boxShadow: '0 12px 32px rgba(0, 0, 0, 0.6)',
           }}
@@ -523,7 +523,7 @@ export function SplitWipeView() {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 6px #22c55e' }} />
-              <span style={{ fontSize: 9, fontFamily: 'Geist Mono, monospace', color: '#86efac', fontWeight: 600 }}>
+              <span style={{ fontSize: 9, fontFamily: 'JetBrains Mono, Consolas, monospace', color: '#86efac', fontWeight: 600 }}>
                 {windData.isLiveApi ? 'LIVE API SYNC' : 'CALIBRATED'}
               </span>
             </div>
@@ -532,13 +532,13 @@ export function SplitWipeView() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 8 }}>
             <div style={{ background: '#18181b', padding: '6px 8px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.05)' }}>
               <div style={{ fontSize: 9, color: '#71717a' }}>WIND VECTOR</div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#38bdf8', fontFamily: 'Geist Mono, monospace' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#38bdf8', fontFamily: 'JetBrains Mono, Consolas, monospace' }}>
                 {windData.speedKmH.toFixed(1)} km/h {windData.compassDir}
               </div>
             </div>
             <div style={{ background: '#18181b', padding: '6px 8px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.05)' }}>
               <div style={{ fontSize: 9, color: '#71717a' }}>RATE OF SPREAD</div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#f59e0b', fontFamily: 'Geist Mono, monospace' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#f59e0b', fontFamily: 'JetBrains Mono, Consolas, monospace' }}>
                 {windData.rateOfSpreadMPerHr} m/hr
               </div>
             </div>
@@ -548,11 +548,11 @@ export function SplitWipeView() {
           <div style={{ background: '#131316', padding: '6px 8px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.05)', marginBottom: 8, fontSize: 10 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', color: '#a1a1aa', marginBottom: 2 }}>
               <span>TEMP / HUMIDITY</span>
-              <span style={{ color: '#fafafa', fontFamily: 'Geist Mono, monospace' }}>{windData.tempC}°C · {windData.humidityPct}% RH</span>
+              <span style={{ color: '#fafafa', fontFamily: 'JetBrains Mono, Consolas, monospace' }}>{windData.tempC}°C · {windData.humidityPct}% RH</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', color: '#a1a1aa' }}>
               <span>SMOKE PM2.5 / AOD</span>
-              <span style={{ color: '#f87171', fontFamily: 'Geist Mono, monospace' }}>{windData.pm25.toFixed(1)} µg/m³ · {windData.aod.toFixed(2)}</span>
+              <span style={{ color: '#f87171', fontFamily: 'JetBrains Mono, Consolas, monospace' }}>{windData.pm25.toFixed(1)} µg/m³ · {windData.aod.toFixed(2)}</span>
             </div>
           </div>
 
@@ -562,21 +562,21 @@ export function SplitWipeView() {
                 <span style={{ width: 8, height: 8, borderRadius: 2, background: '#ef4444' }} />
                 <span style={{ color: '#d4d4d8' }}>1-Hr Immediate Hazard</span>
               </div>
-              <span style={{ fontFamily: 'Geist Mono, monospace', color: '#ef4444', fontWeight: 600 }}>0.8 km</span>
+              <span style={{ fontFamily: 'JetBrains Mono, Consolas, monospace', color: '#ef4444', fontWeight: 600 }}>0.8 km</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 10 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ width: 8, height: 8, borderRadius: 2, background: '#f97316' }} />
                 <span style={{ color: '#d4d4d8' }}>3-Hr Threat Corridor</span>
               </div>
-              <span style={{ fontFamily: 'Geist Mono, monospace', color: '#f97316', fontWeight: 600 }}>2.4 km</span>
+              <span style={{ fontFamily: 'JetBrains Mono, Consolas, monospace', color: '#f97316', fontWeight: 600 }}>2.4 km</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 10 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ width: 8, height: 8, borderRadius: 2, background: '#f59e0b' }} />
                 <span style={{ color: '#d4d4d8' }}>6-Hr Evacuation Perimeter</span>
               </div>
-              <span style={{ fontFamily: 'Geist Mono, monospace', color: '#f59e0b', fontWeight: 600 }}>4.8 km</span>
+              <span style={{ fontFamily: 'JetBrains Mono, Consolas, monospace', color: '#f59e0b', fontWeight: 600 }}>4.8 km</span>
             </div>
           </div>
 
@@ -613,7 +613,7 @@ export function SplitWipeView() {
               key={id}
               onClick={() => setMode(id)}
               style={{
-                fontFamily: 'Space Grotesk, sans-serif',
+                fontFamily: 'Inter, system-ui, sans-serif',
                 fontSize: 11,
                 fontWeight: isActive ? 600 : 500,
                 letterSpacing: '0.06em',
@@ -646,7 +646,7 @@ export function SplitWipeView() {
           border: '1px solid rgba(255,255,255,0.06)',
           borderRadius: 9999,
           padding: '6px 12px',
-          fontFamily: 'Space Grotesk, sans-serif',
+          fontFamily: 'Inter, system-ui, sans-serif',
           fontSize: 10,
           color: '#71717a',
           cursor: 'default',

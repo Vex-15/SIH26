@@ -232,7 +232,7 @@ export function DiurnalPlaybackController() {
                 padding: '6px 14px',
                 color: '#ffffff',
                 fontSize: 12,
-                fontFamily: 'Space Grotesk, sans-serif',
+                fontFamily: 'Inter, system-ui, sans-serif',
                 fontWeight: 500,
                 cursor: 'pointer',
                 transition: 'background 0.15s ease, border-color 0.15s ease',
@@ -249,7 +249,7 @@ export function DiurnalPlaybackController() {
               <CalIcon size={14} color="#9ca3af" />
               <span>{dateRangeDisplay}</span>
               <span style={{ color: '#52525b', margin: '0 2px' }}>·</span>
-              <span style={{ color: '#f59e0b', fontFamily: 'Geist Mono, monospace', fontWeight: 700 }}>
+              <span style={{ color: '#f59e0b', fontFamily: 'JetBrains Mono, Consolas, monospace', fontWeight: 700 }}>
                 {dayStats.total.toLocaleString()} HOTSPOTS
               </span>
               <ChevronDown size={14} color="#9ca3af" />
@@ -430,7 +430,7 @@ export function DiurnalPlaybackController() {
                   padding: '4px 12px',
                   color: '#ffffff',
                   fontSize: 12,
-                  fontFamily: 'Geist Mono, monospace',
+                  fontFamily: 'JetBrains Mono, Consolas, monospace',
                   fontWeight: 600,
                   cursor: 'pointer',
                   marginLeft: 4,
@@ -564,7 +564,7 @@ export function DiurnalPlaybackController() {
                   display: 'flex',
                   justifyContent: 'space-between',
                   fontSize: 9,
-                  fontFamily: 'Geist Mono, monospace',
+                  fontFamily: 'JetBrains Mono, Consolas, monospace',
                   color: '#666666',
                   pointerEvents: 'none',
                 }}
@@ -591,7 +591,7 @@ export function DiurnalPlaybackController() {
             >
               <span
                 style={{
-                  fontFamily: 'Geist Mono, monospace',
+                  fontFamily: 'JetBrains Mono, Consolas, monospace',
                   fontSize: 15,
                   fontWeight: 700,
                   color: '#ffffff',
@@ -604,7 +604,7 @@ export function DiurnalPlaybackController() {
               </span>
               <span
                 style={{
-                  fontFamily: 'Geist Mono, monospace',
+                  fontFamily: 'JetBrains Mono, Consolas, monospace',
                   fontSize: 11,
                   fontWeight: 500,
                   color: '#888888',

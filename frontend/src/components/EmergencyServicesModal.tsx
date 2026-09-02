@@ -97,14 +97,18 @@ export function EmergencyServicesModal() {
     setSelectedEmergencyRoute(station);
 
     // If map is available, fit bounds to include incident and station
-    if (map) {
+    if (map && (window as any).maplibregl?.LngLatBounds) {
       const bounds = new (window as any).maplibregl.LngLatBounds();
       bounds.extend([incidentLon, incidentLat]);
       bounds.extend([station.lon, station.lat]);
       for (const coord of station.routeGeometry) {
         bounds.extend(coord);
       }
-      map.fitBounds(bounds, { padding: 100, maxZoom: 14, duration: 1000 });
+      try {
+        map.fitBounds(bounds, { padding: 100, maxZoom: 14, duration: 1000 });
+      } catch (e) {
+        console.warn('Map bounds fitting failed:', e);
+      }
     }
   };
 
@@ -162,7 +166,7 @@ export function EmergencyServicesModal() {
           position: 'fixed',
           inset: 0,
           background: 'rgba(5, 5, 8, 0.72)',
-          backdropFilter: 'blur(8px)',
+          backdropFilter: 'none',
           zIndex: 1010,
         }}
       />
@@ -184,12 +188,12 @@ export function EmergencyServicesModal() {
           maxHeight: '88vh',
           display: 'flex',
           flexDirection: 'column',
-          background: '#121316',
-          border: '1.5px solid rgba(239, 68, 68, 0.38)',
-          borderRadius: 22,
-          boxShadow: '0 30px 90px rgba(0, 0, 0, 0.9), 0 0 45px rgba(239, 68, 68, 0.18)',
-          fontFamily: 'Space Grotesk, sans-serif',
-          color: '#fafafa',
+          background: 'var(--neu-base)',
+          border: 'none',
+          borderRadius: 'var(--r-lg)',
+          boxShadow: 'var(--neu-shadow-out)',
+          fontFamily: 'var(--font-ui)',
+          color: 'var(--neu-text-strong)',
           overflow: 'hidden',
         }}
       >
@@ -197,8 +201,8 @@ export function EmergencyServicesModal() {
         <div
           style={{
             padding: '20px 24px 16px',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-            background: 'linear-gradient(180deg, rgba(239, 68, 68, 0.12) 0%, rgba(18, 19, 22, 0) 100%)',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+            background: 'var(--neu-base)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
@@ -207,14 +211,13 @@ export function EmergencyServicesModal() {
                 style={{
                   width: 44,
                   height: 44,
-                  borderRadius: 12,
-                  background: 'rgba(239, 68, 68, 0.18)',
-                  border: '1.5px solid rgba(239, 68, 68, 0.5)',
+                  borderRadius: 'var(--r-md)',
+                  background: 'var(--neu-base-raised)',
+                  boxShadow: 'var(--neu-shadow-out-sm)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#ef4444',
-                  boxShadow: '0 0 20px rgba(239, 68, 68, 0.35)',
+                  color: 'var(--accent)',
                 }}
               >
                 <Truck size={22} />
@@ -224,24 +227,24 @@ export function EmergencyServicesModal() {
                   <span
                     style={{
                       fontSize: 10,
-                      fontWeight: 800,
+                      fontWeight: 700,
                       letterSpacing: '0.08em',
                       textTransform: 'uppercase',
-                      color: '#ef4444',
-                      background: 'rgba(239, 68, 68, 0.15)',
-                      padding: '2px 8px',
-                      borderRadius: 999,
-                      border: '1px solid rgba(239, 68, 68, 0.35)',
+                      color: 'var(--neu-text-muted)',
+                      background: 'var(--neu-base-raised)',
+                      padding: '3px 10px',
+                      borderRadius: 'var(--r-sm)',
+                      boxShadow: 'var(--neu-shadow-in-sm)',
                     }}
                   >
                     OSM OVERPASS · OSRM ROUTING ENGINE
                   </span>
-                  <span style={{ fontSize: 11, fontFamily: 'Geist Mono, monospace', color: '#22c55e', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e' }} className="animate-ping" />
+                  <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)' }} className="animate-ping" />
                     LIVE ETA CALCULATION
                   </span>
                 </div>
-                <h2 style={{ fontSize: 18, fontWeight: 700, margin: '4px 0 0', color: '#ffffff' }}>
+                <h2 style={{ fontSize: 18, fontWeight: 700, margin: '4px 0 0', color: 'var(--neu-text-strong)' }}>
                   Nearest Emergency Services & First Responder Dispatch
                 </h2>
               </div>
@@ -250,12 +253,13 @@ export function EmergencyServicesModal() {
             <button
               onClick={() => setEmergencyServicesOpen(false)}
               style={{
-                background: 'transparent',
+                background: 'var(--neu-base)',
                 border: 'none',
-                color: '#a1a1aa',
+                color: 'var(--neu-text)',
                 cursor: 'pointer',
                 padding: 6,
-                borderRadius: 8,
+                borderRadius: 'var(--r-sm)',
+                boxShadow: 'var(--neu-shadow-out-sm)',
               }}
             >
               <X size={20} />
@@ -268,35 +272,36 @@ export function EmergencyServicesModal() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              background: 'rgba(255, 255, 255, 0.04)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: 12,
+              background: 'var(--neu-base-raised)',
+              border: 'none',
+              borderRadius: 'var(--r-md)',
               padding: '10px 14px',
               marginTop: 14,
               fontSize: 12,
+              boxShadow: 'var(--neu-shadow-out-sm)',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <MapPin size={15} color="#ef4444" />
-              <span style={{ fontWeight: 600, color: '#fafafa' }}>{incidentName}</span>
-              <span style={{ fontFamily: 'Geist Mono, monospace', color: '#a1a1aa' }}>
+              <MapPin size={15} color="var(--accent)" />
+              <span style={{ fontWeight: 600, color: 'var(--neu-text-strong)' }}>{incidentName}</span>
+              <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--neu-text)' }}>
                 ({incidentLat.toFixed(4)}° N, {incidentLon.toFixed(4)}° E)
               </span>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontFamily: 'Geist Mono, monospace', fontSize: 11 }}>
-              <span style={{ color: '#fb923c' }}>FRP: {incidentFrp.toFixed(1)} MW</span>
-              <span style={{ color: '#ef4444' }}>Z-Score: +{incidentZScore.toFixed(2)}σ</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#71717a' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontFamily: 'var(--font-mono)', fontSize: 11 }}>
+              <span style={{ color: 'var(--accent)' }}>FRP: {incidentFrp.toFixed(1)} MW</span>
+              <span style={{ color: 'var(--wildfire)' }}>Z-Score: +{incidentZScore.toFixed(2)}σ</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--neu-text)' }}>
                 <span>Radius:</span>
                 <select
                   value={searchRadiusKm}
                   onChange={(e) => setSearchRadiusKm(Number(e.target.value))}
                   style={{
-                    background: '#222328',
-                    border: '1px solid rgba(255,255,255,0.15)',
-                    color: '#fafafa',
-                    borderRadius: 6,
+                    background: 'var(--neu-base-raised)',
+                    border: '1px solid var(--surface-border)',
+                    color: 'var(--neu-text-strong)',
+                    borderRadius: 'var(--r-sm)',
                     padding: '2px 6px',
                     fontSize: 11,
                     cursor: 'pointer',
@@ -318,8 +323,8 @@ export function EmergencyServicesModal() {
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '12px 24px',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
-            background: '#16171b',
+            borderBottom: '1px solid var(--surface-border)',
+            background: 'var(--neu-base)',
           }}
         >
           <div style={{ display: 'flex', gap: 8 }}>
@@ -327,10 +332,10 @@ export function EmergencyServicesModal() {
               onClick={() => setActiveTab('all')}
               style={{
                 padding: '6px 14px',
-                borderRadius: 8,
-                border: activeTab === 'all' ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.08)',
-                background: activeTab === 'all' ? 'rgba(239, 68, 68, 0.15)' : 'transparent',
-                color: activeTab === 'all' ? '#ffffff' : '#a1a1aa',
+                borderRadius: 'var(--r-sm)',
+                border: 'none',
+                background: activeTab === 'all' ? 'var(--accent-subtle)' : 'transparent',
+                color: activeTab === 'all' ? 'var(--accent)' : 'var(--neu-text)',
                 fontSize: 12,
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -342,10 +347,10 @@ export function EmergencyServicesModal() {
               onClick={() => setActiveTab('fire')}
               style={{
                 padding: '6px 14px',
-                borderRadius: 8,
-                border: activeTab === 'fire' ? '1px solid #f97316' : '1px solid rgba(255,255,255,0.08)',
-                background: activeTab === 'fire' ? 'rgba(249, 115, 22, 0.15)' : 'transparent',
-                color: activeTab === 'fire' ? '#ffffff' : '#a1a1aa',
+                borderRadius: 'var(--r-sm)',
+                border: 'none',
+                background: activeTab === 'fire' ? 'var(--agricultural)' : 'transparent',
+                color: activeTab === 'fire' ? '#000000' : 'var(--neu-text)',
                 fontSize: 12,
                 fontWeight: 600,
                 display: 'flex',
@@ -354,17 +359,17 @@ export function EmergencyServicesModal() {
                 cursor: 'pointer',
               }}
             >
-              <Truck size={14} color="#f97316" />
+              <Truck size={14} color={activeTab === 'fire' ? '#000000' : 'var(--agricultural)'} />
               <span>Fire Stations ({emergencyServicesList.filter((s) => s.type === 'fire_station').length})</span>
             </button>
             <button
               onClick={() => setActiveTab('hospital')}
               style={{
                 padding: '6px 14px',
-                borderRadius: 8,
-                border: activeTab === 'hospital' ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.08)',
-                background: activeTab === 'hospital' ? 'rgba(56, 189, 248, 0.15)' : 'transparent',
-                color: activeTab === 'hospital' ? '#ffffff' : '#a1a1aa',
+                borderRadius: 'var(--r-sm)',
+                border: 'none',
+                background: activeTab === 'hospital' ? 'var(--industrial)' : 'transparent',
+                color: activeTab === 'hospital' ? '#000000' : 'var(--neu-text)',
                 fontSize: 12,
                 fontWeight: 600,
                 display: 'flex',
@@ -373,7 +378,7 @@ export function EmergencyServicesModal() {
                 cursor: 'pointer',
               }}
             >
-              <Building2 size={14} color="#38bdf8" />
+              <Building2 size={14} color={activeTab === 'hospital' ? '#000000' : 'var(--industrial)'} />
               <span>Hospitals & Trauma ({emergencyServicesList.filter((s) => s.type === 'hospital').length})</span>
             </button>
             {totalDispatchedCount > 0 && (
@@ -381,10 +386,10 @@ export function EmergencyServicesModal() {
                 onClick={() => setActiveTab('dispatched')}
                 style={{
                   padding: '6px 14px',
-                  borderRadius: 8,
-                  border: activeTab === 'dispatched' ? '1px solid #22c55e' : '1px solid rgba(34,197,94,0.3)',
-                  background: activeTab === 'dispatched' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(34, 197, 94, 0.06)',
-                  color: '#22c55e',
+                  borderRadius: 'var(--r-sm)',
+                  border: 'none',
+                  background: activeTab === 'dispatched' ? 'var(--accent-subtle)' : 'transparent',
+                  color: activeTab === 'dispatched' ? 'var(--accent)' : 'var(--neu-text)',
                   fontSize: 12,
                   fontWeight: 600,
                   display: 'flex',
@@ -400,7 +405,7 @@ export function EmergencyServicesModal() {
           </div>
 
           {isFetchingEmergencyServices && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#38bdf8', fontFamily: 'Geist Mono, monospace' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--accent)', fontFamily: 'var(--font-mono)' }}>
               <RefreshCw size={13} className="animate-spin" />
               <span>Computing OSRM Drive Routes...</span>
             </div>
@@ -410,7 +415,7 @@ export function EmergencyServicesModal() {
         {/* ── Station List Body ── */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 24px', display: 'flex', flexDirection: 'column', gap: 12 }}>
           {filteredList.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px 20px', color: '#71717a' }}>
+            <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--neu-text-disabled)' }}>
               <Building2 size={36} style={{ margin: '0 auto 10px', opacity: 0.4 }} />
               <p style={{ margin: 0, fontSize: 13 }}>No emergency facilities found matching filter.</p>
             </div>
@@ -419,28 +424,27 @@ export function EmergencyServicesModal() {
               const isDispatched = Boolean(dispatchedStations[station.id]);
               const isSelectedRoute = selectedEmergencyRoute?.id === station.id;
               const isFire = station.type === 'fire_station';
-              const themeColor = isFire ? '#f97316' : '#38bdf8';
+              const themeColor = isFire ? 'var(--agricultural)' : 'var(--industrial)';
 
               return (
                 <div
                   key={station.id}
                   style={{
                     background: isSelectedRoute
-                      ? 'rgba(255, 255, 255, 0.07)'
-                      : 'rgba(255, 255, 255, 0.03)',
-                    border: isSelectedRoute
-                      ? `1.5px solid ${themeColor}`
-                      : isDispatched
-                      ? '1px solid rgba(34, 197, 94, 0.4)'
-                      : '1px solid rgba(255, 255, 255, 0.08)',
-                    borderRadius: 14,
+                      ? 'var(--neu-base-raised)'
+                      : 'var(--neu-base)',
+                    borderRadius: 'var(--r-md)',
                     padding: '14px 18px',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: 10,
                     transition: 'all 0.2s',
                     position: 'relative',
-                    overflow: 'hidden',
+                    overflow: 'visible',
+                    boxShadow: 'var(--neu-shadow-out-sm)',
+                    border: isSelectedRoute
+                      ? `2px solid ${themeColor}`
+                      : '1px solid var(--surface-border)',
                   }}
                 >
                   {/* Left accent indicator */}
@@ -451,7 +455,7 @@ export function EmergencyServicesModal() {
                       bottom: 0,
                       left: 0,
                       width: 4,
-                      background: isDispatched ? '#22c55e' : themeColor,
+                      background: isDispatched ? 'var(--accent)' : themeColor,
                     }}
                   />
 
@@ -463,8 +467,8 @@ export function EmergencyServicesModal() {
                           width: 36,
                           height: 36,
                           borderRadius: 10,
-                          background: `${themeColor}18`,
-                          border: `1px solid ${themeColor}44`,
+                          background: `${themeColor}20`,
+                          border: `1px solid ${themeColor}50`,
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -476,7 +480,7 @@ export function EmergencyServicesModal() {
 
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <span style={{ fontSize: 15, fontWeight: 700, color: '#ffffff' }}>
+                          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--neu-text-strong)' }}>
                             {station.name}
                           </span>
                           <span
@@ -502,7 +506,7 @@ export function EmergencyServicesModal() {
                                 padding: '2px 6px',
                                 borderRadius: 4,
                                 background: 'rgba(34, 197, 94, 0.18)',
-                                color: '#22c55e',
+                                color: 'var(--accent)',
                                 border: '1px solid rgba(34, 197, 94, 0.4)',
                               }}
                             >
@@ -511,8 +515,8 @@ export function EmergencyServicesModal() {
                           )}
                         </div>
 
-                        <div style={{ fontSize: 11, color: '#a1a1aa', marginTop: 2 }}>
-                          {station.address} · <span style={{ fontFamily: 'Geist Mono, monospace', color: '#71717a' }}>{station.phone}</span>
+                        <div style={{ fontSize: 11, color: 'var(--neu-text)', marginTop: 2 }}>
+                          {station.address} · <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--neu-text-muted)' }}>{station.phone}</span>
                         </div>
                       </div>
                     </div>
@@ -524,8 +528,8 @@ export function EmergencyServicesModal() {
                           style={{
                             fontSize: 18,
                             fontWeight: 800,
-                            fontFamily: 'Geist Mono, monospace',
-                            color: isDispatched ? '#22c55e' : '#fafafa',
+                            fontFamily: 'JetBrains Mono, Consolas, monospace',
+                            color: isDispatched ? 'var(--accent)' : 'var(--neu-text-strong)',
                             display: 'flex',
                             alignItems: 'center',
                             gap: 4,
@@ -535,7 +539,7 @@ export function EmergencyServicesModal() {
                           <Clock size={15} color={isDispatched ? '#22c55e' : themeColor} />
                           <span>ETA {station.etaMinutes} min</span>
                         </div>
-                        <div style={{ fontSize: 11, color: '#71717a', fontFamily: 'Geist Mono, monospace' }}>
+                        <div style={{ fontSize: 11, color: 'var(--neu-text-muted)', fontFamily: 'var(--font-mono)' }}>
                           {station.distanceKm} km · via OSRM Drive Route
                         </div>
                       </div>
@@ -552,9 +556,10 @@ export function EmergencyServicesModal() {
                           fontWeight: 600,
                           padding: '3px 8px',
                           borderRadius: 6,
-                          background: 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid rgba(255, 255, 255, 0.08)',
-                          color: '#d4d4d8',
+                          background: 'var(--neu-base-raised)',
+                          border: 'none',
+                          color: 'var(--neu-text-em)',
+                          boxShadow: 'var(--neu-shadow-in-sm)',
                         }}
                       >
                         🛡️ {unit}
@@ -570,7 +575,9 @@ export function EmergencyServicesModal() {
                       justifyContent: 'space-between',
                       marginTop: 6,
                       paddingTop: 8,
-                      borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                      borderTop: '1px solid var(--surface-border)',
+                      gap: 8,
+                      flexWrap: 'wrap',
                     }}
                   >
                     {/* View route toggle */}
@@ -578,10 +585,10 @@ export function EmergencyServicesModal() {
                       onClick={() => handleSelectRoute(station)}
                       style={{
                         padding: '6px 12px',
-                        borderRadius: 8,
-                        border: isSelectedRoute ? `1px solid ${themeColor}` : '1px solid rgba(255, 255, 255, 0.12)',
-                        background: isSelectedRoute ? `${themeColor}22` : 'rgba(255, 255, 255, 0.04)',
-                        color: isSelectedRoute ? themeColor : '#a1a1aa',
+                        borderRadius: 'var(--r-sm)',
+                        border: isSelectedRoute ? `2px solid ${themeColor}` : 'none',
+                        background: isSelectedRoute ? `${themeColor}20` : 'var(--neu-base-raised)',
+                        color: isSelectedRoute ? themeColor : 'var(--neu-text-em)',
                         fontSize: 11,
                         fontWeight: 600,
                         display: 'flex',
@@ -589,6 +596,7 @@ export function EmergencyServicesModal() {
                         gap: 6,
                         cursor: 'pointer',
                         transition: 'all 0.15s',
+                        boxShadow: isSelectedRoute ? 'none' : 'var(--neu-shadow-in-sm)',
                       }}
                     >
                       <Navigation size={13} />
@@ -601,21 +609,19 @@ export function EmergencyServicesModal() {
                       disabled={isDispatched || dispatchingId === station.id}
                       style={{
                         padding: '7px 16px',
-                        borderRadius: 8,
-                        border: isDispatched
-                          ? '1px solid rgba(34, 197, 94, 0.5)'
-                          : `1px solid ${themeColor}`,
+                        borderRadius: 'var(--r-sm)',
+                        border: 'none',
                         background: isDispatched
-                          ? 'rgba(34, 197, 94, 0.12)'
-                          : themeColor,
-                        color: isDispatched ? '#22c55e' : '#ffffff',
+                          ? 'var(--accent-subtle)'
+                          : 'var(--accent)',
+                        color: isDispatched ? 'var(--accent)' : '#000000',
                         fontSize: 12,
                         fontWeight: 700,
                         display: 'flex',
                         alignItems: 'center',
                         gap: 6,
                         cursor: isDispatched ? 'default' : 'pointer',
-                        boxShadow: isDispatched ? 'none' : `0 2px 14px ${themeColor}66`,
+                        boxShadow: isDispatched ? 'var(--neu-shadow-in-sm)' : 'var(--neu-shadow-out-sm)',
                         transition: 'all 0.15s',
                       }}
                     >
@@ -670,11 +676,11 @@ export function EmergencyServicesModal() {
                 cursor: 'pointer',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#22c55e', fontWeight: 600 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--accent)', fontWeight: 600 }}>
                 <Radio size={15} />
                 <span>TELEGRAM EMERGENCY WEBHOOK TRANSMITTED · {lastTelegramPayload.authCode}</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#71717a' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--neu-text-muted)' }}>
                 <span>{showTelegramReceipt ? 'Hide Transmission Receipt' : 'View Payload Receipt'}</span>
                 {showTelegramReceipt ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
               </div>
@@ -694,7 +700,7 @@ export function EmergencyServicesModal() {
                     borderRadius: 8,
                     padding: '10px 14px',
                     fontSize: 11,
-                    fontFamily: 'Geist Mono, monospace',
+                    fontFamily: 'JetBrains Mono, Consolas, monospace',
                     color: '#86efac',
                     overflowX: 'auto',
                     whiteSpace: 'pre-wrap',
@@ -712,27 +718,28 @@ export function EmergencyServicesModal() {
         <div
           style={{
             padding: '12px 24px',
-            background: '#101114',
-            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+            background: 'var(--neu-base)',
+            borderTop: '1px solid var(--surface-border)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             fontSize: 11,
-            color: '#71717a',
-            fontFamily: 'Geist Mono, monospace',
+            color: 'var(--neu-text-muted)',
+            fontFamily: 'var(--font-mono)',
           }}
         >
           <span>OSM OVERPASS QL · PROJECT OSRM ROUTER · PROTOCOL V3</span>
           <button
             onClick={() => setEmergencyServicesOpen(false)}
             style={{
-              background: 'transparent',
-              border: '1px solid rgba(255,255,255,0.12)',
-              color: '#fafafa',
-              borderRadius: 6,
+              background: 'var(--neu-base-raised)',
+              border: 'none',
+              color: 'var(--neu-text-strong)',
+              borderRadius: 'var(--r-sm)',
               padding: '4px 12px',
               fontSize: 11,
               cursor: 'pointer',
+              boxShadow: 'var(--neu-shadow-out-sm)',
             }}
           >
             Close Grid

@@ -148,8 +148,8 @@ export function CalendarPopover() {
           border: '1px solid rgba(255, 255, 255, 0.12)',
           borderRadius: 18,
           padding: '16px 18px',
-          boxShadow: '0 24px 50px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.5)',
-          fontFamily: 'Space Grotesk, sans-serif',
+          boxShadow: '0 4px 10px rgba(0, 0, 0, 0.4)',
+          fontFamily: 'Inter, system-ui, sans-serif',
           color: '#fafafa',
         }}
       >
@@ -231,7 +231,7 @@ export function CalendarPopover() {
             padding: '6px 10px',
             marginBottom: 12,
             fontSize: 11,
-            fontFamily: 'Geist Mono, monospace',
+            fontFamily: 'JetBrains Mono, Consolas, monospace',
             color: '#f59e0b',
             display: 'flex',
             alignItems: 'center',
@@ -265,7 +265,7 @@ export function CalendarPopover() {
           >
             <ChevronLeft size={16} />
           </button>
-          <span style={{ fontSize: 13, fontWeight: 700, fontFamily: 'Geist Mono, monospace' }}>
+          <span style={{ fontSize: 13, fontWeight: 700, fontFamily: 'JetBrains Mono, Consolas, monospace' }}>
             {monthNames[activeMonth]} {activeYear}
           </span>
           <button
@@ -347,7 +347,7 @@ export function CalendarPopover() {
                   background: bgColor,
                   color: textColor,
                   fontSize: 11,
-                  fontFamily: 'Geist Mono, monospace',
+                  fontFamily: 'JetBrains Mono, Consolas, monospace',
                   fontWeight: isInRange || isHighDensity ? 700 : 400,
                   cursor: 'pointer',
                   position: 'relative',
