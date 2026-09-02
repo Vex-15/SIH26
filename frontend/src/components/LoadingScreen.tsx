@@ -36,11 +36,11 @@ export function LoadingScreen() {
     }
   }, [isMapReady]);
 
-  // Safety fallback: Never keep user locked out longer than 5 seconds
+  // Safety fallback: Never keep user locked out longer than 10 seconds
   useEffect(() => {
     const fallback = setTimeout(() => {
       setShow(false);
-    }, 5000);
+    }, 10000);
     return () => clearTimeout(fallback);
   }, []);
 
@@ -58,16 +58,18 @@ export function LoadingScreen() {
             zIndex: 99999,
             backgroundColor: '#000000',
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
+            gap: '16px',
             pointerEvents: 'all',
           }}
         >
           {/* Minimalist white progress bar on pure black background */}
           <div
             style={{
-              width: '260px',
-              maxWidth: '75vw',
+              width: '280px',
+              maxWidth: '80vw',
               height: '3px',
               backgroundColor: 'rgba(255, 255, 255, 0.12)',
               borderRadius: '9999px',
@@ -86,6 +88,42 @@ export function LoadingScreen() {
               transition={{ duration: 0.2, ease: 'easeOut' }}
             />
           </div>
+
+          {/* Slower machine notice */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '4px',
+              textAlign: 'center',
+              fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+            }}
+          >
+            <span
+              style={{
+                fontSize: '12px',
+                fontWeight: 450,
+                letterSpacing: '0.3px',
+                color: 'rgba(255, 255, 255, 0.6)',
+              }}
+            >
+              Please allow 5–10 seconds for full website to initialize
+            </span>
+            <span
+              style={{
+                fontSize: '11px',
+                fontWeight: 400,
+                letterSpacing: '0.2px',
+                color: 'rgba(255, 255, 255, 0.38)',
+              }}
+            >
+              (refreshing would help with load speeds)
+            </span>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
