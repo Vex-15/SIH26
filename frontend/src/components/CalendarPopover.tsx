@@ -46,7 +46,9 @@ export function CalendarPopover() {
     startDate, 
     endDate, 
     setDateRange,
-    setPlaybackControllerOpen 
+    setPlaybackControllerOpen,
+    setCurrentHour,
+    setIsPlaying,
   } = useAppStore();
 
   const [activeMonth, setActiveMonth] = useState<number>(() => {
@@ -113,6 +115,8 @@ export function CalendarPopover() {
   const handleDayClick = (dateStr: string) => {
     if (rangeMode === 'single') {
       setDateRange(dateStr, dateStr);
+      setCurrentHour(0);
+      setIsPlaying(false);
       setPlaybackControllerOpen(true);
     } else {
       if (!selectingEnd) {
@@ -125,6 +129,8 @@ export function CalendarPopover() {
           setDateRange(dateStr, startDate);
         }
         setSelectingEnd(false);
+        setCurrentHour(0);
+        setIsPlaying(false);
         setPlaybackControllerOpen(true);
       }
     }
@@ -392,6 +398,8 @@ export function CalendarPopover() {
                     const [y, m] = p.start.split('-');
                     setActiveYear(parseInt(y, 10));
                     setActiveMonth(parseInt(m, 10) - 1);
+                    setCurrentHour(0);
+                    setIsPlaying(false);
                     setPlaybackControllerOpen(true);
                   }}
                   style={{

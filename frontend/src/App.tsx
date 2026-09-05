@@ -16,6 +16,8 @@ import { DiurnalPlaybackController } from './components/prompt7/DiurnalPlaybackC
 import { SplitWipeView } from './components/prompt6/SplitWipeView';
 import { ExportModal } from './components/ExportModal';
 import { LoadingScreen } from './components/LoadingScreen';
+import { SimulationTimelineFAB } from './components/SimulationTimelineFAB';
+import { SimulationTopBanner } from './components/SimulationTopBanner';
 import { useAppStore } from './store/useAppStore';
 import { useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
@@ -63,6 +65,10 @@ export default function App() {
 
       {/* ── Layer 5: 24-Hour Diurnal Playback Controller (Prompt 7) ── */}
       <DiurnalPlaybackController />
+
+      {/* ── Layer 5.5: Simulation-Exclusive Controls (Bottom-Left FAB & Top Exit Banner) ── */}
+      <SimulationTimelineFAB />
+      <SimulationTopBanner />
 
       {/* ── Layer 6: Anomaly Override Alert Modal ── */}
       <AnomalyAlertModal />

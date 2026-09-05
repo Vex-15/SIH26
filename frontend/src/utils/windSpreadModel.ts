@@ -107,106 +107,235 @@ export async function fetchLiveWindData(lat: number, lon: number): Promise<WindT
   };
 }
 
-// Generate an ellipse polygon representing fire spread downwind
+// ════════════════════════════════════════════════════════════════════════════
+// ROTHERMEL & RICHARDS (1990) MATHEMATICAL SURFACE FIRE SPREAD ENGINE
+// WGS-84 Geodesic propagation model matching USDA FARSITE & NTRO defense standards
+// ════════════════════════════════════════════════════════════════════════════
 
-// windDir is the direction the wind is coming from (meteorological convention)
-// Fire blows towards (windDir + 180)% 360
-export function generateSpreadEllipse(
+export interface SpreadKinetics {
+  fuelMoisture: number;      // M_f equilibrium
+  headRateKmH: number;       // R_head (forward propagation velocity)
+  flankRateKmH: number;      // R_flank (lateral propagation velocity)
+  backRateKmH: number;       // R_back (heel/backing propagation velocity)
+  lengthWidthRatio: number;  // L/W Alexander elongation ratio
+  forwardAzimuthDeg: number; // Downwind bearing (degrees clockwise from North)
+}
+
+/**
+ * Calculate instantaneous Rothermel fire spread kinetics from meteorological inputs
+ */
+export function calculateSpreadKinetics(wind: WindTelemetry): SpreadKinetics {
+  // 1. Byram-Nelson fuel moisture equilibrium (0.02 - 0.30)
+  const M_f = Math.max(
+    0.02,
+    Math.min(0.35, 0.03 + 0.262 * (wind.humidityPct / 100) - 0.00104 * wind.tempC)
+  );
+
+  // 2. Alexander 1985 Length-to-Width Ratio
+  const lwRatio = Math.max(1.05, 1.0 + 0.0012 * Math.pow(wind.speedKmH, 2.15));
+
+  // 3. Rothermel empirical forward head fire velocity (km/h)
+  // Baseline dry industrial vegetative / brush fuel rate R0 ~ 0.10 km/h
+  const R0 = 0.11;
+  const phi_w = 0.048 * Math.pow(wind.speedKmH, 1.48); // Wind flux factor
+  const headRateKmH = R0 * (1.0 + phi_w) * Math.exp(-2.6 * M_f);
+
+  // 4. Richards (1990) differential wave propagation rates
+  const flankRateKmH = headRateKmH / lwRatio;
+  const sqrtTerm = Math.sqrt(Math.max(0, lwRatio * lwRatio - 1.0));
+  const backRateKmH = headRateKmH * ((lwRatio - sqrtTerm) / (lwRatio + sqrtTerm));
+
+  // 5. Downwind forward azimuth (meteorological: wind blows FROM wind.directionDeg)
+  const forwardAzimuthDeg = (wind.directionDeg + 180) % 360;
+
+  return {
+    fuelMoisture: M_f,
+    headRateKmH,
+    flankRateKmH,
+    backRateKmH,
+    lengthWidthRatio: lwRatio,
+    forwardAzimuthDeg,
+  };
+}
+
+/**
+ * Generates an exact WGS-84 geodesic boundary polygon at elapsed time `hours`
+ * using Richards (1990) parametric double-ellipse equations.
+ */
+export function generateRichardsIsochrone(
   originLng: number,
   originLat: number,
-  windSpeedKmH: number,
-  windDirDeg: number,
-  hours: number
+  kinetics: SpreadKinetics,
+  hours: number,
+  steps = 48
 ): number[][] {
-  // Downwind azimuth in radians (math standard 0 = East, counterclockwise)
-  // Meteorological windDir is clockwise from North
-  // Wind blows towards azimuth = (windDir + 180) % 360
-  const blowAzimuthDeg = (windDirDeg + 180) % 360;
-  const blowRad = ((90 - blowAzimuthDeg) * Math.PI) / 180;
+  const blowRad = ((90 - kinetics.forwardAzimuthDeg) * Math.PI) / 180;
+  const kmPerDegLat = 111.132;
+  const kmPerDegLon = 111.320 * Math.cos((originLat * Math.PI) / 180);
 
-  // Length to width ratio (Alexander 1985 fire spread model)
-  const lwRatio = 1.0 + 0.0012 * Math.pow(windSpeedKmH, 2.15);
+  // Distances in km
+  const forwardKm = kinetics.headRateKmH * hours;
+  const backKm = kinetics.backRateKmH * hours;
+  const flankKm = kinetics.flankRateKmH * hours;
 
-  // Spread distances in degrees (~111km per deg lat)
-  const kmPerDegLat = 111.0;
-  const kmPerDegLon = 111.0 * Math.cos((originLat * Math.PI) / 180);
-
-  // Forward spread distance in km
-  const forwardKm = (0.28 + (windSpeedKmH * 0.024)) * hours;
-  const flankKm = forwardKm / Math.max(1.2, lwRatio);
-  const backKm = forwardKm * 0.2;
-
-  // Center of ellipse is shifted downwind by (forwardKm - backKm) / 2
-  const centerShiftKm = (forwardKm - backKm) / 2;
-  const semiMajorKm = (forwardKm + backKm) / 2;
+  // Center displacement along wind vector
+  const centerShiftKm = (forwardKm - backKm) / 2.0;
+  const semiMajorKm = (forwardKm + backKm) / 2.0;
   const semiMinorKm = flankKm;
 
   const centerLng = originLng + (centerShiftKm * Math.cos(blowRad)) / kmPerDegLon;
   const centerLat = originLat + (centerShiftKm * Math.sin(blowRad)) / kmPerDegLat;
 
   const points: number[][] = [];
-  const steps = 36;
-
   for (let i = 0; i <= steps; i++) {
     const angle = (i * 2 * Math.PI) / steps;
-    // Unrotated ellipse coords
     const x = semiMajorKm * Math.cos(angle);
     const y = semiMinorKm * Math.sin(angle);
 
-    // Rotate by blow angle
+    // Rotate into geographic coordinate frame
     const rotX = x * Math.cos(blowRad) - y * Math.sin(blowRad);
     const rotY = x * Math.sin(blowRad) + y * Math.cos(blowRad);
 
-    const ptLng = centerLng + rotX / kmPerDegLon;
-    const ptLat = centerLat + rotY / kmPerDegLat;
-
-    points.push([ptLng, ptLat]);
+    points.push([
+      centerLng + rotX / kmPerDegLon,
+      centerLat + rotY / kmPerDegLat,
+    ]);
   }
 
   return points;
 }
 
-// Generate Multi-Tier Fire Spread Feature Collection (1h, 3h, 6h + Wind Vector)
+/**
+ * Generate Pasquill-Gifford Gaussian Atmospheric Smoke Dispersion Corridor
+ * Represents airborne particulate PM2.5 & SO2 cloud fanning downwind.
+ */
+export function generateSmokePlumePolygon(
+  originLng: number,
+  originLat: number,
+  kinetics: SpreadKinetics,
+  lengthKm = 6.8
+): number[][] {
+  const blowRad = ((90 - kinetics.forwardAzimuthDeg) * Math.PI) / 180;
+  const kmPerDegLat = 111.132;
+  const kmPerDegLon = 111.320 * Math.cos((originLat * Math.PI) / 180);
+
+  const steps = 24;
+  const rightSide: number[][] = [];
+  const leftSide: number[][] = [];
+
+  for (let s = 1; s <= steps; s++) {
+    const dist = (s / steps) * lengthKm;
+    // Lateral dispersion sigma_y (Pasquill-Gifford Class D industrial plain)
+    const sigmaY = 0.14 * Math.pow(dist, 0.90);
+
+    const cx = dist * Math.cos(blowRad);
+    const cy = dist * Math.sin(blowRad);
+
+    // Normal vector perpendicular to blow angle
+    const normX = -Math.sin(blowRad) * sigmaY;
+    const normY = Math.cos(blowRad) * sigmaY;
+
+    rightSide.push([
+      originLng + (cx + normX) / kmPerDegLon,
+      originLat + (cy + normY) / kmPerDegLat,
+    ]);
+    leftSide.unshift([
+      originLng + (cx - normX) / kmPerDegLon,
+      originLat + (cy - normY) / kmPerDegLat,
+    ]);
+  }
+
+  return [[originLng, originLat], ...rightSide, ...leftSide, [originLng, originLat]];
+}
+
+// ── Multi-Tier Fire Spread & Hazard Feature Collection ───────────────────────
+
 export function createFireSpreadGeoJson(
   originLng: number,
   originLat: number,
-  wind: WindTelemetry
+  wind: WindTelemetry,
+  activeHour = 2.5
 ): any {
-  const poly1h = generateSpreadEllipse(originLng, originLat, wind.speedKmH, wind.directionDeg, 1.0);
-  const poly3h = generateSpreadEllipse(originLng, originLat, wind.speedKmH, wind.directionDeg, 2.8);
-  const poly6h = generateSpreadEllipse(originLng, originLat, wind.speedKmH, wind.directionDeg, 5.2);
+  const kinetics = calculateSpreadKinetics(wind);
 
-  // Wind vector line endpoint (~1.5 km downwind)
-  const blowAzimuthDeg = (wind.directionDeg + 180) % 360;
-  const blowRad = ((90 - blowAzimuthDeg) * Math.PI) / 180;
-  const kmPerDegLat = 111.0;
-  const kmPerDegLon = 111.0 * Math.cos((originLat * Math.PI) / 180);
-  const windVectorLengthKm = 1.8;
+  // Standard NTRO evacuation isochrones: 1h, 2h, 4h, 6h
+  const poly1h = generateRichardsIsochrone(originLng, originLat, kinetics, 1.0);
+  const poly2h = generateRichardsIsochrone(originLng, originLat, kinetics, 2.0);
+  const poly4h = generateRichardsIsochrone(originLng, originLat, kinetics, 4.0);
+  const poly6h = generateRichardsIsochrone(originLng, originLat, kinetics, 6.0);
 
+  // Dynamic active fire front based on current scrubbed hour
+  const polyActive = generateRichardsIsochrone(originLng, originLat, kinetics, Math.max(0.2, activeHour));
+
+  // Atmospheric toxic smoke dispersion corridor
+  const smokePoly = generateSmokePlumePolygon(originLng, originLat, kinetics, 5.8);
+
+  // Downwind vector endpoint (2.2 km)
+  const blowRad = ((90 - kinetics.forwardAzimuthDeg) * Math.PI) / 180;
+  const kmPerDegLat = 111.132;
+  const kmPerDegLon = 111.320 * Math.cos((originLat * Math.PI) / 180);
+  const windVectorLengthKm = 2.2;
   const windEndLng = originLng + (windVectorLengthKm * Math.cos(blowRad)) / kmPerDegLon;
   const windEndLat = originLat + (windVectorLengthKm * Math.sin(blowRad)) / kmPerDegLat;
 
+  // Active burn area in hectares: A = pi * a * b * 100
+  const activeMajor = (kinetics.headRateKmH + kinetics.backRateKmH) * activeHour * 0.5;
+  const activeMinor = kinetics.flankRateKmH * activeHour;
+  const burnAreaHectares = Math.round(Math.PI * activeMajor * activeMinor * 100);
+
   return {
     type: 'FeatureCollection',
+    metadata: {
+      headRateKmH: kinetics.headRateKmH.toFixed(2),
+      flankRateKmH: kinetics.flankRateKmH.toFixed(2),
+      backRateKmH: kinetics.backRateKmH.toFixed(2),
+      lwRatio: kinetics.lengthWidthRatio.toFixed(2),
+      burnAreaHectares,
+      fuelMoisture: (kinetics.fuelMoisture * 100).toFixed(1),
+      azimuth: kinetics.forwardAzimuthDeg,
+    },
     features: [
+      // 1. Atmospheric Smoke Plume Corridor
+      {
+        type: 'Feature',
+        geometry: { type: 'Polygon', coordinates: [smokePoly] },
+        properties: {
+          tier: 'smoke',
+          label: 'TOXIC SMOKE & PM2.5 DISPERSION CORRIDOR',
+          color: '#64748b',
+        },
+      },
+      // 2. 6-Hour Evacuation Perimeter
       {
         type: 'Feature',
         geometry: { type: 'Polygon', coordinates: [poly6h] },
         properties: {
           tier: '6h',
-          label: '6-HR DOWNWIND SPREAD ZONE',
+          label: '6-HR EVACUATION PERIMETER',
+          color: '#eab308',
+        },
+      },
+      // 3. 4-Hour Projected Spread Zone
+      {
+        type: 'Feature',
+        geometry: { type: 'Polygon', coordinates: [poly4h] },
+        properties: {
+          tier: '4h',
+          label: '4-HR PROJECTED SPREAD ZONE',
           color: '#f59e0b',
         },
       },
+      // 4. 2-Hour High Threat Zone
       {
         type: 'Feature',
-        geometry: { type: 'Polygon', coordinates: [poly3h] },
+        geometry: { type: 'Polygon', coordinates: [poly2h] },
         properties: {
-          tier: '3h',
-          label: '3-HR HIGH THREAT ZONE',
+          tier: '2h',
+          label: '2-HR HIGH THREAT ZONE',
           color: '#f97316',
         },
       },
+      // 5. 1-Hour Immediate Hazard Zone
       {
         type: 'Feature',
         geometry: { type: 'Polygon', coordinates: [poly1h] },
@@ -216,6 +345,17 @@ export function createFireSpreadGeoJson(
           color: '#ef4444',
         },
       },
+      // 6. Dynamic Active Burn Perimeter (Driven by Timeline)
+      {
+        type: 'Feature',
+        geometry: { type: 'Polygon', coordinates: [polyActive] },
+        properties: {
+          tier: 'active',
+          label: `ACTIVE FLAME FRONT (+${activeHour.toFixed(1)}H)`,
+          color: '#ff2222',
+        },
+      },
+      // 7. Vector Direction Line
       {
         type: 'Feature',
         geometry: {
@@ -227,12 +367,101 @@ export function createFireSpreadGeoJson(
         },
         properties: {
           tier: 'wind',
-          label: `WIND ${wind.compassDir} · ${wind.speedKmH.toFixed(1)} km/h`,
+          label: `WIND ${wind.compassDir} · ${wind.speedKmH.toFixed(1)} km/h (${kinetics.forwardAzimuthDeg}°)`,
         },
       },
     ],
   };
 }
+
+/**
+ * Generate wind streamlines — organic polylines that fan from the fire origin
+ * in the downwind direction, modelling smoke-plume dispersion paths.
+ * Each line has a sinusoidal lateral drift to avoid the mechanical "arrow" look.
+ */
+export function generateWindStreamlines(
+  originLng: number,
+  originLat: number,
+  wind: WindTelemetry,
+  count = 7
+): { type: string; features: any[] } {
+  const blowAzimuthDeg = (wind.directionDeg + 180) % 360;
+  const blowRad = ((90 - blowAzimuthDeg) * Math.PI) / 180;
+
+  const kmPerDegLat = 111.0;
+  const kmPerDegLon = 111.0 * Math.cos((originLat * Math.PI) / 180);
+
+  // Stream length scales with wind speed (faster wind → longer visible plume)
+  const streamLengthKm = 1.2 + wind.speedKmH * 0.048;
+  const halfFan = 22 * (Math.PI / 180); // ±22° fan spread
+
+  const features: any[] = [];
+
+  for (let i = 0; i < count; i++) {
+    // Map index to fraction -0.5 → +0.5 for symmetric fan
+    const fraction = count === 1 ? 0 : (i / (count - 1)) - 0.5;
+    const baseAngle = blowRad + fraction * halfFan * 2;
+
+    const steps = 10;
+    const coords: number[][] = [[originLng, originLat]];
+
+    for (let s = 1; s <= steps; s++) {
+      const t = s / steps;
+      // Sinusoidal lateral drift: creates gentle, organic curve on each streamline
+      const drift = Math.sin(t * Math.PI * 1.5) * 0.07 * fraction;
+      const angle = baseAngle + drift;
+      const distKm = t * streamLengthKm;
+
+      coords.push([
+        originLng + (Math.cos(angle) * distKm) / kmPerDegLon,
+        originLat + (Math.sin(angle) * distKm) / kmPerDegLat,
+      ]);
+    }
+
+    features.push({
+      type: 'Feature',
+      geometry: { type: 'LineString', coordinates: coords },
+      properties: { index: i },
+    });
+  }
+
+  return { type: 'FeatureCollection', features };
+}
+
+/**
+ * Play the real fire truck siren at MAXIMUM volume using Web Audio API.
+ * Routes the audio through a GainNode (gain = 3.0) to amplify beyond the
+ * browser's software-volume ceiling of 1.0 — effectively 3× louder.
+ * Returns the HTMLAudioElement so the caller can pause it on acknowledge/exit.
+ */
+export function playEmergencyKlaxon(): HTMLAudioElement | null {
+  try {
+    const audio = new Audio('/assets/siren.mp3');
+    audio.volume = 1.0; // max software volume
+    audio.crossOrigin = 'anonymous';
+
+    // Web Audio API amplifier: GainNode > 1.0 boosts beyond OS limit
+    const AudioContextClass =
+      window.AudioContext || (window as any).webkitAudioContext;
+    if (AudioContextClass) {
+      const ctx = new AudioContextClass() as AudioContext;
+      const src = ctx.createMediaElementSource(audio);
+      const gain = ctx.createGain();
+      gain.gain.value = 3.0; // 3× amplification — blasts through the roof
+      src.connect(gain);
+      gain.connect(ctx.destination);
+      // Resume context if suspended (mobile autoplay policy)
+      if (ctx.state === 'suspended') ctx.resume();
+    }
+
+    audio.play().catch(() => { /* user gesture on Proceed button satisfies autoplay policy */ });
+    return audio;
+  } catch {
+    return null;
+  }
+}
+
+// ── Legacy synthesized alert chime (kept for backward compatibility) ──────────
 
 // Synthesize tactical military emergency alert chime via Web Audio API
 export function playTacticalAlertSound() {

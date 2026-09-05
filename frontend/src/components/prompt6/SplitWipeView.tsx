@@ -4,9 +4,11 @@ import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Wind, Flame } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
+import { PANIPAT_CLUSTER } from '../EmergencySimulationModal';
 import {
   fetchLiveWindData,
   createFireSpreadGeoJson,
+  generateWindStreamlines,
   type WindTelemetry,
 } from '../../utils/windSpreadModel';
 
@@ -64,7 +66,7 @@ const SATELLITE_STYLE: maplibregl.StyleSpecification = {
 const CARTO_DARK_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 
 export function SplitWipeView() {
-  const { selectedCluster } = useAppStore();
+  const { selectedCluster, setSelectedCluster, currentHour, isSimulating } = useAppStore();
   const [wipePct, setWipePct]         = useState(50);
   const [mode, setMode]               = useState<CompareMode>('wipe');
   const [isDragging, setIsDragging]   = useState(false);
@@ -115,6 +117,23 @@ export function SplitWipeView() {
     return () => { isMounted = false; };
   }, [targetCoord[0], targetCoord[1]]);
 
+  // ── Dynamically update mathematical fire spread polygon as timeline scrubs ──
+  useEffect(() => {
+    if (!windData) return;
+    const elapsedHours = Math.max(0.6, currentHour >= 11 ? currentHour - 11 : 2.5);
+    const updatedGeoJson = createFireSpreadGeoJson(targetCoord[0], targetCoord[1], windData, elapsedHours);
+
+    const thSource = thermalMapInst.current?.getSource('fire-spread-src') as maplibregl.GeoJSONSource | undefined;
+    if (thSource && typeof thSource.setData === 'function') {
+      thSource.setData(updatedGeoJson);
+    }
+
+    const optSource = opticalMapInst.current?.getSource('fire-spread-src') as maplibregl.GeoJSONSource | undefined;
+    if (optSource && typeof optSource.setData === 'function') {
+      optSource.setData(updatedGeoJson);
+    }
+  }, [currentHour, windData, targetCoord[0], targetCoord[1]]);
+
   // ── Initialize Synchronized Dual MapLibre Instances ────────────────────────
   useEffect(() => {
     if (!opticalMapRef.current || !thermalMapRef.current) return;
@@ -159,97 +178,214 @@ export function SplitWipeView() {
     optMap.on('move', () => syncMaps(optMap, thMap));
     thMap.on('move',  () => syncMaps(thMap, optMap));
 
-    // ── Geographically Anchored Pulsing Threat Marker on Thermal Map ──
+    // ── Static fire origin dot marker (clickable to open incident telemetry) ──
     const markerEl = document.createElement('div');
-    markerEl.className = 'thermal-threat-marker';
-    markerEl.style.width = '28px';
-    markerEl.style.height = '28px';
-    markerEl.style.position = 'relative';
+    markerEl.style.width = '12px';
+    markerEl.style.height = '12px';
+    markerEl.style.borderRadius = '50%';
+    markerEl.style.background = '#ef4444';
+    markerEl.style.border = '2px solid #ffffff';
     markerEl.style.cursor = 'pointer';
-
-    markerEl.innerHTML = `
-      <div style="position:absolute; inset:6px; border-radius:50%; background:#ef4444; box-shadow:0 0 16px #ef4444; z-index:2;"></div>
-      <div class="pulse-ring r1" style="position:absolute; inset:0; border-radius:50%; border:1.5px solid #ef4444; animation:sonarPulse 2.4s ease-out infinite;"></div>
-      <div class="pulse-ring r2" style="position:absolute; inset:0; border-radius:50%; border:1.5px solid #ef4444; animation:sonarPulse 2.4s ease-out 0.8s infinite;"></div>
-      <div class="pulse-ring r3" style="position:absolute; inset:0; border-radius:50%; border:1.5px solid #ef4444; animation:sonarPulse 2.4s ease-out 1.6s infinite;"></div>
-    `;
+    markerEl.style.boxShadow = '0 0 10px rgba(239, 68, 68, 0.9)';
+    markerEl.title = 'Click to open Panipat Incident Telemetry & ML Dossier';
+    markerEl.onclick = () => {
+      setSelectedCluster(PANIPAT_CLUSTER as any);
+    };
 
     const threatMarker = new maplibregl.Marker({ element: markerEl, anchor: 'center' })
       .setLngLat(targetCoord)
       .addTo(thMap);
 
-    // ── Load Real GeoJSON Vectors on Optical Satellite Map ──
+    const optMarkerEl = document.createElement('div');
+    optMarkerEl.style.width = '12px';
+    optMarkerEl.style.height = '12px';
+    optMarkerEl.style.borderRadius = '50%';
+    optMarkerEl.style.background = '#ef4444';
+    optMarkerEl.style.border = '2px solid #ffffff';
+    optMarkerEl.style.cursor = 'pointer';
+    optMarkerEl.style.boxShadow = '0 0 10px rgba(239, 68, 68, 0.9)';
+    optMarkerEl.title = 'Click to open Panipat Incident Telemetry & ML Dossier';
+    optMarkerEl.onclick = () => {
+      setSelectedCluster(PANIPAT_CLUSTER as any);
+    };
+
+    const optThreatMarker = new maplibregl.Marker({ element: optMarkerEl, anchor: 'center' })
+      .setLngLat(targetCoord)
+      .addTo(optMap);
+
+    // ── Load Wind-Driven Rothermel Mathematical Layers on THERMAL Map (Left) ──
+    thMap.on('load', async () => {
+      try {
+        const liveWind = await fetchLiveWindData(targetCoord[1], targetCoord[0]);
+        const elapsedHours = Math.max(0.6, currentHour >= 11 ? currentHour - 11 : 2.5);
+
+        // 1. Fire spread and smoke polygon source
+        if (!thMap.getSource('fire-spread-src')) {
+          const spreadGeoJson = createFireSpreadGeoJson(targetCoord[0], targetCoord[1], liveWind, elapsedHours);
+          thMap.addSource('fire-spread-src', { type: 'geojson', data: spreadGeoJson });
+
+          // Fill Layer: Semi-transparent hazard zones
+          thMap.addLayer({
+            id: 'fire-spread-fill',
+            type: 'fill',
+            source: 'fire-spread-src',
+            filter: ['==', '$type', 'Polygon'],
+            paint: {
+              'fill-color': [
+                'match', ['get', 'tier'],
+                'active', '#ff2222',
+                '1h',     '#ef4444',
+                '2h',     '#f97316',
+                '4h',     '#f59e0b',
+                '6h',     '#eab308',
+                'smoke',  '#475569',
+                '#ef4444',
+              ],
+              'fill-opacity': [
+                'match', ['get', 'tier'],
+                'active', 0.28,
+                '1h',     0.20,
+                '2h',     0.14,
+                '4h',     0.09,
+                '6h',     0.05,
+                'smoke',  0.10,
+                0.12,
+              ],
+            },
+          });
+
+          // Line Layer: Precision isochrone perimeter contours
+          thMap.addLayer({
+            id: 'fire-spread-lines',
+            type: 'line',
+            source: 'fire-spread-src',
+            filter: ['==', '$type', 'Polygon'],
+            paint: {
+              'line-color': [
+                'match', ['get', 'tier'],
+                'active', '#ffffff',
+                '1h',     '#ef4444',
+                '2h',     '#f97316',
+                '4h',     '#f59e0b',
+                '6h',     '#eab308',
+                'smoke',  '#94a3b8',
+                '#ef4444',
+              ],
+              'line-width': [
+                'match', ['get', 'tier'],
+                'active', 2.2,
+                '1h',     1.8,
+                '2h',     1.4,
+                '4h',     1.2,
+                '6h',     1.0,
+                'smoke',  0.8,
+                1.0,
+              ],
+              'line-opacity': [
+                'match', ['get', 'tier'],
+                'active', 0.95,
+                '1h',     0.85,
+                '2h',     0.70,
+                '4h',     0.55,
+                '6h',     0.45,
+                'smoke',  0.40,
+                0.60,
+              ],
+            },
+          });
+        }
+
+        // 2. Wind streamlines
+        if (!thMap.getSource('streamlines-src')) {
+          const streamlines = generateWindStreamlines(targetCoord[0], targetCoord[1], liveWind);
+          thMap.addSource('streamlines-src', { type: 'geojson', data: streamlines as any });
+          thMap.addLayer({
+            id: 'wind-streamlines',
+            type: 'line',
+            source: 'streamlines-src',
+            paint: {
+              'line-color': '#cbd5e1',
+              'line-width': 1.2,
+              'line-opacity': 0.42,
+            },
+          });
+        }
+      } catch (err) {
+        console.warn('Failed to load wind-driven fire layers on thermal map:', err);
+      }
+    });
+
+    // ── Also add fire spread polygons on Optical Satellite Map (Right) ──
     optMap.on('load', async () => {
-      const liveWind = await fetchLiveWindData(targetCoord[1], targetCoord[0]);
-      const spreadGeoJson = createFireSpreadGeoJson(targetCoord[0], targetCoord[1], liveWind);
+      try {
+        const liveWind = await fetchLiveWindData(targetCoord[1], targetCoord[0]);
+        const elapsedHours = Math.max(0.6, currentHour >= 11 ? currentHour - 11 : 2.5);
 
-      if (!optMap.getSource('fire-spread-src')) {
-        optMap.addSource('fire-spread-src', {
-          type: 'geojson',
-          data: spreadGeoJson,
-        });
+        if (!optMap.getSource('fire-spread-src')) {
+          const spreadGeoJson = createFireSpreadGeoJson(targetCoord[0], targetCoord[1], liveWind, elapsedHours);
+          optMap.addSource('fire-spread-src', { type: 'geojson', data: spreadGeoJson });
 
-        // Fill Zones (1h, 3h, 6h)
-        optMap.addLayer({
-          id: 'fire-spread-fill',
-          type: 'fill',
-          source: 'fire-spread-src',
-          filter: ['==', '$type', 'Polygon'],
-          paint: {
-            'fill-color': [
-              'match', ['get', 'tier'],
-              '1h', '#ef4444',
-              '3h', '#f97316',
-              '6h', '#f59e0b',
-              '#ef4444',
-            ],
-            'fill-opacity': [
-              'match', ['get', 'tier'],
-              '1h', 0.28,
-              '3h', 0.18,
-              '6h', 0.10,
-              0.15,
-            ],
-          },
-        });
+          optMap.addLayer({
+            id: 'fire-spread-fill-opt',
+            type: 'fill',
+            source: 'fire-spread-src',
+            filter: ['==', '$type', 'Polygon'],
+            paint: {
+              'fill-color': [
+                'match', ['get', 'tier'],
+                'active', '#ff2222',
+                '1h',     '#ef4444',
+                '2h',     '#f97316',
+                '4h',     '#f59e0b',
+                '6h',     '#eab308',
+                'smoke',  '#475569',
+                '#ef4444',
+              ],
+              'fill-opacity': [
+                'match', ['get', 'tier'],
+                'active', 0.28,
+                '1h',     0.20,
+                '2h',     0.14,
+                '4h',     0.09,
+                '6h',     0.05,
+                'smoke',  0.10,
+                0.12,
+              ],
+            },
+          });
 
-        // Zone Outline Strokes
-        optMap.addLayer({
-          id: 'fire-spread-lines',
-          type: 'line',
-          source: 'fire-spread-src',
-          filter: ['==', '$type', 'Polygon'],
-          paint: {
-            'line-color': [
-              'match', ['get', 'tier'],
-              '1h', '#ef4444',
-              '3h', '#f97316',
-              '6h', '#f59e0b',
-              '#ef4444',
-            ],
-            'line-width': [
-              'match', ['get', 'tier'],
-              '1h', 2.0,
-              '3h', 1.6,
-              '6h', 1.2,
-              1.5,
-            ],
-            'line-dasharray': [4, 2],
-          },
-        });
-
-        // Atmospheric Wind Vector Line
-        optMap.addLayer({
-          id: 'wind-vector-line',
-          type: 'line',
-          source: 'fire-spread-src',
-          filter: ['==', '$type', 'LineString'],
-          paint: {
-            'line-color': '#38bdf8',
-            'line-width': 3,
-            'line-dasharray': [3, 2],
-          },
-        });
+          optMap.addLayer({
+            id: 'fire-spread-lines-opt',
+            type: 'line',
+            source: 'fire-spread-src',
+            filter: ['==', '$type', 'Polygon'],
+            paint: {
+              'line-color': [
+                'match', ['get', 'tier'],
+                'active', '#ffffff',
+                '1h',     '#ef4444',
+                '2h',     '#f97316',
+                '4h',     '#f59e0b',
+                '6h',     '#eab308',
+                'smoke',  '#94a3b8',
+                '#ef4444',
+              ],
+              'line-width': [
+                'match', ['get', 'tier'],
+                'active', 2.2,
+                '1h',     1.8,
+                '2h',     1.4,
+                '4h',     1.2,
+                '6h',     1.0,
+                'smoke',  0.8,
+                1.0,
+              ],
+              'line-opacity': 0.80,
+            },
+          });
+        }
+      } catch (err) {
+        console.warn('Failed to load fire polygons on optical map:', err);
       }
     });
 
@@ -310,6 +446,7 @@ export function SplitWipeView() {
 
     return () => {
       threatMarker.remove();
+      optThreatMarker.remove();
       optMap.remove();
       thMap.remove();
     };
@@ -331,12 +468,7 @@ export function SplitWipeView() {
         background: '#0d0d0d',
       }}
     >
-      <style>{`
-        @keyframes sonarPulse {
-          0% { transform: scale(1); opacity: 0.8; }
-          100% { transform: scale(4.5); opacity: 0; }
-        }
-      `}</style>
+
 
       {/* ── Optical Map (Real Satellite Imagery) ── */}
       <div
@@ -423,87 +555,89 @@ export function SplitWipeView() {
         )}
       </AnimatePresence>
 
-      {/* ── Sleek Minimal Top Sensor Pill (Clean & De-bloated) ── */}
-      <motion.div
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-        style={{
-          position: 'fixed',
-          top: 16,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 50,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          background: '#18181b',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: 9999,
-          padding: '7px 16px',
-          whiteSpace: 'nowrap',
-        }}
-      >
-        <span
-          style={{
-            fontFamily: 'Space Grotesk, sans-serif',
-            fontSize: 11,
-            fontWeight: 700,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            color: '#f59e0b',
-          }}
-        >
-          THERMAL · VIIRS 375m
-        </span>
-
-        <span style={{ width: 1, height: 14, background: '#27272a', flexShrink: 0 }} />
-
-        <span
-          style={{
-            fontFamily: 'Space Grotesk, sans-serif',
-            fontSize: 11,
-            fontWeight: 500,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            color: '#a1a1aa',
-          }}
-        >
-          OPTICAL · SENTINEL‑2 10m
-        </span>
-
-        {windData && (
-          <>
-            <span style={{ width: 1, height: 14, background: '#27272a', flexShrink: 0 }} />
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <Wind size={12} color="#38bdf8" />
-              <span
-                style={{
-                  fontFamily: 'Geist Mono, ui-monospace, monospace',
-                  fontSize: 10,
-                  color: '#38bdf8',
-                  fontWeight: 600,
-                }}
-              >
-                {windData.speedKmH.toFixed(0)} km/h {windData.compassDir}
-              </span>
-            </div>
-          </>
-        )}
-      </motion.div>
-
-      {/* ── Fire Spread Dispersion HUD (Bottom-Right Telemetry Card) ── */}
-      {windData && (
+      {/* ── Sleek Minimal Top Sensor Pill (Visible only when not in simulation mode) ── */}
+      {!isSimulating && (
         <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3, delay: 0.2 }}
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
           style={{
             position: 'fixed',
-            bottom: 24,
-            right: 80,
+            top: 16,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 50,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            background: '#18181b',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: 9999,
+            padding: '7px 16px',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          <span
+            style={{
+              fontFamily: 'Space Grotesk, sans-serif',
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: '#f59e0b',
+            }}
+          >
+            THERMAL · VIIRS 375m
+          </span>
+
+          <span style={{ width: 1, height: 14, background: '#27272a', flexShrink: 0 }} />
+
+          <span
+            style={{
+              fontFamily: 'Space Grotesk, sans-serif',
+              fontSize: 11,
+              fontWeight: 500,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: '#a1a1aa',
+            }}
+          >
+            OPTICAL · SENTINEL‑2 10m
+          </span>
+
+          {windData && (
+            <>
+              <span style={{ width: 1, height: 14, background: '#27272a', flexShrink: 0 }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                <Wind size={12} color="#38bdf8" />
+                <span
+                  style={{
+                    fontFamily: 'Geist Mono, ui-monospace, monospace',
+                    fontSize: 10,
+                    color: '#38bdf8',
+                    fontWeight: 600,
+                  }}
+                >
+                  {windData.speedKmH.toFixed(0)} km/h {windData.compassDir}
+                </span>
+              </div>
+            </>
+          )}
+        </motion.div>
+      )}
+
+      {/* ── Fire Spread Dispersion HUD (Top-Left Telemetry Card — won't collide with drawer) ── */}
+      {windData && (
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+          style={{
+            position: 'fixed',
+            top: 72,
+            left: 80,
             zIndex: 45,
-            width: 270,
+            width: 275,
             background: 'rgba(24, 24, 27, 0.94)',
             backdropFilter: 'blur(12px)',
             border: '1px solid rgba(255, 255, 255, 0.1)',
@@ -522,7 +656,7 @@ export function SplitWipeView() {
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 6px #22c55e' }} />
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e' }} />
               <span style={{ fontSize: 9, fontFamily: 'Geist Mono, monospace', color: '#86efac', fontWeight: 600 }}>
                 {windData.isLiveApi ? 'LIVE API SYNC' : 'CALIBRATED'}
               </span>
@@ -579,7 +713,6 @@ export function SplitWipeView() {
               <span style={{ fontFamily: 'Geist Mono, monospace', color: '#f59e0b', fontWeight: 600 }}>4.8 km</span>
             </div>
           </div>
-
         </motion.div>
       )}
 

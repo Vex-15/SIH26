@@ -1,0 +1,934 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "generated_at": "2026-09-04 16:04:54 UTC",
+    "total_detections": 18,
+    "anomalies_detected": 3,
+    "satellite_sources": [
+      "VIIRS_SNPP",
+      "VIIRS_JPSS1",
+      "MODIS_TERRA"
+    ],
+    "model_pipeline": "Phase 1-8 Full Multi-Modal Stacking Ensemble"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": "live_pt_1",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          72.648,
+          21.108
+        ]
+      },
+      "properties": {
+        "id": "live_pt_1",
+        "brightness": 492.5,
+        "frp": 148.5,
+        "cls": 4,
+        "class_name": "Accidental Fire",
+        "confidence": 90.6,
+        "source": "VIIRS_SNPP",
+        "acq_date": "2026-09-04",
+        "acq_time": "21:34",
+        "acq_hour": 21,
+        "elevation": 14.0,
+        "land_cover": "Industrial / Built-up",
+        "no2": 0.0005,
+        "so2": 0.0004,
+        "is_anomaly": true,
+        "z_score": 58.0,
+        "baseline_mean_mw": 3.5,
+        "p_tab": [
+          0.0,
+          0.0,
+          0.484,
+          0.0,
+          0.516
+        ],
+        "p_img": [
+          0.02,
+          0.03,
+          0.05,
+          0.05,
+          0.85
+        ],
+        "p_stack": [
+          0.004,
+          0.003,
+          0.083,
+          0.004,
+          0.906
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "live_pt_2",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          72.6567,
+          21.1163
+        ]
+      },
+      "properties": {
+        "id": "live_pt_2",
+        "brightness": 496.6,
+        "frp": 114.3,
+        "cls": 4,
+        "class_name": "Accidental Fire",
+        "confidence": 89.6,
+        "source": "VIIRS_SNPP",
+        "acq_date": "2026-09-04",
+        "acq_time": "21:34",
+        "acq_hour": 21,
+        "elevation": 14.0,
+        "land_cover": "Industrial / Built-up",
+        "no2": 0.0005,
+        "so2": 0.0004,
+        "is_anomaly": true,
+        "z_score": 44.32,
+        "baseline_mean_mw": 3.5,
+        "p_tab": [
+          0.0,
+          0.0,
+          0.498,
+          0.0,
+          0.502
+        ],
+        "p_img": [
+          0.02,
+          0.03,
+          0.05,
+          0.05,
+          0.85
+        ],
+        "p_stack": [
+          0.005,
+          0.004,
+          0.092,
+          0.004,
+          0.896
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "live_pt_3",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          72.6479,
+          21.0976
+        ]
+      },
+      "properties": {
+        "id": "live_pt_3",
+        "brightness": 497.8,
+        "frp": 120.1,
+        "cls": 4,
+        "class_name": "Accidental Fire",
+        "confidence": 92.5,
+        "source": "VIIRS_SNPP",
+        "acq_date": "2026-09-04",
+        "acq_time": "21:34",
+        "acq_hour": 21,
+        "elevation": 14.0,
+        "land_cover": "Industrial / Built-up",
+        "no2": 0.0005,
+        "so2": 0.0004,
+        "is_anomaly": true,
+        "z_score": 46.64,
+        "baseline_mean_mw": 3.5,
+        "p_tab": [
+          0.0,
+          0.0,
+          0.454,
+          0.0,
+          0.546
+        ],
+        "p_img": [
+          0.02,
+          0.03,
+          0.05,
+          0.05,
+          0.85
+        ],
+        "p_stack": [
+          0.004,
+          0.003,
+          0.065,
+          0.003,
+          0.925
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "live_pt_4",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          70.068,
+          22.471
+        ]
+      },
+      "properties": {
+        "id": "live_pt_4",
+        "brightness": 361.2,
+        "frp": 4.8,
+        "cls": 2,
+        "class_name": "Industrial Persistent",
+        "confidence": 98.4,
+        "source": "VIIRS_JPSS1",
+        "acq_date": "2026-09-04",
+        "acq_time": "21:34",
+        "acq_hour": 21,
+        "elevation": 22.0,
+        "land_cover": "Industrial / Built-up",
+        "no2": 0.0003,
+        "so2": 0.0002,
+        "is_anomaly": false,
+        "z_score": 0.52,
+        "baseline_mean_mw": 3.5,
+        "p_tab": [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "p_img": [
+          0.01,
+          0.02,
+          0.84,
+          0.1,
+          0.03
+        ],
+        "p_stack": [
+          0.0,
+          0.0,
+          0.984,
+          0.0,
+          0.015
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "live_pt_5",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          70.0998,
+          22.4396
+        ]
+      },
+      "properties": {
+        "id": "live_pt_5",
+        "brightness": 351.9,
+        "frp": 4.2,
+        "cls": 2,
+        "class_name": "Industrial Persistent",
+        "confidence": 98.4,
+        "source": "VIIRS_JPSS1",
+        "acq_date": "2026-09-04",
+        "acq_time": "21:34",
+        "acq_hour": 21,
+        "elevation": 22.0,
+        "land_cover": "Industrial / Built-up",
+        "no2": 0.0003,
+        "so2": 0.0002,
+        "is_anomaly": false,
+        "z_score": 0.28,
+        "baseline_mean_mw": 3.5,
+        "p_tab": [
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "p_img": [
+          0.01,
+          0.02,
+          0.84,
+          0.1,
+          0.03
+        ],
+        "p_stack": [
+          0.0,
+          0.0,
+          0.984,
+          0.0,
+          0.015
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "live_pt_6",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          70.0612,
+          22.4701
+        ]
+      },
+      "properties": {
+        "id": "live_pt_6",
+        "brightness": 358.5,
+        "frp": 5.1,
+        "cls": 2,
+        "class_name": "Industrial Persistent",
+        "confidence": 98.4,
+        "source": "VIIRS_JPSS1",
+        "acq_date": "2026-09-04",
+        "acq_time": "21:34",
+        "acq_hour": 21,
+        "elevation": 22.0,
+        "land_cover": "Industrial / Built-up",
+        "no2": 0.0003,
+        "so2": 0.0002,
+        "is_anomaly": false,
+        "z_score": 0.64,
+        "baseline_mean_mw": 3.5,
+        "p_tab": [
+          0.0,
+          0.0,
+          0.999,
+          0.0,
+          0.001
+        ],
+        "p_img": [
+          0.01,
+          0.02,
+          0.84,
+          0.1,
+          0.03
+        ],
+        "p_stack": [
+          0.0,
+          0.0,
+          0.984,
+          0.0,
+          0.015
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "live_pt_7",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          95.088,
+          27.379
+        ]
+      },
+      "properties": {
+        "id": "live_pt_7",
+        "brightness": 382.4,
+        "frp": 8.2,
+        "cls": 3,
+        "class_name": "Gas Flare",
+        "confidence": 98.7,
+        "source": "VIIRS_SNPP",
+        "acq_date": "2026-09-04",
+        "acq_time": "21:34",
+        "acq_hour": 21,
+        "elevation": 112.0,
+        "land_cover": "Industrial / Built-up",
+        "no2": 0.0001,
+        "so2": 0.0003,
+        "is_anomaly": false,
+        "z_score": 1.88,
+        "baseline_mean_mw": 3.5,
+        "p_tab": [
+          0.0,
+          0.0,
+          0.007,
+          0.992,
+          0.0
+        ],
+        "p_img": [
+          0.01,
+          0.02,
+          0.84,
+          0.1,
+          0.03
+        ],
+        "p_stack": [
+          0.001,
+          0.001,
+          0.007,
+          0.987,
+          0.005
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "live_pt_8",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          95.0622,
+          27.391
+        ]
+      },
+      "properties": {
+        "id": "live_pt_8",
+        "brightness": 378.5,
+        "frp": 6.3,
+        "cls": 3,
+        "class_name": "Gas Flare",
+        "confidence": 98.6,
+        "source": "VIIRS_SNPP",
+        "acq_date": "2026-09-04",
+        "acq_time": "21:34",
+        "acq_hour": 21,
+        "elevation": 112.0,
+        "land_cover": "Industrial / Built-up",
+        "no2": 0.0001,
+        "so2": 0.0003,
+        "is_anomaly": false,
+        "z_score": 1.12,
+        "baseline_mean_mw": 3.5,
+        "p_tab": [
+          0.0,
+          0.0,
+          0.013,
+          0.987,
+          0.0
+        ],
+        "p_img": [
+          0.01,
+          0.02,
+          0.84,
+          0.1,
+          0.03
+        ],
+        "p_stack": [
+          0.001,
+          0.001,
+          0.007,
+          0.986,
+          0.006
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "live_pt_9",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          95.056,
+          27.401
+        ]
+      },
+      "properties": {
+        "id": "live_pt_9",
+        "brightness": 372.9,
+        "frp": 6.6,
+        "cls": 3,
+        "class_name": "Gas Flare",
+        "confidence": 98.6,
+        "source": "VIIRS_SNPP",
+        "acq_date": "2026-09-04",
+        "acq_time": "21:34",
+        "acq_hour": 21,
+        "elevation": 112.0,
+        "land_cover": "Industrial / Built-up",
+        "no2": 0.0001,
+        "so2": 0.0003,
+        "is_anomaly": false,
+        "z_score": 1.24,
+        "baseline_mean_mw": 3.5,
+        "p_tab": [
+          0.0,
+          0.0,
+          0.013,
+          0.987,
+          0.0
+        ],
+        "p_img": [
+          0.01,
+          0.02,
+          0.84,
+          0.1,
+          0.03
+        ],
+        "p_stack": [
+          0.001,
+          0.001,
+          0.007,
+          0.986,
+          0.006
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "live_pt_10",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          79.152,
+          29.619
+        ]
+      },
+      "properties": {
+        "id": "live_pt_10",
+        "brightness": 344.0,
+        "frp": 26.4,
+        "cls": 0,
+        "class_name": "Wildfire",
+        "confidence": 99.9,
+        "source": "MODIS",
+        "acq_date": "2026-09-04",
+        "acq_time": "21:34",
+        "acq_hour": 21,
+        "elevation": 1420.0,
+        "land_cover": "Cropland / Vegetated",
+        "no2": 0.0,
+        "so2": 0.0,
+        "is_anomaly": false,
+        "z_score": 1.8,
+        "baseline_mean_mw": 12.0,
+        "p_tab": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "p_img": [
+          0.88,
+          0.06,
+          0.02,
+          0.01,
+          0.03
+        ],
+        "p_stack": [
+          0.999,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "live_pt_11",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          79.1478,
+          29.5818
+        ]
+      },
+      "properties": {
+        "id": "live_pt_11",
+        "brightness": 343.4,
+        "frp": 28.6,
+        "cls": 0,
+        "class_name": "Wildfire",
+        "confidence": 99.9,
+        "source": "MODIS",
+        "acq_date": "2026-09-04",
+        "acq_time": "21:34",
+        "acq_hour": 21,
+        "elevation": 1420.0,
+        "land_cover": "Cropland / Vegetated",
+        "no2": 0.0,
+        "so2": 0.0,
+        "is_anomaly": false,
+        "z_score": 2.08,
+        "baseline_mean_mw": 12.0,
+        "p_tab": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "p_img": [
+          0.88,
+          0.06,
+          0.02,
+          0.01,
+          0.03
+        ],
+        "p_stack": [
+          0.999,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "live_pt_12",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          79.145,
+          29.6079
+        ]
+      },
+      "properties": {
+        "id": "live_pt_12",
+        "brightness": 335.3,
+        "frp": 23.6,
+        "cls": 0,
+        "class_name": "Wildfire",
+        "confidence": 99.9,
+        "source": "MODIS",
+        "acq_date": "2026-09-04",
+        "acq_time": "21:34",
+        "acq_hour": 21,
+        "elevation": 1420.0,
+        "land_cover": "Cropland / Vegetated",
+        "no2": 0.0,
+        "so2": 0.0,
+        "is_anomaly": false,
+        "z_score": 1.45,
+        "baseline_mean_mw": 12.0,
+        "p_tab": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "p_img": [
+          0.88,
+          0.06,
+          0.02,
+          0.01,
+          0.03
+        ],
+        "p_stack": [
+          0.999,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "live_pt_13",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.963,
+          29.39
+        ]
+      },
+      "properties": {
+        "id": "live_pt_13",
+        "brightness": 364.5,
+        "frp": 6.1,
+        "cls": 2,
+        "class_name": "Industrial Persistent",
+        "confidence": 98.3,
+        "source": "VIIRS_JPSS1",
+        "acq_date": "2026-09-04",
+        "acq_time": "21:34",
+        "acq_hour": 21,
+        "elevation": 235.0,
+        "land_cover": "Industrial / Built-up",
+        "no2": 0.0003,
+        "so2": 0.0002,
+        "is_anomaly": false,
+        "z_score": 1.04,
+        "baseline_mean_mw": 3.5,
+        "p_tab": [
+          0.0,
+          0.0,
+          0.994,
+          0.0,
+          0.006
+        ],
+        "p_img": [
+          0.01,
+          0.02,
+          0.84,
+          0.1,
+          0.03
+        ],
+        "p_stack": [
+          0.0,
+          0.0,
+          0.983,
+          0.0,
+          0.016
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "live_pt_14",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.9993,
+          29.4186
+        ]
+      },
+      "properties": {
+        "id": "live_pt_14",
+        "brightness": 365.9,
+        "frp": 5.7,
+        "cls": 2,
+        "class_name": "Industrial Persistent",
+        "confidence": 98.3,
+        "source": "VIIRS_JPSS1",
+        "acq_date": "2026-09-04",
+        "acq_time": "21:34",
+        "acq_hour": 21,
+        "elevation": 235.0,
+        "land_cover": "Industrial / Built-up",
+        "no2": 0.0003,
+        "so2": 0.0002,
+        "is_anomaly": false,
+        "z_score": 0.88,
+        "baseline_mean_mw": 3.5,
+        "p_tab": [
+          0.0,
+          0.0,
+          0.995,
+          0.0,
+          0.005
+        ],
+        "p_img": [
+          0.01,
+          0.02,
+          0.84,
+          0.1,
+          0.03
+        ],
+        "p_stack": [
+          0.0,
+          0.0,
+          0.983,
+          0.0,
+          0.016
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "live_pt_15",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          76.974,
+          29.3506
+        ]
+      },
+      "properties": {
+        "id": "live_pt_15",
+        "brightness": 348.3,
+        "frp": 5.5,
+        "cls": 2,
+        "class_name": "Industrial Persistent",
+        "confidence": 98.4,
+        "source": "VIIRS_JPSS1",
+        "acq_date": "2026-09-04",
+        "acq_time": "21:34",
+        "acq_hour": 21,
+        "elevation": 235.0,
+        "land_cover": "Industrial / Built-up",
+        "no2": 0.0003,
+        "so2": 0.0002,
+        "is_anomaly": false,
+        "z_score": 0.8,
+        "baseline_mean_mw": 3.5,
+        "p_tab": [
+          0.0,
+          0.0,
+          0.998,
+          0.0,
+          0.002
+        ],
+        "p_img": [
+          0.01,
+          0.02,
+          0.84,
+          0.1,
+          0.03
+        ],
+        "p_stack": [
+          0.0,
+          0.0,
+          0.984,
+          0.0,
+          0.015
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "live_pt_16",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          75.857,
+          30.901
+        ]
+      },
+      "properties": {
+        "id": "live_pt_16",
+        "brightness": 331.0,
+        "frp": 16.2,
+        "cls": 1,
+        "class_name": "Agricultural",
+        "confidence": 99.9,
+        "source": "VIIRS_SNPP",
+        "acq_date": "2026-09-04",
+        "acq_time": "21:34",
+        "acq_hour": 21,
+        "elevation": 245.0,
+        "land_cover": "Cropland / Vegetated",
+        "no2": 0.0001,
+        "so2": 0.0,
+        "is_anomaly": false,
+        "z_score": 0.52,
+        "baseline_mean_mw": 12.0,
+        "p_tab": [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "p_img": [
+          0.05,
+          0.88,
+          0.03,
+          0.02,
+          0.02
+        ],
+        "p_stack": [
+          0.0,
+          0.999,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "live_pt_17",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          75.8588,
+          30.8663
+        ]
+      },
+      "properties": {
+        "id": "live_pt_17",
+        "brightness": 336.0,
+        "frp": 13.3,
+        "cls": 1,
+        "class_name": "Agricultural",
+        "confidence": 99.9,
+        "source": "VIIRS_SNPP",
+        "acq_date": "2026-09-04",
+        "acq_time": "21:34",
+        "acq_hour": 21,
+        "elevation": 245.0,
+        "land_cover": "Cropland / Vegetated",
+        "no2": 0.0001,
+        "so2": 0.0,
+        "is_anomaly": false,
+        "z_score": 0.16,
+        "baseline_mean_mw": 12.0,
+        "p_tab": [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "p_img": [
+          0.05,
+          0.88,
+          0.03,
+          0.02,
+          0.02
+        ],
+        "p_stack": [
+          0.0,
+          0.999,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "live_pt_18",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          75.8272,
+          30.9308
+        ]
+      },
+      "properties": {
+        "id": "live_pt_18",
+        "brightness": 332.3,
+        "frp": 17.3,
+        "cls": 1,
+        "class_name": "Agricultural",
+        "confidence": 99.9,
+        "source": "VIIRS_SNPP",
+        "acq_date": "2026-09-04",
+        "acq_time": "21:34",
+        "acq_hour": 21,
+        "elevation": 245.0,
+        "land_cover": "Cropland / Vegetated",
+        "no2": 0.0001,
+        "so2": 0.0,
+        "is_anomaly": false,
+        "z_score": 0.66,
+        "baseline_mean_mw": 12.0,
+        "p_tab": [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "p_img": [
+          0.05,
+          0.88,
+          0.03,
+          0.02,
+          0.02
+        ],
+        "p_stack": [
+          0.0,
+          0.999,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    }
+  ]
+}

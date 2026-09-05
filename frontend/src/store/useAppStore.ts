@@ -16,6 +16,25 @@ export type VisualMetric =
   | 'elevation'        // ⛰️ Topographic Elevation (m)
   | 'Target_Class';    // 🎯 AI Multi-Modal Predicted Class
 
+export interface ScaleTier {
+  id: string;
+  name: string;
+  rangeLabel: string;
+  color: string;
+  min?: number;
+  max?: number;
+  codes?: number[];
+}
+
+export interface MetricScaleFilter {
+  metric: VisualMetric;
+  tierId: string;
+  min?: number;
+  max?: number;
+  codes?: number[];
+  label: string;
+}
+
 export interface FilterSettings {
   minBrightness: number; // 300 - 380 K
   minFrp: number;        // 0 - 200 MW
@@ -123,8 +142,10 @@ interface AppState {
   isCalendarOpen: boolean;
   isExportOpen: boolean;
   isPlaybackControllerOpen: boolean;
+  isSimulating: boolean;
   hasAcknowledgedAnomaly: boolean;
   isMapReady: boolean;
+  metricScaleFilter: MetricScaleFilter | null;
 
   // Location Search State
   isLocationSearchOpen: boolean;
@@ -149,6 +170,9 @@ interface AppState {
   setActiveMetric: (metric: VisualMetric) => void;
   setMap: (map: maplibregl.Map | null) => void;
   toggleFilter: (fireClass: FireClass) => void;
+  setSoloFilter: (fireClass: FireClass) => void;
+  resetActiveFilters: () => void;
+  setMetricScaleFilter: (filter: MetricScaleFilter | null) => void;
   setFilterSettings: (settings: Partial<FilterSettings>) => void;
   resetFilterSettings: () => void;
   setLayersOpen: (open: boolean) => void;
@@ -165,6 +189,8 @@ interface AppState {
   setCalendarOpen: (open: boolean) => void;
   setExportOpen: (open: boolean) => void;
   setPlaybackControllerOpen: (open: boolean) => void;
+  setIsSimulating: (isSimulating: boolean) => void;
+  exitSimulation: () => void;
   setHasAcknowledgedAnomaly: (ack: boolean) => void;
   setIsMapReady: (ready: boolean) => void;
 
@@ -199,7 +225,7 @@ export function getToday2024Date(): string {
 
 const defaultInitialDate = getToday2024Date();
 
-export const useAppStore = create<AppState>((set) => ({
+export const useAppStore = create<AppState>((set, get) => ({
   theme: 'dark',
   mode: 'demo',
   mapMode: 'thermal',
@@ -223,8 +249,10 @@ export const useAppStore = create<AppState>((set) => ({
   isCalendarOpen: false,
   isExportOpen: false,
   isPlaybackControllerOpen: false,
+  isSimulating: false,
   hasAcknowledgedAnomaly: false,
   isMapReady: false,
+  metricScaleFilter: null,
 
   // Location Search State Initial Values
   isLocationSearchOpen: false,
@@ -250,7 +278,8 @@ export const useAppStore = create<AppState>((set) => ({
   toggleTheme: () => set((s) => ({ theme: s.theme === 'dark' ? 'light' : 'dark' })),
   setMode: (mode) => set({ mode }),
   setMapMode: (mapMode) => set({ mapMode }),
-  setActiveMetric: (activeMetric) => set({ activeMetric }),
+  setActiveMetric: (activeMetric) => set({ activeMetric, metricScaleFilter: null }),
+  setMetricScaleFilter: (metricScaleFilter) => set({ metricScaleFilter }),
   setMap: (map) => set({ map }),
   toggleFilter: (fireClass) =>
     set((s) => ({
@@ -259,6 +288,44 @@ export const useAppStore = create<AppState>((set) => ({
         [fireClass]: !s.activeFilters[fireClass],
       },
     })),
+  setSoloFilter: (fireClass) =>
+    set((s) => {
+      const activeKeys = (Object.keys(s.activeFilters) as FireClass[]).filter(
+        (k) => s.activeFilters[k]
+      );
+      // If this class is already the only one active, reset to all active (un-solo)
+      if (activeKeys.length === 1 && activeKeys[0] === fireClass) {
+        return {
+          activeFilters: {
+            wildfire: true,
+            agricultural: true,
+            industrial: true,
+            gasflare: true,
+            accidental: true,
+          },
+        };
+      }
+      // Otherwise isolate this class and disable the others
+      return {
+        activeFilters: {
+          wildfire: fireClass === 'wildfire',
+          agricultural: fireClass === 'agricultural',
+          industrial: fireClass === 'industrial',
+          gasflare: fireClass === 'gasflare',
+          accidental: fireClass === 'accidental',
+        },
+      };
+    }),
+  resetActiveFilters: () =>
+    set({
+      activeFilters: {
+        wildfire: true,
+        agricultural: true,
+        industrial: true,
+        gasflare: true,
+        accidental: true,
+      },
+    }),
   setFilterSettings: (settings) =>
     set((s) => ({
       filterSettings: { ...s.filterSettings, ...settings },
@@ -309,7 +376,31 @@ export const useAppStore = create<AppState>((set) => ({
       isMetricSelectorOpen: open ? false : s.isMetricSelectorOpen,
     })),
   setExportOpen: (isExportOpen) => set({ isExportOpen }),
-  setPlaybackControllerOpen: (isPlaybackControllerOpen) => set({ isPlaybackControllerOpen }),
+  setPlaybackControllerOpen: (isPlaybackControllerOpen) =>
+    set((s) => ({
+      isPlaybackControllerOpen,
+      isPlaying: isPlaybackControllerOpen ? s.isPlaying : false,
+      selectedCluster: isPlaybackControllerOpen ? null : s.selectedCluster,
+    })),
+  setIsSimulating: (isSimulating) => set({ isSimulating }),
+  exitSimulation: () => {
+    const { map } = get();
+    if (map) {
+      map.flyTo({ center: [78.9629, 20.5937], zoom: 4.8, duration: 1600, essential: true });
+    }
+    const defaultDate = getToday2024Date();
+    set({
+      isSimulating: false,
+      isEmergencySimulationOpen: false,
+      selectedCluster: null,
+      mapMode: 'thermal',
+      isPlaybackControllerOpen: false,
+      isPlaying: false,
+      startDate: defaultDate,
+      endDate: defaultDate,
+      selectedDate: defaultDate,
+    });
+  },
   setHasAcknowledgedAnomaly: (hasAcknowledgedAnomaly) => set({ hasAcknowledgedAnomaly }),
   setIsMapReady: (isMapReady) => set({ isMapReady }),
 
@@ -350,4 +441,56 @@ export const LAND_COVER_NAMES: Record<number, string> = {
   90: 'Herbaceous Wetland',
   95: 'Mangroves',
   100: 'Moss and Lichen',
+};
+
+export const METRIC_SCALE_TIERS: Partial<Record<VisualMetric, ScaleTier[]>> = {
+  brightness: [
+    { id: 'b_cool',     name: 'Cool',     rangeLabel: '< 320 K',   color: '#2d1160', max: 320 },
+    { id: 'b_moderate', name: 'Moderate', rangeLabel: '320–335 K', color: '#6b1f7a', min: 320, max: 335 },
+    { id: 'b_elevated', name: 'Elevated', rangeLabel: '335–345 K', color: '#d62f2f', min: 335, max: 345 },
+    { id: 'b_high',     name: 'High',     rangeLabel: '345–360 K', color: '#f5961a', min: 345, max: 360 },
+    { id: 'b_extreme',  name: 'Extreme',  rangeLabel: '> 360 K',   color: '#fef08a', min: 360 },
+  ],
+  frp: [
+    { id: 'f_low',      name: 'Low',      rangeLabel: '< 10 MW',   color: '#2d1160', max: 10 },
+    { id: 'f_moderate', name: 'Moderate', rangeLabel: '10–30 MW',  color: '#7b1fa2', min: 10, max: 30 },
+    { id: 'f_high',     name: 'High',     rangeLabel: '30–80 MW',  color: '#e53935', min: 30, max: 80 },
+    { id: 'f_severe',   name: 'Severe',   rangeLabel: '80–200 MW', color: '#fb923c', min: 80, max: 200 },
+    { id: 'f_extreme',  name: 'Extreme',  rangeLabel: '> 200 MW',  color: '#fef08a', min: 200 },
+  ],
+  tropomi_no2: [
+    { id: 'n_clean',    name: 'Clean',    rangeLabel: '< 0.05',      color: '#023e8a', max: 0.05 },
+    { id: 'n_low',      name: 'Low Plume',rangeLabel: '0.05–0.12',  color: '#0077b6', min: 0.05, max: 0.12 },
+    { id: 'n_moderate', name: 'Moderate', rangeLabel: '0.12–0.20',  color: '#00b4d8', min: 0.12, max: 0.20 },
+    { id: 'n_heavy',    name: 'Heavy',    rangeLabel: '0.20–0.28',  color: '#ffb703', min: 0.20, max: 0.28 },
+    { id: 'n_dense',    name: 'Dense',    rangeLabel: '> 0.28',      color: '#e85d04', min: 0.28 },
+  ],
+  tropomi_so2: [
+    { id: 's_clean',    name: 'Clean',    rangeLabel: '< 0.03',      color: '#1b4332', max: 0.03 },
+    { id: 's_low',      name: 'Low',      rangeLabel: '0.03–0.08',  color: '#2d6a4f', min: 0.03, max: 0.08 },
+    { id: 's_moderate', name: 'Moderate', rangeLabel: '0.08–0.16',  color: '#52b788', min: 0.08, max: 0.16 },
+    { id: 's_elevated', name: 'Elevated', rangeLabel: '0.16–0.24',  color: '#f9c74f', min: 0.16, max: 0.24 },
+    { id: 's_dense',    name: 'Dense',    rangeLabel: '> 0.24',      color: '#f3722c', min: 0.24 },
+  ],
+  land_cover_code: [
+    { id: 'lc_forest',  name: 'Forest',      rangeLabel: 'Tree Cover',   color: '#059669', codes: [10] },
+    { id: 'lc_shrub',   name: 'Shrub/Grass', rangeLabel: 'Vegetation',   color: '#84cc16', codes: [20, 30] },
+    { id: 'lc_agri',    name: 'Cropland',    rangeLabel: 'Agriculture',  color: '#f97316', codes: [40] },
+    { id: 'lc_urban',   name: 'Urban/Built', rangeLabel: 'Infrastructure', color: '#6366f1', codes: [50] },
+    { id: 'lc_wetland', name: 'Wetland/Water', rangeLabel: 'Aquatic',    color: '#06b6d4', codes: [80, 90, 95] },
+  ],
+  is_industrial: [
+    { id: 'ind_none',   name: 'Non-Ind',     rangeLabel: '< 15%',        color: '#312e81', max: 0.15 },
+    { id: 'ind_low',    name: 'Low Ratio',   rangeLabel: '15–40%',       color: '#4338ca', min: 0.15, max: 0.40 },
+    { id: 'ind_mod',    name: 'Moderate',    rangeLabel: '40–70%',       color: '#7c3aed', min: 0.40, max: 0.70 },
+    { id: 'ind_high',   name: 'High Facility', rangeLabel: '70–90%',     color: '#a855f7', min: 0.70, max: 0.90 },
+    { id: 'ind_pure',   name: 'Industrial',  rangeLabel: '> 90%',        color: '#fbbf24', min: 0.90 },
+  ],
+  elevation: [
+    { id: 'el_coast',   name: 'Coastal/Low', rangeLabel: '< 150 m',      color: '#1e3a5f', max: 150 },
+    { id: 'el_plain',   name: 'Plains',      rangeLabel: '150–400 m',    color: '#1d4ed8', min: 150, max: 400 },
+    { id: 'el_plat',    name: 'Plateau',     rangeLabel: '400–800 m',    color: '#7c3aed', min: 400, max: 800 },
+    { id: 'el_high',    name: 'Highland',    rangeLabel: '800–1500 m',   color: '#be123c', min: 800, max: 1500 },
+    { id: 'el_alpine',  name: 'Alpine',      rangeLabel: '> 1500 m',     color: '#f59e0b', min: 1500 },
+  ],
 };

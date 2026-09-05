@@ -20,6 +20,10 @@ export function LeftDock() {
     setCalendarOpen,
     isPlaybackControllerOpen,
     setPlaybackControllerOpen,
+    isSimulating,
+    exitSimulation,
+    setCurrentHour,
+    setIsPlaying,
   } = useAppStore();
 
   const handleHomeClick = () => {
@@ -95,28 +99,36 @@ export function LeftDock() {
 
       {/* ── Real-Time Emergency Simulation Trigger ── */}
       <DockIcon
-        active={isEmergencySimulationOpen}
+        active={isEmergencySimulationOpen || isSimulating}
         onClick={() => {
-          setEmergencySimulationOpen(!isEmergencySimulationOpen);
-          setLayersOpen(false);
-          setMetricSelectorOpen(false);
-          setCalendarOpen(false);
+          if (isSimulating) {
+            exitSimulation();
+          } else {
+            setEmergencySimulationOpen(!isEmergencySimulationOpen);
+            setLayersOpen(false);
+            setMetricSelectorOpen(false);
+            setCalendarOpen(false);
+          }
         }}
         ariaLabel="Real-Time Emergency Warning Simulator"
         className="text-red-500 hover:text-red-400"
       >
-        <Radio size={18} strokeWidth={1.8} color={isEmergencySimulationOpen ? '#ef4444' : '#f87171'} />
+        <Radio size={18} strokeWidth={1.8} color={isEmergencySimulationOpen || isSimulating ? '#ef4444' : '#f87171'} />
       </DockIcon>
 
       {/* ── Temporal Archive & Data Export Suite (Single Unified Trigger) ── */}
       <DockIcon
         active={isPlaybackControllerOpen}
         onClick={() => {
-          setPlaybackControllerOpen(!isPlaybackControllerOpen);
           if (!isPlaybackControllerOpen) {
             setLayersOpen(false);
             setMetricSelectorOpen(false);
             setCalendarOpen(false);
+            setCurrentHour(0); // 12:00 AM start of day
+            setIsPlaying(false); // Paused — played by user only!
+            setPlaybackControllerOpen(true);
+          } else {
+            setPlaybackControllerOpen(false);
           }
         }}
         ariaLabel="Temporal Playback & Export Suite"

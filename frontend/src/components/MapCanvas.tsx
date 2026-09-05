@@ -439,15 +439,17 @@ export function MapCanvas() {
   const hoveredHexIdRef = useRef<string | null>(null);
   const hoveredPointIdRef = useRef<string | null>(null);
   const loadedPlaybackDateRef = useRef<string | null>(null);
-  const { theme, activeFilters, filterSettings, activeMetric, setHoveredCluster } = useAppStore();
+  const { theme, activeFilters, filterSettings, activeMetric, metricScaleFilter, setHoveredCluster } = useAppStore();
 
-  const buildFilterExpression = useCallback(() => {
-    const { activeFilters: f, filterSettings: s, isPlaybackControllerOpen } = useAppStore.getState();
+  const buildFilterExpression = useCallback((isPlayerOpen?: boolean) => {
+    const isPlayback = isPlayerOpen !== undefined ? isPlayerOpen : useAppStore.getState().isPlaybackControllerOpen;
     
     // When playback/single-day player is active, suppress yearlong hexbins so ONLY selected day points show
-    if (isPlaybackControllerOpen) {
+    if (isPlayback) {
       return ['==', ['get', 'count'], -1] as maplibregl.ExpressionSpecification;
     }
+
+    const { activeFilters: f, filterSettings: s, metricScaleFilter: msf, activeMetric: curMetric } = useAppStore.getState();
 
     const clauses: maplibregl.ExpressionSpecification[] = [];
 
@@ -473,14 +475,43 @@ export function MapCanvas() {
     if (s.minSo2 > 0)          clauses.push(['>=', ['get', 's_m'], s.minSo2]);
     if (s.onlyAnomalies)       clauses.push(['>', ['get', 'ac_c'], 0]);
 
+    // ── Metric Scale Tier Filter (interactive top legend clicks) ──
+    if (msf && msf.metric === curMetric) {
+      if (msf.metric === 'brightness') {
+        if (msf.min !== undefined) clauses.push(['>=', ['get', 'b_m'], msf.min]);
+        if (msf.max !== undefined) clauses.push(['<', ['get', 'b_m'], msf.max]);
+      } else if (msf.metric === 'frp') {
+        if (msf.min !== undefined) clauses.push(['>=', ['get', 'f_m'], msf.min]);
+        if (msf.max !== undefined) clauses.push(['<', ['get', 'f_m'], msf.max]);
+      } else if (msf.metric === 'tropomi_no2') {
+        if (msf.min !== undefined) clauses.push(['>=', ['get', 'n_m'], msf.min]);
+        if (msf.max !== undefined) clauses.push(['<', ['get', 'n_m'], msf.max]);
+      } else if (msf.metric === 'tropomi_so2') {
+        if (msf.min !== undefined) clauses.push(['>=', ['get', 's_m'], msf.min]);
+        if (msf.max !== undefined) clauses.push(['<', ['get', 's_m'], msf.max]);
+      } else if (msf.metric === 'land_cover_code' && msf.codes && msf.codes.length > 0) {
+        if (msf.codes.length === 1) {
+          clauses.push(['==', ['get', 'lc'], msf.codes[0]]);
+        } else {
+          clauses.push(['in', ['get', 'lc'], ['literal', msf.codes]]);
+        }
+      } else if (msf.metric === 'is_industrial') {
+        if (msf.min !== undefined) clauses.push(['>=', ['get', 'ind_r'], msf.min]);
+        if (msf.max !== undefined) clauses.push(['<', ['get', 'ind_r'], msf.max]);
+      } else if (msf.metric === 'elevation') {
+        if (msf.min !== undefined) clauses.push(['>=', ['get', 'elev'], msf.min]);
+        if (msf.max !== undefined) clauses.push(['<', ['get', 'elev'], msf.max]);
+      }
+    }
+
     if (clauses.length === 0) {
-      return ['all'] as unknown as maplibregl.ExpressionSpecification;
+      return null as unknown as maplibregl.ExpressionSpecification;
     }
     return ['all', ...clauses] as maplibregl.ExpressionSpecification;
   }, []);
 
   const buildTimelineFilterExpression = useCallback(() => {
-    const { activeFilters: f, filterSettings: s, currentHour, isPlaybackControllerOpen } = useAppStore.getState();
+    const { activeFilters: f, filterSettings: s, metricScaleFilter: msf, activeMetric: curMetric, currentHour, isPlaybackControllerOpen } = useAppStore.getState();
 
     const clauses: maplibregl.ExpressionSpecification[] = [];
 
@@ -514,14 +545,43 @@ export function MapCanvas() {
     if (s.minSo2 > 0)          clauses.push(['>=', ['get', 'so2'], s.minSo2]);
     if (s.onlyAnomalies)       clauses.push(['==', ['get', 'cls'], 4]);
 
+    // ── Metric Scale Tier Filter ──
+    if (msf && msf.metric === curMetric) {
+      if (msf.metric === 'brightness') {
+        if (msf.min !== undefined) clauses.push(['>=', ['get', 'brightness'], msf.min]);
+        if (msf.max !== undefined) clauses.push(['<', ['get', 'brightness'], msf.max]);
+      } else if (msf.metric === 'frp') {
+        if (msf.min !== undefined) clauses.push(['>=', ['get', 'frp'], msf.min]);
+        if (msf.max !== undefined) clauses.push(['<', ['get', 'frp'], msf.max]);
+      } else if (msf.metric === 'tropomi_no2') {
+        if (msf.min !== undefined) clauses.push(['>=', ['get', 'no2'], msf.min]);
+        if (msf.max !== undefined) clauses.push(['<', ['get', 'no2'], msf.max]);
+      } else if (msf.metric === 'tropomi_so2') {
+        if (msf.min !== undefined) clauses.push(['>=', ['get', 'so2'], msf.min]);
+        if (msf.max !== undefined) clauses.push(['<', ['get', 'so2'], msf.max]);
+      } else if (msf.metric === 'land_cover_code' && msf.codes && msf.codes.length > 0) {
+        if (msf.codes.length === 1) {
+          clauses.push(['==', ['get', 'lc'], msf.codes[0]]);
+        } else {
+          clauses.push(['in', ['get', 'lc'], ['literal', msf.codes]]);
+        }
+      } else if (msf.metric === 'is_industrial') {
+        if (msf.min !== undefined) clauses.push(['>=', ['get', 'ind_r'], msf.min]);
+        if (msf.max !== undefined) clauses.push(['<', ['get', 'ind_r'], msf.max]);
+      } else if (msf.metric === 'elevation') {
+        if (msf.min !== undefined) clauses.push(['>=', ['get', 'elev'], msf.min]);
+        if (msf.max !== undefined) clauses.push(['<', ['get', 'elev'], msf.max]);
+      }
+    }
+
     if (clauses.length === 0) {
-      return ['all'] as unknown as maplibregl.ExpressionSpecification;
+      return null as unknown as maplibregl.ExpressionSpecification;
     }
     return ['all', ...clauses] as maplibregl.ExpressionSpecification;
   }, []);
 
   const buildPointsFilterExpression = useCallback(() => {
-    const { activeFilters: f, filterSettings: s } = useAppStore.getState();
+    const { activeFilters: f, filterSettings: s, metricScaleFilter: msf, activeMetric: curMetric } = useAppStore.getState();
 
     const clauses: maplibregl.ExpressionSpecification[] = [];
 
@@ -549,31 +609,122 @@ export function MapCanvas() {
     if (s.minSo2 > 0)          clauses.push(['>=', ['get', 'so2'], s.minSo2]);
     if (s.onlyAnomalies)       clauses.push(['==', ['get', 'cls'], 4]);
 
+    // ── Metric Scale Tier Filter ──
+    if (msf && msf.metric === curMetric) {
+      if (msf.metric === 'brightness') {
+        if (msf.min !== undefined) clauses.push(['>=', ['get', 'brightness'], msf.min]);
+        if (msf.max !== undefined) clauses.push(['<', ['get', 'brightness'], msf.max]);
+      } else if (msf.metric === 'frp') {
+        if (msf.min !== undefined) clauses.push(['>=', ['get', 'frp'], msf.min]);
+        if (msf.max !== undefined) clauses.push(['<', ['get', 'frp'], msf.max]);
+      } else if (msf.metric === 'tropomi_no2') {
+        if (msf.min !== undefined) clauses.push(['>=', ['get', 'no2'], msf.min]);
+        if (msf.max !== undefined) clauses.push(['<', ['get', 'no2'], msf.max]);
+      } else if (msf.metric === 'tropomi_so2') {
+        if (msf.min !== undefined) clauses.push(['>=', ['get', 'so2'], msf.min]);
+        if (msf.max !== undefined) clauses.push(['<', ['get', 'so2'], msf.max]);
+      } else if (msf.metric === 'land_cover_code' && msf.codes && msf.codes.length > 0) {
+        if (msf.codes.length === 1) {
+          clauses.push(['==', ['get', 'lc'], msf.codes[0]]);
+        } else {
+          clauses.push(['in', ['get', 'lc'], ['literal', msf.codes]]);
+        }
+      } else if (msf.metric === 'is_industrial') {
+        if (msf.min !== undefined) clauses.push(['>=', ['get', 'ind_r'], msf.min]);
+        if (msf.max !== undefined) clauses.push(['<', ['get', 'ind_r'], msf.max]);
+      } else if (msf.metric === 'elevation') {
+        if (msf.min !== undefined) clauses.push(['>=', ['get', 'elev'], msf.min]);
+        if (msf.max !== undefined) clauses.push(['<', ['get', 'elev'], msf.max]);
+      }
+    }
+
     if (clauses.length === 0) {
-      return ['all'] as unknown as maplibregl.ExpressionSpecification;
+      return null as unknown as maplibregl.ExpressionSpecification;
     }
     return ['all', ...clauses] as maplibregl.ExpressionSpecification;
   }, []);
 
-  const applyFilters = useCallback(() => {
+  const applyFilters = useCallback((isPlayerOpen?: boolean) => {
     const map = mapRef.current;
     if (!map) return;
-    const hexFilter = buildFilterExpression();
+    const isPlayback = isPlayerOpen !== undefined ? isPlayerOpen : useAppStore.getState().isPlaybackControllerOpen;
+    const hexFilter = buildFilterExpression(isPlayerOpen);
     const ptFilter = buildPointsFilterExpression();
     const tlFilter = buildTimelineFilterExpression();
 
-    // Yearlong hexbin mesh (visible when playback is closed)
-    if (map.getLayer('hexbins-fill')) map.setFilter('hexbins-fill', hexFilter);
-
-    // High-zoom individual point icons (from PMTiles, shown at zoom >= 7.2 when playback closed)
-    if (map.getLayer('points-symbols')) map.setFilter('points-symbols', ptFilter);
-
-    // PMTiles-based accidental radar rings (high zoom, playback closed)
-    if (map.getLayer('accidental-radar-rings')) map.setFilter('accidental-radar-rings', ['all', ptFilter, ['==', ['get', 'cls'], 4]]);
-
-    // Daily GeoJSON timeline simulation layers (playback open, filtered by hour)
-    if (map.getLayer('timeline-symbols')) map.setFilter('timeline-symbols', tlFilter);
-    if (map.getLayer('timeline-accidental-radar')) map.setFilter('timeline-accidental-radar', ['all', tlFilter, ['==', ['get', 'cls'], 4]]);
+    if (isPlayback) {
+      // ── Playback Mode: Hide baseline layers, show daily timeline simulation ──
+      if (map.getLayer('hexbins-fill')) {
+        map.setLayoutProperty('hexbins-fill', 'visibility', 'none');
+      }
+      if (map.getLayer('hexbins-hover-border')) {
+        map.setLayoutProperty('hexbins-hover-border', 'visibility', 'none');
+      }
+      if (map.getLayer('points-symbols')) {
+        map.setLayoutProperty('points-symbols', 'visibility', 'none');
+      }
+      if (map.getLayer('accidental-radar-rings')) {
+        map.setLayoutProperty('accidental-radar-rings', 'visibility', 'none');
+      }
+      if (map.getLayer('timeline-symbols')) {
+        map.setLayoutProperty('timeline-symbols', 'visibility', 'visible');
+        map.setPaintProperty('timeline-symbols', 'icon-opacity', 1.0);
+        map.setFilter('timeline-symbols', tlFilter);
+      }
+      if (map.getLayer('timeline-accidental-radar')) {
+        map.setLayoutProperty('timeline-accidental-radar', 'visibility', 'visible');
+        map.setPaintProperty('timeline-accidental-radar', 'circle-stroke-opacity', 0.82);
+        map.setFilter('timeline-accidental-radar', tlFilter ? ['all', tlFilter, ['==', ['get', 'cls'], 4]] : ['==', ['get', 'cls'], 4]);
+      }
+    } else {
+      // ── Normal Baseline Mode: Restore baseline hexbins and PMTiles points, hide timeline ──
+      if (map.getLayer('hexbins-fill')) {
+        map.setLayoutProperty('hexbins-fill', 'visibility', 'visible');
+        map.setFilter('hexbins-fill', hexFilter);
+        map.setPaintProperty('hexbins-fill', 'fill-opacity', [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          3.0, 0.88,
+          6.5, 0.82,
+          7.5, 0.0,
+        ]);
+      }
+      if (map.getLayer('hexbins-hover-border')) {
+        map.setLayoutProperty('hexbins-hover-border', 'visibility', 'visible');
+      }
+      if (map.getLayer('points-symbols')) {
+        map.setLayoutProperty('points-symbols', 'visibility', 'visible');
+        map.setFilter('points-symbols', ptFilter);
+        map.setPaintProperty('points-symbols', 'icon-opacity', [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          7.2, 0.0,
+          7.8, 1.0,
+        ]);
+      }
+      if (map.getLayer('accidental-radar-rings')) {
+        map.setLayoutProperty('accidental-radar-rings', 'visibility', 'visible');
+        map.setFilter('accidental-radar-rings', ptFilter ? ['all', ptFilter, ['==', ['get', 'cls'], 4]] : ['==', ['get', 'cls'], 4]);
+        map.setPaintProperty('accidental-radar-rings', 'circle-stroke-opacity', [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          7.0, 0.0,
+          7.8, 0.75,
+          12.0, 0.85,
+        ]);
+      }
+      if (map.getLayer('timeline-symbols')) {
+        map.setLayoutProperty('timeline-symbols', 'visibility', 'none');
+        map.setPaintProperty('timeline-symbols', 'icon-opacity', 0);
+      }
+      if (map.getLayer('timeline-accidental-radar')) {
+        map.setLayoutProperty('timeline-accidental-radar', 'visibility', 'none');
+        map.setPaintProperty('timeline-accidental-radar', 'circle-stroke-opacity', 0);
+      }
+    }
   }, [buildFilterExpression, buildPointsFilterExpression, buildTimelineFilterExpression]);
 
 
@@ -1214,6 +1365,7 @@ export function MapCanvas() {
       const src = map.getSource('daily-timeline-source') as maplibregl.GeoJSONSource | undefined;
       if (src) src.setData({ type: 'FeatureCollection', features: [] });
       loadedPlaybackDateRef.current = null;
+      applyFilters(false);
       return;
     }
 
@@ -1231,20 +1383,21 @@ export function MapCanvas() {
           src.setData(geojson);
           loadedPlaybackDateRef.current = startDate;
           // Apply hour filter immediately after loading
-          applyFilters();
+          applyFilters(true);
         }
       })
       .catch((err) => {
         console.warn('Daily timeline slice not found:', err);
         const src = mapRef.current?.getSource('daily-timeline-source') as maplibregl.GeoJSONSource | undefined;
         if (src) src.setData({ type: 'FeatureCollection', features: [] });
+        applyFilters(true);
       });
   }, [isPlaybackControllerOpen, startDate, applyFilters]);
 
   // ── Re-apply filters whenever hour integer or class filters change ──
   useEffect(() => {
     applyFilters();
-  }, [activeFilters, filterSettings, startDate, endDate, isPlaybackControllerOpen, currentHourInt, applyFilters]);
+  }, [activeFilters, filterSettings, metricScaleFilter, startDate, endDate, isPlaybackControllerOpen, currentHourInt, applyFilters]);
 
 
   useEffect(() => {
@@ -1270,30 +1423,8 @@ export function MapCanvas() {
     }
 
     try {
-      if (isPlaybackControllerOpen) {
-        // ── PLAYBACK MODE ──
-        // Hide the yearlong hexbin mesh — dark map so individual daily hotspots are the star
-        map.setPaintProperty('hexbins-fill', 'fill-opacity', 0);
-
-        // Hide high-zoom PMTiles points (we use timeline-symbols in playback mode instead)
-        if (map.getLayer('points-symbols')) {
-          map.setPaintProperty('points-symbols', 'icon-opacity', 0);
-        }
-        if (map.getLayer('accidental-radar-rings')) {
-          map.setPaintProperty('accidental-radar-rings', 'circle-stroke-opacity', 0);
-        }
-
-        // Show timeline simulation layers
-        if (map.getLayer('timeline-symbols')) {
-          map.setPaintProperty('timeline-symbols', 'icon-opacity', 1.0);
-        }
-        if (map.getLayer('timeline-accidental-radar')) {
-          map.setPaintProperty('timeline-accidental-radar', 'circle-stroke-opacity', 0.82);
-        }
-
-      } else {
-        // ── NORMAL MODE ──
-        // Hexbins visible at national/macro zoom, fade out as user zooms in past 7.5
+      if (!isPlaybackControllerOpen) {
+        // Hexbins subtle diurnal modulation at national/macro zoom
         map.setPaintProperty('hexbins-fill', 'fill-opacity', [
           'interpolate',
           ['linear'],
@@ -1302,36 +1433,6 @@ export function MapCanvas() {
           6.5, 0.82 * (0.5 + 0.5 * diurnalFactor),
           7.5, 0.0,
         ]);
-
-        // Individual point icons appear only at high zoom (>= 7.2), after hexbins have faded
-        if (map.getLayer('points-symbols')) {
-          map.setPaintProperty('points-symbols', 'icon-opacity', [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            7.2, 0.0,
-            7.8, 1.0,
-          ]);
-        }
-
-        if (map.getLayer('accidental-radar-rings')) {
-          map.setPaintProperty('accidental-radar-rings', 'circle-stroke-opacity', [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            7.0, 0.0,
-            7.8, 0.75,
-            12.0, 0.85,
-          ]);
-        }
-
-        // Hide timeline simulation layers in normal mode
-        if (map.getLayer('timeline-symbols')) {
-          map.setPaintProperty('timeline-symbols', 'icon-opacity', 0);
-        }
-        if (map.getLayer('timeline-accidental-radar')) {
-          map.setPaintProperty('timeline-accidental-radar', 'circle-stroke-opacity', 0);
-        }
       }
     } catch {
       // Layer might not be ready yet

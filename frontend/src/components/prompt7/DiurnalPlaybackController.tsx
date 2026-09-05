@@ -38,6 +38,7 @@ export function DiurnalPlaybackController() {
     setCalendarOpen,
     setExportOpen,
     mapMode,
+    isSimulating,
   } = useAppStore();
 
   const [temporalIndex, setTemporalIndex] = useState<Record<string, DailyStats>>({});
@@ -66,7 +67,7 @@ export function DiurnalPlaybackController() {
 
   // ── Smooth Playback Animation Loop with Real Date Auto-Advance ────────────
   useEffect(() => {
-    if (!isPlaying || !isPlaybackControllerOpen || mapMode === 'optical') {
+    if (!isPlaying || !isPlaybackControllerOpen || (mapMode === 'optical' && !isSimulating)) {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
       lastTimeRef.current = null;
       return;
@@ -99,7 +100,7 @@ export function DiurnalPlaybackController() {
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, [isPlaying, playbackSpeed, setCurrentHour, shiftDate, isPlaybackControllerOpen, mapMode]);
+  }, [isPlaying, playbackSpeed, setCurrentHour, shiftDate, isPlaybackControllerOpen, mapMode, isSimulating]);
 
   // ── Stepper Handlers (crossing midnight advances/retreats day) ────────────
   const handlePrevHour = () => {
@@ -186,7 +187,7 @@ export function DiurnalPlaybackController() {
 
   return (
     <AnimatePresence>
-      {isPlaybackControllerOpen && mapMode !== 'optical' && (
+      {isPlaybackControllerOpen && (mapMode !== 'optical' || isSimulating) && (
         <motion.div
           key="diurnal-controller"
           initial={{ opacity: 0, y: 30, x: '-50%', scale: 0.98 }}
@@ -197,7 +198,7 @@ export function DiurnalPlaybackController() {
             position: 'fixed',
             bottom: 24,
             left: '50%',
-            zIndex: 45,
+            zIndex: 90,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
