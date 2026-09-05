@@ -10,6 +10,27 @@ import type { ClusterInfo, VisualMetric } from '../store/useAppStore';
 const _pmtilesProtocol = new Protocol();
 maplibregl.addProtocol('pmtiles', _pmtilesProtocol.tile);
 
+const PMTILES_LOCAL_URL = 'pmtiles:///data/india_matched_hexbins.pmtiles';
+const PMTILES_MIRROR_URL = 'pmtiles://https://thermalwatch-india-3591.web.app/data/india_matched_hexbins.pmtiles';
+let _activePmtilesUrl = PMTILES_LOCAL_URL;
+
+// Preflight test local PMTiles availability on module load
+(async () => {
+  try {
+    const res = await fetch('/data/india_matched_hexbins.pmtiles', {
+      headers: { Range: 'bytes=0-16383' },
+    });
+    const ct = res.headers.get('content-type') || '';
+    if ((res.status !== 200 && res.status !== 206) || ct.includes('text/html')) {
+      console.warn('[MapCanvas] Local PMTiles not found or served as HTML; using CDN mirror fallback.');
+      _activePmtilesUrl = PMTILES_MIRROR_URL;
+    }
+  } catch (e) {
+    console.warn('[MapCanvas] Error testing local PMTiles, using CDN mirror fallback:', e);
+    _activePmtilesUrl = PMTILES_MIRROR_URL;
+  }
+})();
+
 const STYLES = {
   dark:  'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
   light: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
@@ -747,7 +768,7 @@ export function MapCanvas() {
       if (!map.getSource('india-hexbins')) {
         map.addSource('india-hexbins', {
           type: 'vector',
-          url: 'pmtiles:///data/india_matched_hexbins.pmtiles',
+          url: _activePmtilesUrl,
           promoteId: { 'hexbins': 'hex_id' },
         });
       }
@@ -1309,6 +1330,78 @@ export function MapCanvas() {
     // Fallback: If style loads or container layout shifts during initial bundle mounting
     map.on('style.load', () => {
       map.resize();
+    });
+
+    // PMTiles runtime failover: If local file errors out with magic number / corrupt range, switch to mirror
+    map.on('error', (e: any) => {
+      const msg = e?.error?.message || '';
+      if ((msg.includes('PMTiles') || msg.includes('magic number')) && _activePmtilesUrl !== PMTILES_MIRROR_URL) {
+        console.warn('[MapCanvas] PMTiles error detected with local source, auto-swapping to CDN mirror:', msg);
+        _activePmtilesUrl = PMTILES_MIRROR_URL;
+        try {
+          if (map.getLayer('hexbins-hover-border')) map.removeLayer('hexbins-hover-border');
+          if (map.getLayer('hexbins-fill')) map.removeLayer('hexbins-fill');
+          if (map.getSource('india-hexbins')) map.removeSource('india-hexbins');
+
+          map.addSource('india-hexbins', {
+            type: 'vector',
+            url: PMTILES_MIRROR_URL,
+            promoteId: { 'hexbins': 'hex_id' },
+          });
+
+          const beforeId = map.getLayer('accidental-radar-rings') ? 'accidental-radar-rings' : undefined;
+
+          map.addLayer({
+            id: 'hexbins-fill',
+            type: 'fill',
+            source: 'india-hexbins',
+            'source-layer': 'hexbins',
+            maxzoom: 8.0,
+            paint: {
+              'fill-color': getMetricColorExpression(useAppStore.getState().activeMetric),
+              'fill-opacity': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                3.0, 0.88,
+                6.5, 0.82,
+                7.5, 0.0,
+              ],
+            },
+          }, beforeId);
+
+          map.addLayer({
+            id: 'hexbins-hover-border',
+            type: 'line',
+            source: 'india-hexbins',
+            'source-layer': 'hexbins',
+            maxzoom: 8.0,
+            paint: {
+              'line-color': [
+                'case',
+                ['boolean', ['feature-state', 'hover'], false],
+                '#ffffff',
+                'transparent'
+              ],
+              'line-width': [
+                'case',
+                ['boolean', ['feature-state', 'hover'], false],
+                2.0,
+                0
+              ],
+              'line-opacity': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                7.0, 1.0,
+                7.2, 0.0
+              ],
+            },
+          }, beforeId);
+        } catch (swapErr) {
+          console.error('[MapCanvas] Error recovering PMTiles source:', swapErr);
+        }
+      }
     });
 
     const resizeTimer = setTimeout(() => {

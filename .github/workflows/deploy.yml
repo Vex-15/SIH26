@@ -26,6 +26,15 @@ jobs:
         working-directory: ./frontend
         run: npm ci
 
+      - name: Ensure PMTiles Data Assets
+        working-directory: ./frontend
+        run: |
+          mkdir -p public/data
+          if [ ! -f "public/data/india_matched_hexbins.pmtiles" ]; then
+            echo "Fetching PMTiles archive from mirror..."
+            curl -fL "https://thermalwatch-india-3591.web.app/data/india_matched_hexbins.pmtiles" -o "public/data/india_matched_hexbins.pmtiles"
+          fi
+
       - name: Build Production Bundle
         working-directory: ./frontend
         run: npm run build
